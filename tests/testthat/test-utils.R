@@ -8,7 +8,10 @@ test_that("nth gives n-th element", {
 
 test_that("empty is recognized", {
   expect_true(is_empty(new.env()))
-  expect_false(is_empty(as.environment(list(a = 1))))
+
+  e <- as.environment(list(a = 1))
+  expect_false(is_empty(e))
+  expect_silent(is_empty(e))
 
   expect_true(is_empty(NULL))
   expect_true(is_empty(NA))

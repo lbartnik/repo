@@ -12,8 +12,8 @@ first <- function(x) nth(x, 1)
 # --- tests ------------------------------------------------------------
 
 is_empty <- function (x) {
-  (is.environment(x) && !length(x)) ||
-    is.null(x) || is.na(x) || !length(x) || (is.character(x) && !nchar(x))
+  if (is.environment(x)) return(!length(x))
+  is.null(x) || is.na(x) || !length(x) || (is.character(x) && !nchar(x))
 }
 
 

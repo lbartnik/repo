@@ -41,7 +41,7 @@ repository_updater <- function (repo, env, plot, expr) {
     }
 
     .$plot_tags <- auto_tags(.$svg, class = 'plot')
-    parents <- extract_parents(env, expr)
+    names <- extract_parents(env, expr)
     .$plot_tags$parents <- .$last_commit$ids()[names]
   }
 

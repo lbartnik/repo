@@ -7,7 +7,9 @@ commit <- function (repo, object_ids, plot_id, expr, parent_id)
     plot_id     = plot_id
     expr        = expr
     parent_id   = parent_id
+    my_id       = NA_character_
 
+    id      = function (.) .$my_id
     ids     = function (.) .$object_ids
     objects = commit_objects
     write   = commit_write
