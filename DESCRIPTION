@@ -12,14 +12,20 @@ Depends:
   R (>= 3.4.0)
 Imports:
     defer,
+    proto,
     rsvg,
     storage
 Suggests:
+    data.table,
     devtools,
     mockery,
     testthat
 Collate:
   'repo-package.R'
+  'commit.R'
+  'repository.R'
+  'repository-impl.R'
+  'utils.R'
 Remotes:
   lbartnik/defer,
   lbartnik/storage
