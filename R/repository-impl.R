@@ -57,17 +57,34 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$write <- function (.) {
+    # store list of object pointers + basic 'history' tags
+    data <- list(objects = .$ids, expr = .$expr)
+    tags <- list(class = 'commit', parent = .$last_commit$id())
+    cid  <- storage::compute_id(list(data, tags))
+
+    # this should never happen because hash is computed from both objects
+    # and parent id; if it does happen, something is SERIOUSLY broken
+    if (storage::os_exists(.$store, cid)) {
+      stop("commit already exists, aborting")
+    }
+
+    # write the commit meta-data
+    storage::os_write(.$store, data, tags, id = cid)
+
+    # write objects, append the parent commit id to tags
     napply(new, function (name, id) {
       dbg("artifact `", name, "` not present, storing [", id, "]")
-      storage::os_write(.$store, .$objects[[name]], id = id, tags = .$tags[[name]])
+      storage::os_write(.$store, .$objects[[name]], id = id,
+                        tags = c(.$tags[[name]], list(parent_commit = cid)))
     })
 
     if (!is.na(.$plot_id)) {
       dbg("storing new plot [", id, "] with parents: ", paste(parents, collapse = ", "))
-      storage::os_write(.$store, .$svg, id = .$plot_id, tags = .$plot_tags)
+      storage::os_write(.$store, .$svg, id = .$plot_id,
+                        tags = c(.$plot_tags, list(parent_commit = cid)))
     }
 
-    # TODO write commit
+    invisible(cid)
   }
 
   u$sync_repo <- function (.) {
