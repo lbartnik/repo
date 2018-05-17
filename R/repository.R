@@ -32,12 +32,10 @@ repository_update <-function (repo, env, plot, expr) {
   updater$process_objects()
   updater$process_plot()
 
-  candidate <- updater$candidate_commit()
-
   # if there are new artifacts, store a new commit
-  if (commit_changed(.$last_commit, candidate)) {
+  if (updater$introduced_changes()) {
     updater$write()
-    updater$sync()
+    updater$sync_repo()
   }
 }
 

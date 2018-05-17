@@ -114,3 +114,48 @@ test_that("updater ignores repeated plot", {
   expect_false(exists('plot_tags', envir = u))
 })
 
+
+test_that("updater recognizes changes among objects", {
+  process_objects <- function (...) {
+    u <- repository_updater(single_repository(), as.environment(list(...)),
+                            NULL, bquote(a <- 1))
+    u$process_objects()
+    u$process_plot()
+    u
+  }
+
+  # test a number of scenarios
+  u <- process_objects(a = 1)
+  expect_false(u$introduced_changes())
+
+  u <- process_objects(a = 2)
+  expect_true(u$introduced_changes())
+
+  u <- process_objects(b = 1)
+  expect_true(u$introduced_changes())
+})
+
+
+test_that("updater recognizes changes to plots", {
+  process_plot <- function (plot, last_plot = NULL) {
+    u <- repository_updater(single_repository(last_plot = last_plot),
+                            as.environment(list(a = 1)), plot, bquote(plot(a)))
+    u$process_objects()
+    u$process_plot()
+    u
+  }
+
+  # test a number of scenarios
+  u <- process_plot(NULL)
+  expect_false(u$introduced_changes())
+
+  u <- process_plot(dummy_plot())
+  expect_true(u$introduced_changes())
+
+  u <- process_plot(dummy_plot(), plot_as_svg(dummy_plot()))
+  expect_false(u$introduced_changes())
+
+  # removing a plot should not trigger a new commit
+  u <- process_plot(NULL, dummy_plot())
+  expect_false(u$introduced_changes())
+})

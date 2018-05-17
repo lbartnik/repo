@@ -45,8 +45,15 @@ repository_updater <- function (repo, env, plot, expr) {
     .$plot_tags$parents <- .$last_commit$ids()[names]
   }
 
-  u$candidate_commit <- function (.) {
-    commit(.$.super, .$ids, .$expr, .$last_commit$id())
+  u$introduced_changes <- function (.) {
+    ia <- .$ids
+    ib <- .$last_commit$ids()
+
+    sorted_names <- function(x) if (is.null(names(x))) character() else sort(names(x))
+    an <- sorted_names(ia)
+    bn <- sorted_names(ib)
+
+    return(!identical(ia[an], ib[bn]) || (!is.null(.$svg) && !svg_equal(.$svg, .$last_plot)))
   }
 
   u$write <- function (.) {
@@ -63,7 +70,7 @@ repository_updater <- function (repo, env, plot, expr) {
     # TODO write commit
   }
 
-  u$sync <- function (.) {
+  u$sync_repo <- function (.) {
     # TODO synchronize changes into repo (.super)
   }
 
