@@ -25,6 +25,22 @@ test_that("empty is recognized", {
 })
 
 
+test_that("error is recognized", {
+  a <- try(stop("e"), silent = TRUE)
+  expect_true(is_error(a))
+
+  a <- tryCatch(stop("e"), error = function(e)e)
+  expect_true(is_error(a))
+})
+
+
+test_that("FALSE is recognized", {
+  expect_true(isFALSE(FALSE))
+  expect_false(isFALSE(TRUE))
+  expect_false(isFALSE(1))
+})
+
+
 test_that("all_named requires names", {
   expect_true(all_named(list(a = 1, b = 2)))
   expect_false(all_named(list(a = 1, 2)))

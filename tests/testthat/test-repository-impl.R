@@ -83,3 +83,34 @@ test_that("updater identifies new object", {
   expect_named(u$tags$b$parents, 'a')
 })
 
+
+test_that("updater identifies new plot", {
+  r <- single_repository(last_plot = NULL)
+  e <- list(a = 1)
+  p <- dummy_plot()
+  u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
+
+  expect_null(u$last_plot)
+  expect_equal(u$plot, p)
+  u$process_plot()
+
+  expect_not_null(u$plot_id)
+  expect_named(u$plot_tags, c("class", "time", "parents"), ignore.order = TRUE)
+  expect_named(u$plot_tags$parents, "a")
+})
+
+
+test_that("updater ignores repeated plot", {
+  p <- dummy_plot()
+  r <- single_repository(last_plot = plot_as_svg(p))
+  e <- list(a = 1)
+  u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
+
+  expect_not_null(u$last_plot)
+  expect_equal(u$plot, p)
+  u$process_plot()
+
+  expect_true(is.na(u$plot_id))
+  expect_false(exists('plot_tags', envir = u))
+})
+

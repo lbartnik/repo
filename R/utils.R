@@ -16,6 +16,10 @@ is_empty <- function (x) {
   is.null(x) || is.na(x) || !length(x) || (is.character(x) && !nchar(x))
 }
 
+is_error <- function (x) inherits(x, 'try-error') || inherits(x, 'simpleError')
+
+isFALSE <- function (x) identical(x, FALSE)
+
 
 # --- lists ------------------------------------------------------------
 
