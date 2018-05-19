@@ -190,8 +190,6 @@ svg_equal <- function (a, b)
 #' @param obj Object to be processed.
 #' @return `obj` with environment references replaced by `emptyenv()`
 #'
-#' @rdname repository_append
-#'
 strip_object <- function (obj)
 {
   if (is.symbol(obj)) return(obj)
