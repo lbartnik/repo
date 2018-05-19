@@ -20,7 +20,7 @@ repository_updater <- function (repo, env, plot, expr) {
     .$tags <- lapply(names(.$new), function (name) auto_tags(.$objects[[name]]))
     .$tags <- napply(with_names(.$tags, names(.$new)), function (name, tags) {
       names <- extract_parents(env, expr)
-      tags$parents <- .$last_commit$ids()[names]
+      tags$parents <- .$last_commit$objects[names]
       tags
     })
   }
@@ -42,12 +42,12 @@ repository_updater <- function (repo, env, plot, expr) {
 
     .$plot_tags <- auto_tags(.$svg, class = 'plot')
     names <- extract_parents(env, expr)
-    .$plot_tags$parents <- .$last_commit$ids()[names]
+    .$plot_tags$parents <- .$last_commit$objects[names]
   }
 
   u$introduced_changes <- function (.) {
     ia <- .$ids
-    ib <- .$last_commit$ids()
+    ib <- .$last_commit$objects
 
     sorted_names <- function(x) if (is.null(names(x))) character() else sort(names(x))
     an <- sorted_names(ia)
@@ -58,8 +58,8 @@ repository_updater <- function (repo, env, plot, expr) {
 
   u$write <- function (.) {
     # store list of object pointers + basic 'history' tags
-    data <- list(objects = .$ids, expr = .$expr)
-    tags <- list(class = 'commit', parent = .$last_commit$id())
+    data <- list(expr = .$expr, objects = .$ids, plot = .$plot_id)
+    tags <- list(class = 'commit', parent = .$last_commit$id)
     cid  <- storage::compute_id(list(data, tags))
 
     # this should never happen because hash is computed from both objects
@@ -72,7 +72,7 @@ repository_updater <- function (repo, env, plot, expr) {
     storage::os_write(.$store, data, tags, id = cid)
 
     # write objects, append the parent commit id to tags
-    napply(new, function (name, id) {
+    napply(.$new, function (name, id) {
       dbg("artifact `", name, "` not present, storing [", id, "]")
       storage::os_write(.$store, .$objects[[name]], id = id,
                         tags = c(.$tags[[name]], list(parent_commit = cid)))
@@ -84,11 +84,13 @@ repository_updater <- function (repo, env, plot, expr) {
                         tags = c(.$plot_tags, list(parent_commit = cid)))
     }
 
+    .$last_commit_id <- cid
     invisible(cid)
   }
 
   u$sync_repo <- function (.) {
-    # TODO synchronize changes into repo (.super)
+    .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
+    .$.super$last_plot   <- .$svg
   }
 
   u

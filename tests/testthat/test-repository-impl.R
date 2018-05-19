@@ -161,7 +161,7 @@ test_that("updater recognizes changes to plots", {
 })
 
 
-test_that("commit is written", {
+test_that("objects are written", {
   r <- single_repository()
   u <- repository_updater(r, as.environment(list(a = 2)), NULL, bquote(a <- 2))
   s <- r$store
@@ -178,8 +178,35 @@ test_that("commit is written", {
 
   x <- storage::os_read(s, ct_id)
   expect_named(x$tags, c("class", "parent"))
-  expect_named(x$object, c("objects", "expr"))
+  expect_named(x$object, c("expr", "objects", "plot"))
   expect_named(x$object$objects, "a")
   expect_equal(x$object$objects$a, storage::compute_id(2))
 })
 
+
+test_that("plot is written", {
+  r <- single_repository()
+  p <- dummy_plot()
+  u <- repository_updater(r, as.environment(list(a = 1)), p, bquote(plot(a)))
+  s <- r$store
+
+  expect_length(s, 2)
+
+  u$process_objects()
+  u$process_plot()
+  ct_id <- u$write()
+
+  ids <- storage::os_list(s)
+  expect_length(ids, 4)
+
+  x <- storage::os_read(s, ct_id)
+  expect_true(x$object$plot %in% ids)
+
+  t <- storage::os_read_object(s, x$object$plot)
+  expect_true(svg_equal(t, plot_as_svg(p)))
+})
+
+
+test_that("changes are synchronized into the repository", {
+
+})

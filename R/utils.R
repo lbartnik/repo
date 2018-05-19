@@ -40,6 +40,8 @@ combine <- function (...) {
 # --- lapply -----------------------------------------------------------
 
 napply <- function (lst, f, ...) {
+  if (!length(lst)) return(list())
+
   stopifnot(is.list(lst), all_named(lst))
 
   ans <- mapply(name = names(lst), value = lst, function (name, value) f(name, value, ...),

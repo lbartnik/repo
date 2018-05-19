@@ -10,11 +10,10 @@ repository <- function (store)
   stopifnot(storage::is_object_store(store))
 
   r <- proto::proto(expr = {
-    store     = store
-    last_plot = NULL
+    store       = store
+    last_plot   = NULL
+    last_commit = list(objects = list(), id = NA_character_)
   })
-  r$last_commit = commit(r, list(), NA_character_, bquote(), NA_character_)
-
 
   class(r) <- c('repository', class(r))
   r

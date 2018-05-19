@@ -67,6 +67,12 @@ test_that("napply passes names and values", {
   })
 })
 
+
+test_that("napply handles edge cases", {
+  expect_length(napply(NULL, print), 0)
+})
+
+
 test_that("not negates a function", {
   f <- function (x) identical(x, 2)
   expect_true(f(2))
