@@ -208,5 +208,17 @@ test_that("plot is written", {
 
 
 test_that("changes are synchronized into the repository", {
+  r <- single_repository()
+  u <- repository_updater(r, new.env(), NULL, bquote(plot(a)))
 
+  u$last_commit_id <- 'last_commit_id'
+  u$ids <- list(a = 'id1', b = 'id2')
+  u$svg <- 'svg'
+
+  u$sync_repo()
+
+  expect_named(r$last_commit, c("id", "objects"), ignore.order = TRUE)
+  expect_equal(r$last_commit$id, 'last_commit_id')
+  expect_equal(r$last_commit$objects, u$ids)
+  expect_equal(r$last_plot, u$svg)
 })
