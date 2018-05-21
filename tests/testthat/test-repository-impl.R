@@ -49,6 +49,12 @@ test_that("stripping preserves address", {
 })
 
 
+test_that("regular environment is not stripped", {
+  e <- as.environment(list(a = 1))
+  expect_equal(strip_object(e), e)
+})
+
+
 # --- repository update ------------------------------------------------
 
 test_that("updater processes objects", {
