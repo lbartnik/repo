@@ -25,11 +25,21 @@ isFALSE <- function (x) identical(x, FALSE)
 
 vector <- function () {
   proto(expr = {
-    values = list()
+    values    <- list()
     push_back <- function (., value) { .$values <- c(.$values, value) }
+    pop_front <- function (.) { ans <- first(.$values); .$values <- .$values[-1]; ans }
+    size      <- function (.) length(.$values)
+    data      <- function (.) .$values
   })
 }
 
+map <- function () {
+  proto(expr = {
+    values <- list()
+    assign <- function (., key, value) { .$values[[key]] <- value }
+    data      <- function (., key = NULL) if (is.null(key)) .$values else .$values[[key]]
+  })
+}
 
 # --- lists ------------------------------------------------------------
 
@@ -49,6 +59,14 @@ combine <- function (...) {
 
 # --- lapply -----------------------------------------------------------
 
+map_lst <- function (x, f, ...) {
+  ans <- lapply(x, f)
+  if (!is.null(names(ans))) return(ans)
+  names(ans) <- as.character(x)
+  ans
+}
+
+# TODO rename to map_names
 napply <- function (lst, f, ...) {
   if (!length(lst)) return(list())
 

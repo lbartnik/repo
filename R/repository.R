@@ -53,17 +53,19 @@ repository_update <-function (repo, env, plot, expr) {
 #' @rdname repository
 #' @export
 repository_history <- function (repo, id = NULL) {
-  tags <- rlang::quo(class == 'commit')
+  tags <- list(rlang::quo(class == 'commit'))
   ids  <- storage::os_find(repo$store, tags)
-  cmts <- lapply(ids, function(id) storage::os_read(repo$store, id))
+  cmts <- map_lst(ids, function(id) storage::os_read(repo$store, id))
 
   nodes <- map()
   edges <- vector()
-  lapply(cmts, function (cmt) {
-    nodes$assign(cmt$object$id, list(artifacts = cmt$object$objects))
-    edges$push_back(list(source = cmt$tags$parent, target = cmt$object$id))
+  napply(cmts, function (id, cmt) {
+    nodes$assign(id, list(id = id, artifacts = cmt$object$objects, plot = cmt$object$plot))
+    edges$push_back(list(source = cmt$tags$parent, target = id))
   })
 
+  structure(list(nodes = nodes$data(), edges = edges$data()),
+            class = 'commits')
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object

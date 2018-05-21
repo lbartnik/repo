@@ -58,6 +58,14 @@ test_that("combine merges lists", {
 })
 
 
+test_that("map_lst assigns names", {
+  x <- map_lst(list(a = 1), I)
+  expect_named(x, 'a')
+
+  x <- map_lst('a', I)
+  expect_named(x, 'a')
+})
+
 test_that("napply passes names and values", {
   napply(list(a = 1), function (...) {
     args <- list(...)

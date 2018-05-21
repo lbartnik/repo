@@ -1,10 +1,10 @@
 options(repository.debug = TRUE)
 
-path  <- file.path(getwd(), 'repository')
-store <- storage::filesystem(path, create = TRUE)
+path  <- file.path(getwd(), 'tmp-repo')
+store <- storage::filesystem(path, create = FALSE)
 repo  <- repository::repository(store)
 
-plot <- tryCatch(recordPlot(), error = function(e)'error')
+#plot <- tryCatch(recordPlot(), error = function(e)'error')
+#repository_update(repo, globalenv(), plot, bquote(a <- 1))
 
-
-repository_update(repo, globalenv(), plot, bquote(a <- 1))
+repository_history(repo)
