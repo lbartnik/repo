@@ -52,9 +52,23 @@ repository_update <-function (repo, env, plot, expr) {
 #'
 #' @rdname repository
 #' @export
-repository_history <- function (repo, id) {
+repository_history <- function (repo, id = NULL) {
+  tags <- rlang::quo(class == 'commit')
+  ids  <- storage::os_find(repo$store, tags)
+  cmts <- lapply(ids, function(id) storage::os_read(repo$store, id))
 
+  nodes <- map()
+  edges <- vector()
+  lapply(cmts, function (cmt) {
+    nodes$assign(cmt$object$id, list(artifacts = cmt$object$objects))
+    edges$push_back(list(source = cmt$tags$parent, target = cmt$object$id))
+  })
 
+  # wrap in a 'commits' object that
+  # 1. can be turned into a 'stratified' object
+  # 2. can be turned into a 'deltas' object
+  # 3. can be turned into JSON
+  # 4. can be iterated over
 }
 
 
@@ -66,8 +80,14 @@ repository_history <- function (repo, id) {
 #'
 #' @rdname repository
 #' @export
-repository_explain <- function (repo, id) {
+repository_explain <- function (repo, id = NULL) {
+  # 1. find object
+  # 2. recursively find all parents
 
+  # 3. wrap explanation in a 'origin' object that can be
+  # a) turned into a 'stratified' object
+  # b) turned into JSON
+  # c) iterated over
 }
 
 

@@ -1,4 +1,4 @@
-Package: repo
+Package: repository
 Type: Package
 Title: Object Repository for R
 Version: 0.1
@@ -6,8 +6,8 @@ Date: 2018-05-09
 Authors@R: person("Lukasz", "Bartnik", email = "l.bartnik@gmail.com", role = c("aut", "cre"))
 Description: Tracks full history of multiple consecutive R sessions.
 License: MIT + file LICENSE
-URL: https://github.com/lbartnik/repo
-BugReports: https://github.com/lbartnik/repo/issues
+URL: https://github.com/lbartnik/repository
+BugReports: https://github.com/lbartnik/repository/issues
 Depends:
   R (>= 3.4.0)
 Imports:

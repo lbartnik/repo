@@ -21,6 +21,16 @@ is_error <- function (x) inherits(x, 'try-error') || inherits(x, 'simpleError')
 isFALSE <- function (x) identical(x, FALSE)
 
 
+# --- vector -----------------------------------------------------------
+
+vector <- function () {
+  proto(expr = {
+    values = list()
+    push_back <- function (., value) { .$values <- c(.$values, value) }
+  })
+}
+
+
 # --- lists ------------------------------------------------------------
 
 all_named <- function (x) {
