@@ -52,16 +52,22 @@ repository_update <-function (repo, env, plot, expr) {
 #'
 #' @rdname repository
 #' @export
+#'
 repository_history <- function (repo, id = NULL) {
   tags <- list(rlang::quo(class == 'commit'))
   ids  <- storage::os_find(repo$store, tags)
   cmts <- map_lst(ids, function(id) storage::os_read(repo$store, id))
 
+  # TODO handle the id argument
+
   nodes <- map()
   edges <- vector()
   napply(cmts, function (id, cmt) {
-    nodes$assign(id, list(id = id, artifacts = cmt$object$objects, plot = cmt$object$plot))
-    edges$push_back(list(source = cmt$tags$parent, target = id))
+    nodes$assign(id, list(id = id, artifacts = cmt$object$objects, plot = cmt$object$plot,
+                          expr = cmt$object$expr))
+    if (!is.na(cmt$tags$parent)) {
+      edges$push_back(list(source = cmt$tags$parent, target = id))
+    }
   })
 
   structure(list(nodes = nodes$data(), edges = edges$data()),

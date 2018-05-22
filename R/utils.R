@@ -26,7 +26,7 @@ isFALSE <- function (x) identical(x, FALSE)
 vector <- function () {
   proto(expr = {
     values    <- list()
-    push_back <- function (., value) { .$values <- c(.$values, value) }
+    push_back <- function (., value) { .$values <- c(.$values, list(value)) }
     pop_front <- function (.) { ans <- first(.$values); .$values <- .$values[-1]; ans }
     size      <- function (.) length(.$values)
     data      <- function (.) .$values

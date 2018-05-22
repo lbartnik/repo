@@ -7,4 +7,8 @@ repo  <- repository::repository(store)
 #plot <- tryCatch(recordPlot(), error = function(e)'error')
 #repository_update(repo, globalenv(), plot, bquote(a <- 1))
 
-repository_history(repo)
+h <- repository_history(repo)
+
+step_over(h, function (commit) {
+  cat(deparse(commit$expr), "\n")
+})
