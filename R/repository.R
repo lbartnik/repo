@@ -47,18 +47,19 @@ repository_update <-function (repo, env, plot, expr) {
 #' Each node in that graph represents the state of R session (aka. a
 #' __commit__) at a given point in time. Each edge represents a single
 #' R command issued by the user. If the optional parameter `id` is
-#' specified, the history is limited to the sequence of __commits__
-#' leading to the commit with the given identifier.
+#' specified, the history is limited to the subtree of __commits__
+#' with `id` as the root.
 #'
 #' @rdname repository
 #' @export
 #'
 repository_history <- function (repo, id = NULL) {
+  # TODO handle the id argument
+  stopifnot(is.null(id))
+
   tags <- list(rlang::quo(class == 'commit'))
   ids  <- storage::os_find(repo$store, tags)
   cmts <- map_lst(ids, function(id) storage::os_read(repo$store, id))
-
-  # TODO handle the id argument
 
   nodes <- map()
   edges <- vector()
@@ -71,7 +72,7 @@ repository_history <- function (repo, id = NULL) {
   })
 
   structure(list(nodes = nodes$data(), edges = edges$data()),
-            class = 'commits')
+            class = c('commits', 'graph'))
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
