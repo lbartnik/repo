@@ -4,7 +4,7 @@
 \alias{strip_object}
 \title{Removes references to environments.}
 \usage{
-strip_object(obj)
+strip_object(obj, attr = FALSE)
 }
 \arguments{
 \item{obj}{Object to be processed.}

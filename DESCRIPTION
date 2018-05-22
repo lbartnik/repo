@@ -11,18 +11,18 @@ BugReports: https://github.com/lbartnik/repository/issues
 Depends:
   R (>= 3.4.0)
 Imports:
-    defer,
-    proto,
-    rsvg,
-    storage
+  defer,
+  proto,
+  rsvg,
+  storage
 Suggests:
-    data.table,
-    devtools,
-    mockery,
-    testthat
+  data.table,
+  devtools,
+  mockery,
+  testthat
 Collate:
   'repo-package.R'
-  'commit.R'
+  'inspect.R'
   'repository.R'
   'repository-impl.R'
   'utils.R'

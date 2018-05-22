@@ -11,6 +11,8 @@ is_history <- function (x) inherits(x, 'history')
 is_commits <- function (x) inherits(x, 'commits')
 
 
+#' Show ancestors.
+#'
 #' @export
 #' @rdname history
 #'

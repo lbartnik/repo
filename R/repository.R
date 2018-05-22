@@ -29,6 +29,7 @@ is_repository <- function (x) inherits(x, 'repository')
 #' @export
 repository_update <-function (repo, env, plot, expr) {
   guard()
+  stopifnot(is_repository(repo))
 
   updater <- repository_updater(repo, env, plot, expr)
   updater$process_objects()
@@ -54,6 +55,9 @@ repository_update <-function (repo, env, plot, expr) {
 #' @export
 #'
 repository_history <- function (repo, id = NULL) {
+  guard()
+  stopifnot(is_repository(repo))
+
   # TODO handle the id argument
   stopifnot(is.null(id))
 
@@ -85,6 +89,16 @@ repository_history <- function (repo, id = NULL) {
   # 4. can be iterated over
 }
 
+
+#' @rdname repository
+#' @export
+#'
+repository_last_commit <- function (repo) {
+  guard()
+  stopifnot(is_repository(repo))
+
+  repo$last_commit$id
+}
 
 
 #' @description `repository_explain` returns a graph that describes
