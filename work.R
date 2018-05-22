@@ -9,6 +9,6 @@ repo  <- repository::repository(store)
 
 h <- repository_history(repo)
 
-step_over(h, function (commit) {
+zzz <- lapply(ancestors(h, 'd8db7af5fca4437d45c7b5d09705cb077614caf9'), function (commit) {
   cat(deparse(commit$expr), "\n")
 })

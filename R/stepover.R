@@ -1,13 +1,34 @@
 #' @export
 print.commits <- function (x) {
   cat('<commits>\n')
-  cat(length(x$nodes), 'node(s) and', length(x$edges), 'edge(s)\n')
+  cat(length(x), 'node(s)')
 }
+
+is_graph <- function (x) inherits(x, 'graph')
+
+is_history <- function (x) inherits(x, 'history')
 
 is_commits <- function (x) inherits(x, 'commits')
 
 
-is_graph <- function (x) inherits(x, 'graph')
+#' @export
+#' @rdname history
+#'
+ancestors <- function (x, id) {
+  stopifnot(is_history(x))
+  stopifnot(id %in% names(x))
+
+  extract <- function (id) {
+    ans <- x[id]
+    if (!is.na(first(ans)$parent)) {
+      ans <- c(extract(first(ans)$parent), ans)
+    }
+    ans
+  }
+
+  extract(id)
+}
+
 
 
 graph_reduce <- function (x, from = NULL, to = NULL) {

@@ -57,22 +57,27 @@ repository_history <- function (repo, id = NULL) {
   # TODO handle the id argument
   stopifnot(is.null(id))
 
-  tags <- list(rlang::quo(class == 'commit'))
-  ids  <- storage::os_find(repo$store, tags)
-  cmts <- map_lst(ids, function(id) storage::os_read(repo$store, id))
+  query <- list(rlang::quo(class == 'commit'))
+  ids   <- storage::os_find(repo$store, query)
+  cmts  <- map_lst(ids, function(id) storage::os_read(repo$store, id))
 
-  nodes <- map()
-  edges <- vector()
+  nodes <- list()
   napply(cmts, function (id, cmt) {
-    nodes$assign(id, list(id = id, artifacts = cmt$object$objects, plot = cmt$object$plot,
-                          expr = cmt$object$expr))
-    if (!is.na(cmt$tags$parent)) {
-      edges$push_back(list(source = cmt$tags$parent, target = id))
+    node          <- cmt$object
+    node$id       <- id
+    node$parent   <- cmt$tags$parent
+    node$children <- c()
+    nodes[[id]] <<- node
+  })
+
+  # when all nodes are extracted, assign children
+  lapply(nodes, function (node) {
+    if (!is.na(node$parent)) {
+      nodes[[node$parent]] <<- append(nodes[[node$parent]], node$id)
     }
   })
 
-  structure(list(nodes = nodes$data(), edges = edges$data()),
-            class = c('commits', 'graph'))
+  structure(nodes, class = c('commits', 'history', 'graph'))
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
