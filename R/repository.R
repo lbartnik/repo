@@ -77,27 +77,16 @@ repository_history <- function (repo, id = NULL) {
   # when all nodes are extracted, assign children
   lapply(nodes, function (node) {
     if (!is.na(node$parent)) {
-      nodes[[node$parent]] <<- append(nodes[[node$parent]], node$id)
+      nodes[[node$parent]]$children <<- append(nodes[[node$parent]]$children, node$id)
     }
   })
 
-  structure(nodes, class = c('commits', 'history', 'graph'))
+  structure(list(repo = repo, data = nodes), class = c('history', 'graph'))
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
   # 3. can be turned into JSON
   # 4. can be iterated over
-}
-
-
-#' @rdname repository
-#' @export
-#'
-repository_last_commit <- function (repo) {
-  guard()
-  stopifnot(is_repository(repo))
-
-  repo$last_commit$id
 }
 
 
@@ -119,3 +108,35 @@ repository_explain <- function (repo, id = NULL) {
 }
 
 
+#' @rdname repository
+#' @export
+#'
+repository_last_commit <- function (repo) {
+  guard()
+  stopifnot(is_repository(repo))
+
+  repo$last_commit$id
+}
+
+
+#' @rdname repository
+#' @export
+#'
+repository_rewind <- function (repo, id) {
+  guard()
+  stopifnot(is_repository(repo))
+
+  tryCatch({
+    tags <- storage::os_read_tags(repo$store, id)
+    stopifnot(identical(tags$class, "commit"))
+  }, error = function (e) {
+    stop("cannot find commit matching id ", id, call. = FALSE)
+  })
+
+  repo$last_commit <- list(
+    id = id,
+    objects = storage::os_read_object(repo$store, id)$objects
+  )
+
+  invisible()
+}

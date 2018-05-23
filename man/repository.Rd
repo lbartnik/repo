@@ -5,8 +5,9 @@
 \alias{repository}
 \alias{repository_update}
 \alias{repository_history}
-\alias{repository_last_commit}
 \alias{repository_explain}
+\alias{repository_last_commit}
+\alias{repository_rewind}
 \title{Object Repository for R}
 \usage{
 repository(store)
@@ -15,9 +16,11 @@ repository_update(repo, env, plot, expr)
 
 repository_history(repo, id = NULL)
 
+repository_explain(repo, id = NULL)
+
 repository_last_commit(repo)
 
-repository_explain(repo, id = NULL)
+repository_rewind(repo, id)
 }
 \arguments{
 \item{store}{Read and write objects into this storage.}

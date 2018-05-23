@@ -1,6 +1,6 @@
 #' @export
-print.commits <- function (x) {
-  cat('<commits>\n')
+print.history <- function (x) {
+  cat('<history:commits>\n')
   cat(length(x), 'node(s)')
 }
 
@@ -8,20 +8,18 @@ is_graph <- function (x) inherits(x, 'graph')
 
 is_history <- function (x) inherits(x, 'history')
 
-is_commits <- function (x) inherits(x, 'commits')
-
 
 #' Show ancestors.
 #'
 #' @export
 #' @rdname history
 #'
-ancestors <- function (x, id) {
+history_ancestors <- function (x, id) {
   stopifnot(is_history(x))
-  stopifnot(id %in% names(x))
+  stopifnot(id %in% names(x$data))
 
   extract <- function (id) {
-    ans <- x[id]
+    ans <- x$data[id]
     if (!is.na(first(ans)$parent)) {
       ans <- c(extract(first(ans)$parent), ans)
     }
@@ -32,23 +30,47 @@ ancestors <- function (x, id) {
 }
 
 
+#' @export
+#' @rdname history
+#'
+history_leaves <- function (x) {
+  stopifnot(is_history(x))
+
+  names(Filter(function (commit) { length(commit$children) == 0 }, x$data))
+}
+
+
+#' @export
+#' @rdname history
+#'
+history_match <- function (x, m) {
+  stopifnot(is_history(x))
+  stopifnot(all_named(m))
+
+  m <- lapply(m, storage::compute_id)
+  d <- Filter(x$data, f = function (commit) {
+    setequal(names(commit$objects), names(m)) && setequal(unname(commit$objects), unname(m))
+  })
+
+  names(d)
+}
+
+
+#' @export
+#' @rdname history
+#'
+history_data <- function (x, id) {
+  stopifnot(is_history(x))
+  stopifnot(id %in% names(x$data))
+
+  ct <- x$data[[id]]
+  lapply(ct$objects, function (id) storage::os_read_object(x$repo$store, id))
+}
+
 
 graph_reduce <- function (x, from = NULL, to = NULL) {
   stopifnot(is_graph(x))
-
-  nodes <- napply(x$nodes, function(id, node) {
-    list(
-      id       = id,
-      parent   = NA_character_,
-      children = c(),
-      data     = node
-    )
-  })
-
-  lapply(x$edges, function (edge) {
-    nodes[[edge$target]]$parent <<- edge$source
-    nodes[[edge$source]]$children <<- append(nodes[[edge$source]]$children, edge$target)
-  })
+  nodes <- x$data
 
   if (!is.null(from)) {
     extract <- function (id) {
@@ -72,16 +94,8 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
     nodes <- extract(to)
   }
 
-  edges <- vector()
-  nodes <- lapply(nodes, function (node) {
-    if (!is.na(node$parent)) {
-      edges$push_back(list(source = node$parent, target = node$id))
-    }
-    node$data
-  })
-
-  structure(list(nodes = nodes, edges = edges$data()),
-            class = class(x))
+  x$data <- nodes
+  x
 }
 
 
