@@ -18,15 +18,7 @@ history_ancestors <- function (x, id) {
   stopifnot(is_history(x))
   stopifnot(id %in% names(x$data))
 
-  extract <- function (id) {
-    ans <- x$data[id]
-    if (!is.na(first(ans)$parent)) {
-      ans <- c(extract(first(ans)$parent), ans)
-    }
-    ans
-  }
-
-  extract(id)
+  graph_reduce(x, to = id)
 }
 
 
@@ -86,7 +78,7 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
     extract <- function (id) {
       ans <- nodes[id]
       if (!is.na(first(ans)$parent)) {
-        ans <- c(ans, extract(first(ans)$parent))
+        ans <- c(extract(first(ans)$parent), ans)
       }
       ans
     }
