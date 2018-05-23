@@ -71,6 +71,7 @@ repository_history <- function (repo, id = NULL) {
     node$id       <- id
     node$parent   <- cmt$tags$parent
     node$children <- c()
+    node$time     <- cmt$tags$time
     nodes[[id]] <<- node
   })
 
@@ -140,3 +141,13 @@ repository_rewind <- function (repo, id) {
 
   invisible()
 }
+
+
+#' @export
+#' @rdname repository
+#'
+repository_data <- function (repo, ids) {
+  stopifnot(is_repository(repo))
+  map_lst(ids, function (id) storage::os_read_object(repo$store, id))
+}
+

@@ -9,6 +9,8 @@ repo  <- repository::repository(store)
 
 h <- repository_history(repo)
 
+storage::os_read_tags(repo$store, 'd8db7af5fca4437d45c7b5d09705cb077614caf9')
+
 zzz <- lapply(ancestors(h, 'd8db7af5fca4437d45c7b5d09705cb077614caf9'), function (commit) {
   cat(deparse(commit$expr), "\n")
 })

@@ -2,10 +2,10 @@
 
 S3method(print,history)
 export(history_ancestors)
-export(history_data)
-export(history_leaves)
+export(history_ends)
 export(history_match)
 export(repository)
+export(repository_data)
 export(repository_explain)
 export(repository_history)
 export(repository_last_commit)

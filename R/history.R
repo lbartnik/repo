@@ -1,7 +1,7 @@
 #' @export
 print.history <- function (x) {
   cat('<history:commits>\n')
-  cat(length(x), 'node(s)')
+  cat(length(x$data), 'node(s)')
 }
 
 is_graph <- function (x) inherits(x, 'graph')
@@ -16,8 +16,6 @@ is_history <- function (x) inherits(x, 'history')
 #'
 history_ancestors <- function (x, id) {
   stopifnot(is_history(x))
-  stopifnot(id %in% names(x$data))
-
   graph_reduce(x, to = id)
 }
 
@@ -25,10 +23,9 @@ history_ancestors <- function (x, id) {
 #' @export
 #' @rdname history
 #'
-history_leaves <- function (x) {
+history_ends <- function (x) {
   stopifnot(is_history(x))
-
-  names(Filter(function (commit) { length(commit$children) == 0 }, x$data))
+  Filter(function (commit) { length(commit$children) == 0 }, x$data)
 }
 
 
@@ -48,27 +45,18 @@ history_match <- function (x, m) {
 }
 
 
-#' @export
-#' @rdname history
-#'
-history_data <- function (x, id) {
-  stopifnot(is_history(x))
-  stopifnot(id %in% names(x$data))
-
-  ct <- x$data[[id]]
-  lapply(ct$objects, function (id) storage::os_read_object(x$repo$store, id))
-}
-
-
 graph_reduce <- function (x, from = NULL, to = NULL) {
   stopifnot(is_graph(x))
   nodes <- x$data
 
   if (!is.null(from)) {
+    stopifnot(from %in% names(nodes))
+
     extract <- function (id) {
       c(nodes[id],
         unlist(lapply(nodes[[id]]$children, extract), recursive = FALSE))
     }
+
     nodes <- extract(from)
   }
 
