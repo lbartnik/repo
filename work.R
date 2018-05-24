@@ -11,6 +11,10 @@ h <- repository_history(repo)
 
 storage::os_read_tags(repo$store, 'd8db7af5fca4437d45c7b5d09705cb077614caf9')
 
-zzz <- lapply(ancestors(h, 'd8db7af5fca4437d45c7b5d09705cb077614caf9'), function (commit) {
+zzz <- lapply(filter(h, ancestor_of('d8db7af5fca4437d45c7b5d09705cb077614caf9'))$data, function (commit) {
   cat(deparse(commit$expr), "\n")
 })
+
+filter(h, ancestor_of('d8db7af5fca4437d45c7b5d09705cb077614caf9'))
+
+filter(h, data_matches(x = 1))

@@ -1,4 +1,8 @@
+#' History of R session(s).
+#'
+#' @rdname history
 #' @export
+#'
 print.history <- function (x) {
   cat('<history:commits>\n')
   cat(length(x$data), 'node(s)')
@@ -9,72 +13,69 @@ is_graph <- function (x) inherits(x, 'graph')
 is_history <- function (x) inherits(x, 'history')
 
 
-#' Show ancestors.
-#'
-#' @export
 #' @rdname history
+#' @export
 #'
-history_ancestors <- function (x, id) {
-  stopifnot(is_history(x))
-  graph_reduce(x, to = id)
+filter <- function (x, ...)
+{
+  stopifnot(is_graph(x))
+  # ancestors_of
+  # branch_ends
+  # data_matches
+
+  quo <- rlang::enquos(...)
+  stopifnot(identical(length(quo), 1L))
+
+  conditions <- list(
+    ancestor_of  = function (y) graph_reduce(x, to = y),
+    branch_tip   = function ()  {
+      Filter(x, f = function (commit) identical(length(commit$children), 0L))
+    },
+    data_matches = function (...) {
+      data <- list(...)
+      stopifnot(all_named(data))
+
+      data <- lapply(data, storage::compute_id)
+      Filter(x, f = function (commit) {
+        setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
+      })
+    }
+  )
+
+  rlang::eval_tidy(first(quo), conditions)
 }
 
-
-#' @export
-#' @rdname history
-#'
-history_ends <- function (x) {
-  stopifnot(is_history(x))
-  Filter(function (commit) { length(commit$children) == 0 }, x$data)
-}
-
-
-#' @export
-#' @rdname history
-#'
-history_match <- function (x, m) {
-  stopifnot(is_history(x))
-  stopifnot(all_named(m))
-
-  m <- lapply(m, storage::compute_id)
-  d <- Filter(x$data, f = function (commit) {
-    setequal(names(commit$objects), names(m)) && setequal(unname(commit$objects), unname(m))
-  })
-
-  names(d)
-}
 
 
 graph_reduce <- function (x, from = NULL, to = NULL) {
   stopifnot(is_graph(x))
-  nodes <- x$data
+  cls <- class(x)
 
   if (!is.null(from)) {
-    stopifnot(from %in% names(nodes))
+    stopifnot(from %in% names(x))
 
     extract <- function (id) {
-      c(nodes[id],
-        unlist(lapply(nodes[[id]]$children, extract), recursive = FALSE))
+      c(x[id], unlist(lapply(x[[id]]$children, extract), recursive = FALSE))
     }
 
-    nodes <- extract(from)
+    x <- extract(from)
   }
 
   if (!is.null(to)) {
-    stopifnot(to %in% names(nodes))
+    stopifnot(to %in% names(x))
 
     extract <- function (id) {
-      ans <- nodes[id]
+      ans <- x[id]
       if (!is.na(first(ans)$parent)) {
         ans <- c(extract(first(ans)$parent), ans)
       }
       ans
     }
 
-    nodes <- extract(to)
+    x <- extract(to)
   }
 
-  x$data <- nodes
+  class(x) <- cls
   x
 }
 

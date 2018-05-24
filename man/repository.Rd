@@ -15,7 +15,7 @@ repository(store)
 
 repository_update(repo, env, plot, expr)
 
-repository_history(repo, id = NULL)
+repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL)
 

@@ -7,14 +7,14 @@ test_that("reduce graph", {
 test_that("find ancestors", {
   h <- sample_graph()
 
-  x <- history_ancestors(h, "d")
-  expect_named(x$data, c("a", "b", "d"))
+  x <- filter(h, ancestor_of("d"))
+  expect_named(x, c("a", "b", "d"))
 
-  x <- history_ancestors(h, "g")
-  expect_named(x$data, c("a", "c", "g"))
+  x <- filter(h, ancestor_of("g"))
+  expect_named(x, c("a", "c", "g"))
 
-  x <- history_ancestors(h, "c")
-  expect_named(x$data, c("a", "c"))
+  x <- filter(h, ancestor_of("c"))
+  expect_named(x, c("a", "c"))
 })
 
 

@@ -54,12 +54,12 @@ repository_update <-function (repo, env, plot, expr) {
 #' @rdname repository
 #' @export
 #'
-repository_history <- function (repo, id = NULL) {
+repository_history <- function (repo, mode = 'all') {
   guard()
   stopifnot(is_repository(repo))
 
-  # TODO handle the id argument
-  stopifnot(is.null(id))
+  # TODO handle the mode argument when == 'current'
+  stopifnot(!identical(mode, 'all'))
 
   query <- list(rlang::quo(class == 'commit'))
   ids   <- storage::os_find(repo$store, query)
@@ -82,7 +82,7 @@ repository_history <- function (repo, id = NULL) {
     }
   })
 
-  structure(list(repo = repo, data = nodes), class = c('history', 'graph'))
+  structure(nodes, class = c('history', 'graph'))
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
