@@ -18,3 +18,12 @@ test_that("find ancestors", {
 })
 
 
+test_that("find matching data", {
+  h <- sample_graph()
+
+  x <- filter(h, data_matches(x = 1))
+  expect_named(x, "g")
+
+  x <- filter(h, data_matches(data = list(x = 1)))
+  expect_named(x, "g")
+})

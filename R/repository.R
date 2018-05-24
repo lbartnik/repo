@@ -59,7 +59,7 @@ repository_history <- function (repo, mode = 'all') {
   stopifnot(is_repository(repo))
 
   # TODO handle the mode argument when == 'current'
-  stopifnot(!identical(mode, 'all'))
+  stopifnot(identical(mode, 'all'))
 
   query <- list(rlang::quo(class == 'commit'))
   ids   <- storage::os_find(repo$store, query)

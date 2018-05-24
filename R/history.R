@@ -19,9 +19,7 @@ is_history <- function (x) inherits(x, 'history')
 filter <- function (x, ...)
 {
   stopifnot(is_graph(x))
-  # ancestors_of
-  # branch_ends
-  # data_matches
+  cls <- class(x)
 
   quo <- rlang::enquos(...)
   stopifnot(identical(length(quo), 1L))
@@ -31,8 +29,8 @@ filter <- function (x, ...)
     branch_tip   = function ()  {
       Filter(x, f = function (commit) identical(length(commit$children), 0L))
     },
-    data_matches = function (...) {
-      data <- list(...)
+    data_matches = function (..., data) {
+      data <- if (missing(data)) list(...) else c(data, list(...))
       stopifnot(all_named(data))
 
       data <- lapply(data, storage::compute_id)
@@ -42,7 +40,9 @@ filter <- function (x, ...)
     }
   )
 
-  rlang::eval_tidy(first(quo), conditions)
+  ans <- rlang::eval_tidy(first(quo), conditions)
+  class(ans) <- cls
+  ans
 }
 
 
