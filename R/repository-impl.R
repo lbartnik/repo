@@ -59,7 +59,7 @@ repository_updater <- function (repo, env, plot, expr) {
   u$write <- function (.) {
     # store list of object pointers + basic 'history' tags
     data <- list(expr = .$expr, objects = .$ids, plot = .$plot_id)
-    tags <- list(class = 'commit', parent = .$last_commit$id)
+    tags <- auto_tags(NULL, class = 'commit', parent = .$last_commit$id)
     cid  <- storage::compute_id(list(data, tags))
 
     # this should never happen because hash is computed from both objects
@@ -128,6 +128,7 @@ auto_tags <- function (obj, ...) {
 #'
 plot_as_svg <- function (pl)
 {
+  guard()
   if (is.null(pl)) return(NULL)
 
   # TODO use svglite::stringSVG
@@ -190,19 +191,18 @@ svg_equal <- function (a, b)
 #' @param obj Object to be processed.
 #' @return `obj` with environment references replaced by `emptyenv()`
 #'
-#' @rdname repository_append
-#'
-strip_object <- function (obj)
+strip_object <- function (obj, attr = FALSE)
 {
   if (is.symbol(obj)) return(obj)
+  if (inherits(obj, 'recordedplot')) return(obj)
 
   # TODO should we disregard any environment?
-  if (is.environment(obj)) return(emptyenv())
+  if (is.environment(obj) && isTRUE(attr)) return(emptyenv())
 
-  attrs <- if (!is.null(attributes(obj))) lapply(attributes(obj), strip_object)
+  attrs <- if (!is.null(attributes(obj))) lapply(attributes(obj), strip_object, attr = TRUE)
 
   if (is.list(obj)) {
-    obj_tmp <- lapply(obj, strip_object)
+    obj_tmp <- lapply(obj, strip_object, attr = FALSE)
     # use stripped object only if stripping actually changed something
     obj_lst <- lapply(obj, function(x)x)
     if (!identical(obj_tmp, obj_lst)) {
@@ -216,3 +216,39 @@ strip_object <- function (obj)
   obj
 }
 
+# --- history ----------------------------------------------------------
+
+commit <- function (store, id) {
+  stopifnot(storage::is_object_store(store))
+
+  data <- storage::os_read(store, id)
+
+  raw  <- data$object
+  tags <- data$tags
+
+  stopifnot(has_name(raw, 'objects'), has_name(raw, 'expr'), has_name(raw, 'plot'))
+  stopifnot(has_name(tags, 'parent'), has_name(tags, 'time'))
+
+  raw <- as.environment(raw)
+
+  raw$id       <- id
+  raw$parent   <- tags$parent
+  raw$children <- c()
+  raw$time     <- tags$time
+
+  attr(raw, 'store') <- store
+  structure(raw, class = 'commit')
+}
+
+
+#' @export
+`$.commit` <- function (x, i) {
+  if (i %in% names(x)) return(x[[i]])
+  if (identical(i, 'data')) {
+    store <- attr(x, 'store')
+    x$data <- map_lst(x$objects, function (id) storage::os_read_object(store, id))
+    return(x[["data"]])
+  }
+
+  stop('unknown key ', i)
+}

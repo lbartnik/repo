@@ -49,6 +49,12 @@ test_that("stripping preserves address", {
 })
 
 
+test_that("regular environment is not stripped", {
+  e <- as.environment(list(a = 1))
+  expect_equal(strip_object(e), e)
+})
+
+
 # --- repository update ------------------------------------------------
 
 test_that("updater processes objects", {
@@ -177,8 +183,8 @@ test_that("objects are written", {
   expect_true(storage::compute_id(2) %in% ids)
 
   x <- storage::os_read(s, ct_id)
-  expect_named(x$tags, c("class", "parent"))
-  expect_named(x$object, c("expr", "objects", "plot"))
+  expect_named(x$tags, c("class", "parent", "time"), ignore.order = TRUE)
+  expect_named(x$object, c("expr", "objects", "plot"), ignore.order = TRUE)
   expect_named(x$object$objects, "a")
   expect_equal(x$object$objects$a, storage::compute_id(2))
 })
@@ -221,4 +227,14 @@ test_that("changes are synchronized into the repository", {
   expect_equal(r$last_commit$id, 'last_commit_id')
   expect_equal(r$last_commit$objects, u$ids)
   expect_equal(r$last_plot, u$svg)
+})
+
+
+test_that("commit returns its data", {
+  r <- single_repository()
+  c <- commit(r$store, 'p')
+
+  d <- c$data
+  expect_named(d, 'a')
+  expect_equivalent(unlist(d), 1)
 })

@@ -1,4 +1,8 @@
 
+has_name <- function (x, name) isTRUE(name %in% names(x))
+
+# --- access -----------------------------------------------------------
+
 nth <- function(x, n) {
   if (!length(x)) return(vector(mode = typeof(x)))
   x[[n]]
@@ -21,6 +25,26 @@ is_error <- function (x) inherits(x, 'try-error') || inherits(x, 'simpleError')
 isFALSE <- function (x) identical(x, FALSE)
 
 
+# --- vector -----------------------------------------------------------
+
+vector <- function () {
+  proto(expr = {
+    values    <- list()
+    push_back <- function (., value) { .$values <- c(.$values, list(value)) }
+    pop_front <- function (.) { ans <- first(.$values); .$values <- .$values[-1]; ans }
+    size      <- function (.) length(.$values)
+    data      <- function (.) .$values
+  })
+}
+
+map <- function () {
+  proto(expr = {
+    values <- list()
+    assign <- function (., key, value) { .$values[[key]] <- value }
+    data      <- function (., key = NULL) if (is.null(key)) .$values else .$values[[key]]
+  })
+}
+
 # --- lists ------------------------------------------------------------
 
 all_named <- function (x) {
@@ -39,6 +63,14 @@ combine <- function (...) {
 
 # --- lapply -----------------------------------------------------------
 
+map_lst <- function (x, f, ...) {
+  ans <- lapply(x, f)
+  if (!is.null(names(ans))) return(ans)
+  names(ans) <- as.character(x)
+  ans
+}
+
+# TODO rename to map_names
 napply <- function (lst, f, ...) {
   if (!length(lst)) return(list())
 

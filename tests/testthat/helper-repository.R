@@ -13,7 +13,9 @@ single_repository <- function (...) {
   })
 
   storage::os_write(r$store, 1, list(), storage::compute_id(1))
-  storage::os_write(r$store, list(objects = r$last_commit$objects), list(),
+  storage::os_write(r$store, list(objects = r$last_commit$objects,
+                                  expr = bquote(), plot = NA_character_),
+                    list(parent = NA_character_, time = NA),
                     r$last_commit$id)
 
   r
