@@ -5,7 +5,7 @@
 #'
 print.history <- function (x) {
   cat('<history:commits>\n')
-  cat(length(x$data), 'node(s)')
+  cat(length(x), 'node(s)')
 }
 
 is_graph <- function (x) inherits(x, 'graph')
@@ -80,42 +80,23 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
 }
 
 
+introduced <- function (hist, id) {
+  stopifnot(is_history(hist))
+  stopifnot(id %in% names(hist))
 
+  c <- hist[[id]]
+  if (is.na(c$parent)) return(names(c$objects))
 
-step_over <- function (x, f, ...) UseMethod("step_over")
+  p <- hist[[c$parent]]
+  new_objs <- Filter(function (n) {
+    is.na(match(n, names(p$objects))) || !identical(c$objects[[n]], p$objects[[n]])
+  }, names(c$objects))
 
-step_over.default <- function (x, f, ...) stop("cannot iterate over class ", class(x))
-
-step_over.commits <- function (x, f, ...) {
-
-  nodes <- napply(x$nodes, function(id, node) {
-    node$id <- id
-    node$parent <- NA_character_
-    node$children <- c()
-    node
-  })
-
-  lapply(x$edges, function (edge) {
-    nodes[[edge$target]]$parent <<- edge$source
-    nodes[[edge$source]]$children <<- append(nodes[[edge$source]]$children, edge$target)
-  })
-
-  ans <- vector()
-
-  traverse <- function (id) {
-    a <- f(nodes[[id]], ...)
-    ans$push_back(a)
-    lapply(nodes[[id]]$children, traverse)
-
-    nodes[[id]] <<- NULL
+  # there is a plot (first condition) and it's different from
+  # what was there before (second condition)
+  if (!is.null(c$plot) && !identical(c$plot, p$plot)) {
+    return(c(new_objs, '::plot::'))
   }
 
-  roots <- names(Filter(function (node) is.na(node$parent), nodes))
-  lapply(roots, traverse)
-
-  if (length(nodes)) {
-    stop("the commit graph is malformed")
-  }
-
-  invisible()
+  new_objs
 }

@@ -236,5 +236,5 @@ test_that("commit returns its data", {
 
   d <- c$data
   expect_named(d, 'a')
-  expect_equal(unlist(d), 1)
+  expect_equivalent(unlist(d), 1)
 })

@@ -64,21 +64,22 @@ repository_history <- function (repo, mode = 'all') {
   nodes <- map_lst(ids, function(id) commit(repo$store, id))
 
   # when all nodes are extracted, assign children
+  nodes <- structure(nodes, class = c('history', 'graph'))
+
   lapply(nodes, function (node) {
     if (!is.na(node$parent)) {
       nodes[[node$parent]]$children <<- append(nodes[[node$parent]]$children, node$id)
     }
+    node$new <- introduced(nodes, node$id)
   })
-
-  ans <- structure(nodes, class = c('history', 'graph'))
 
   # if only the current branch, filter out that branch
   if (identical(mode, 'current')) {
-    return(filter(ans, ancestor_of(repo$last_commit$id)))
+    return(filter(nodes, ancestor_of(repo$last_commit$id)))
   }
 
   # else, return everything ("all")
-  ans
+  nodes
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object

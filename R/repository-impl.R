@@ -240,6 +240,8 @@ commit <- function (store, id) {
   structure(raw, class = 'commit')
 }
 
+
+#' @export
 `$.commit` <- function (x, i) {
   if (i %in% names(x)) return(x[[i]])
   if (identical(i, 'data')) {
