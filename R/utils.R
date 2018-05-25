@@ -1,4 +1,8 @@
 
+has_name <- function (x, name) isTRUE(name %in% names(x))
+
+# --- access -----------------------------------------------------------
+
 nth <- function(x, n) {
   if (!length(x)) return(vector(mode = typeof(x)))
   x[[n]]

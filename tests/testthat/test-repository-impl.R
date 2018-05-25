@@ -228,3 +228,13 @@ test_that("changes are synchronized into the repository", {
   expect_equal(r$last_commit$objects, u$ids)
   expect_equal(r$last_plot, u$svg)
 })
+
+
+test_that("commit returns its data", {
+  r <- single_repository()
+  c <- commit(r$store, 'p')
+
+  d <- c$data
+  expect_named(d, 'a')
+  expect_equal(unlist(d), 1)
+})

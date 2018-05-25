@@ -57,23 +57,11 @@ repository_update <-function (repo, env, plot, expr) {
 repository_history <- function (repo, mode = 'all') {
   guard()
   stopifnot(is_repository(repo))
-
-  # TODO handle the mode argument when == 'current'
-  stopifnot(identical(mode, 'all'))
+  stopifnot(mode %in% c("all", "current"))
 
   query <- list(rlang::quo(class == 'commit'))
   ids   <- storage::os_find(repo$store, query)
-  cmts  <- map_lst(ids, function(id) storage::os_read(repo$store, id))
-
-  nodes <- list()
-  napply(cmts, function (id, cmt) {
-    node          <- cmt$object
-    node$id       <- id
-    node$parent   <- cmt$tags$parent
-    node$children <- c()
-    node$time     <- cmt$tags$time
-    nodes[[id]] <<- node
-  })
+  nodes <- map_lst(ids, function(id) commit(repo$store, id))
 
   # when all nodes are extracted, assign children
   lapply(nodes, function (node) {
@@ -82,7 +70,15 @@ repository_history <- function (repo, mode = 'all') {
     }
   })
 
-  structure(nodes, class = c('history', 'graph'))
+  ans <- structure(nodes, class = c('history', 'graph'))
+
+  # if only the current branch, filter out that branch
+  if (identical(mode, 'current')) {
+    return(filter(ans, ancestor_of(repo$last_commit$id)))
+  }
+
+  # else, return everything ("all")
+  ans
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
@@ -112,17 +108,6 @@ repository_explain <- function (repo, id = NULL) {
 #' @rdname repository
 #' @export
 #'
-repository_last_commit <- function (repo) {
-  guard()
-  stopifnot(is_repository(repo))
-
-  repo$last_commit$id
-}
-
-
-#' @rdname repository
-#' @export
-#'
 repository_rewind <- function (repo, id) {
   guard()
   stopifnot(is_repository(repo))
@@ -141,13 +126,3 @@ repository_rewind <- function (repo, id) {
 
   invisible()
 }
-
-
-#' @export
-#' @rdname repository
-#'
-repository_data <- function (repo, ids) {
-  stopifnot(is_repository(repo))
-  map_lst(ids, function (id) storage::os_read_object(repo$store, id))
-}
-
