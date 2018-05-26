@@ -70,6 +70,11 @@ map_lst <- function (x, f, ...) {
   ans
 }
 
+map_chr <- function (x, f, ...) {
+  ans <- lapply(x, f, ...)
+  as.character(unlist(ans))
+}
+
 # TODO rename to map_names
 napply <- function (lst, f, ...) {
   if (!length(lst)) return(list())

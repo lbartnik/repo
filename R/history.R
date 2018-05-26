@@ -20,6 +20,7 @@ filter <- function (x, ...)
 {
   stopifnot(is_graph(x))
   cls <- class(x)
+  str <- attr(x, 'store')
 
   quo <- rlang::enquos(...)
   stopifnot(identical(length(quo), 1L))
@@ -37,11 +38,15 @@ filter <- function (x, ...)
       Filter(x, f = function (commit) {
         setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
       })
+    },
+    no_parent = function () {
+      Filter(x, f = function (commit) is.na(commit$parent))
     }
   )
 
   ans <- rlang::eval_tidy(first(quo), conditions)
   class(ans) <- cls
+  attr(x, 'store') <- str
   ans
 }
 

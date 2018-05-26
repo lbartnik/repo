@@ -79,7 +79,7 @@ repository_history <- function (repo, mode = 'all') {
   nodes <- map_lst(ids, function(id) commit(repo$store, id))
 
   # when all nodes are extracted, assign children
-  nodes <- structure(nodes, class = c('history', 'graph'))
+  nodes <- structure(nodes, class = c('history', 'graph'), store = store)
 
   lapply(nodes, function (node) {
     if (!is.na(node$parent)) {
@@ -166,9 +166,7 @@ repository_rewind <- function (repo, id) {
 #'
 as_deltas <- function (x) {
   stopifnot(is_history(x))
-
-
-
+  history_to_deltas(x)
 }
 
 

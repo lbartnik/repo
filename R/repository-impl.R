@@ -277,42 +277,31 @@ commit <- function (store, id) {
 history_to_deltas <- function (hist)
 {
   stopifnot(is_history(hist))
+  store <- attr(hist, 'store')
 
-  # convert each single commit
-  all <- lapply(graph, function (commit) {
-    new_objects <- introduced_in(graph, commit$id)
-    if (!length(new_objects)) return(NULL)
-    commit_to_steps(commit, new_objects)
-  })
-  out <- vapply(all, is.null, logical(1))
-  all <- all[!out]
+  nodes <- map()
+  convert <- function (commit_id, parent_delta) {
+    commit  <- hist[[commit_id]]
+    new_ids <- commit$objects[introduced(hist, commit_id)]
 
-  steps <- unlist(lapply(all, `[[`, i = 'steps'), recursive = FALSE)
-  links <- unlist(lapply(all, `[[`, i = 'links'), recursive = FALSE)
+    mapply(new_ids, c(parent_delta, head(new_ids, -1)), FUN = function (child, parent) {
+      from_store <- storage::os_read(store, child)
+      delta <- from_store$tags
+      delta$id <- child
+      delta$parent <- parent
+      delta$description <- description(from_store$object)
+      nodes$assign(delta$id, delta)
+    })
 
-  find_parent <- function (id)
-  {
-    parent <- graph[[id]]$parent
-    if (is.na(parent) || length(all[[parent]]$steps)) return(parent)
-    return(find_parent(parent))
+    parent_delta <- last(new_ids)
+    lapply(commit$children, function (commit_id) convert(commit_id, parent_delta))
   }
 
-  # connect the last object of each "parent" commit with the first
-  # object of each of its "children"
-  bridges <- unname(lapply(graph[!out], function (commit) {
-    parent <- find_parent(commit$id)
-    if (is.na(parent)) return(NULL)
-    list(
-      source = last(all[[parent]]$steps)$id,
-      target = first(all[[commit$id]]$steps)$id
-    )
-  }))
-  bridges <- bridges[!vapply(bridges, is.null, logical(1))]
-  links <- c(links, bridges)
+  roots <- names(filter(hist, no_parent()))
+  lapply(roots, function (id) convert(id, NA_character_))
 
   # return the final "steps" structure
-  structure(list(steps = unname(steps), links = unname(links)),
-            class = 'deltas')
+  structure(nodes$values, class = 'deltas')
 }
 
 
@@ -323,3 +312,26 @@ history_to_deltas <- function (hist)
 #'
 is_deltas <- function (x) inherits(x, 'deltas')
 
+
+#' Provide a summary of an object.
+#'
+#' @param object Object to be described.
+#'
+#' @import broom
+#' @rdname internals
+#'
+description <- function (object)
+{
+  if (is_empty(object)) return(NA_character_)
+
+  if (is.data.frame(object)) return(paste0('data.frame[', nrow(object), ', ', ncol(object), ']'))
+
+  if (inherits(object, 'lm')) {
+    g <- broom::glance(object)
+    return(paste0('lm adjR2:', format(g$adj.r.squared, digits = 2),
+                  ' AIC:', format(g$AIC, digits = 2),
+                  ' df:', g$df))
+  }
+
+  paste(class(object), collapse = '::')
+}
