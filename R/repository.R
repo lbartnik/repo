@@ -166,6 +166,9 @@ repository_rewind <- function (repo, id) {
 #'
 as_deltas <- function (x) {
   stopifnot(is_history(x))
+
+
+
 }
 
 

@@ -252,3 +252,74 @@ commit <- function (store, id) {
 
   stop('unknown key ', i)
 }
+
+
+# --- deltas -----------------------------------------------------------
+
+#' Transform a graph of commits into a graph of deltas.
+#'
+#' A _delta_ is an introduction of a new artifact (object, plot, printout)
+#' in the R session. Graph of deltas is easier to read for a person than
+#' a graph of commits becase only the relevant (new) information is shown
+#' in each node of the graph. Thus, translating from commits to deltas is
+#' the first step to present the history of changes in R session recorded
+#' in commits.
+#'
+#' @description `history_to_deltas` is the main function which orchestrates
+#' the transformation.
+#'
+#' @param hist Object returned by [repository_history].
+#' @return Object of S3 class `deltas`.
+#'
+#' @rdname deltas
+#' @importFrom utils head tail
+#'
+history_to_deltas <- function (hist)
+{
+  stopifnot(is_history(hist))
+
+  # convert each single commit
+  all <- lapply(graph, function (commit) {
+    new_objects <- introduced_in(graph, commit$id)
+    if (!length(new_objects)) return(NULL)
+    commit_to_steps(commit, new_objects)
+  })
+  out <- vapply(all, is.null, logical(1))
+  all <- all[!out]
+
+  steps <- unlist(lapply(all, `[[`, i = 'steps'), recursive = FALSE)
+  links <- unlist(lapply(all, `[[`, i = 'links'), recursive = FALSE)
+
+  find_parent <- function (id)
+  {
+    parent <- graph[[id]]$parent
+    if (is.na(parent) || length(all[[parent]]$steps)) return(parent)
+    return(find_parent(parent))
+  }
+
+  # connect the last object of each "parent" commit with the first
+  # object of each of its "children"
+  bridges <- unname(lapply(graph[!out], function (commit) {
+    parent <- find_parent(commit$id)
+    if (is.na(parent)) return(NULL)
+    list(
+      source = last(all[[parent]]$steps)$id,
+      target = first(all[[commit$id]]$steps)$id
+    )
+  }))
+  bridges <- bridges[!vapply(bridges, is.null, logical(1))]
+  links <- c(links, bridges)
+
+  # return the final "steps" structure
+  structure(list(steps = unname(steps), links = unname(links)),
+            class = 'deltas')
+}
+
+
+#' @description `is_deltas` verifies if the given object is a valid
+#' `deltas` structure.
+#'
+#' @rdname deltas
+#'
+is_deltas <- function (x) inherits(x, 'deltas')
+
