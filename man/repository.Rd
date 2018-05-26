@@ -3,6 +3,7 @@
 \name{repository}
 \alias{repository}
 \alias{repository}
+\alias{is_repository}
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
@@ -10,6 +11,8 @@
 \title{Object Repository for R}
 \usage{
 repository(store)
+
+is_repository(x)
 
 repository_update(repo, env, plot, expr)
 

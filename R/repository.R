@@ -22,6 +22,8 @@ repository <- function (store)
 }
 
 
+#' @rdname repository
+#' @export
 is_repository <- function (x) inherits(x, 'repository')
 
 

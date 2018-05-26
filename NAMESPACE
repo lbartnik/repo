@@ -3,6 +3,7 @@
 S3method("$",commit)
 S3method(print,history)
 export(filter)
+export(is_repository)
 export(repository)
 export(repository_explain)
 export(repository_history)
