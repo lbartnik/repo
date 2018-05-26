@@ -2,11 +2,9 @@
 #'
 #' @param store Read and write objects into this storage.
 #'
-#' @import proto
-#' @name repository
 #' @rdname repository
-#'
 #' @export
+#'
 repository <- function (store)
 {
   stopifnot(storage::is_object_store(store))
@@ -22,13 +20,27 @@ repository <- function (store)
 }
 
 
+#' @description `is_repository` verifies whether `x` is a repository
+#' object.
+#'
+#' @param x Object to be tested or converted.
+#'
 #' @rdname repository
 #' @export
+#'
 is_repository <- function (x) inherits(x, 'repository')
 
 
+#' @description `repository_update` appends a new commit to the repository.
+#'
+#' @param repo A repository object.
+#' @param env Environment to create a commit from (e.g. [globalenv]).
+#' @param plot A recorded plot (see [grDevices::recordPlot]).
+#' @param expr The expression related to the most recent changed in `env`.
+#'
 #' @rdname repository
 #' @export
+#'
 repository_update <-function (repo, env, plot, expr) {
   guard()
   stopifnot(is_repository(repo))
@@ -54,6 +66,7 @@ repository_update <-function (repo, env, plot, expr) {
 #' with `id` as the root.
 #'
 #' @rdname repository
+#'
 #' @export
 #'
 repository_history <- function (repo, mode = 'all') {
@@ -91,12 +104,13 @@ repository_history <- function (repo, mode = 'all') {
 
 
 #' @description `repository_explain` returns a graph that describes
-#' the __origin__ of an artifact (an R object or a plot) with the given
+#' the _origin_ of an artifact (an R object or a plot) with the given
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
 #' @rdname repository
 #' @export
+#'
 repository_explain <- function (repo, id = NULL) {
   # 1. find object
   # 2. recursively find all parents
@@ -108,7 +122,16 @@ repository_explain <- function (repo, id = NULL) {
 }
 
 
+#' @description `repository_rewind` changes the internal pointer to the
+#' _last commit_ and, if `id` denotes a historical commit, sets it to
+#' that value. Subsequent commits will be recorded as descendants of
+#' commit `id`.
+#'
+#' @param repo Repository object.
+#' @param id Commit identifier.
+#'
 #' @rdname repository
+#'
 #' @export
 #'
 repository_rewind <- function (repo, id) {
@@ -129,3 +152,27 @@ repository_rewind <- function (repo, id) {
 
   invisible()
 }
+
+
+#' @description `as_deltas` converts a `history` object (a tree of
+#' _commits_) into an equivalent tree of _artifacts_. Each node in the
+#' tree of artifacts represents a single artifact introduced in a given
+#' commit. It is still a representation of historical changes in R
+#' session but at the level of a single artifact rather than at the
+#' level of a snapshot of R session (a _commit_).
+#'
+#' @rdname repository
+#' @export
+#'
+as_deltas <- function (x) {
+  stopifnot(is_history(x))
+}
+
+
+#' @rdname repository
+#' @export
+#'
+as_origin <- function (x) {
+  stopifnot(is_history(x))
+}
+
