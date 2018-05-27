@@ -3,6 +3,8 @@
 #' @param store Read and write objects into this storage.
 #'
 #' @rdname repository
+#'
+#' @importFrom proto proto
 #' @export
 #'
 repository <- function (store)

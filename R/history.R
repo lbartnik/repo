@@ -10,7 +10,7 @@ print.history <- function (x) {
 
 is_graph <- function (x) inherits(x, 'graph')
 
-is_history <- function (x) inherits(x, 'history')
+is_history <- function (x) inherits(x, 'history') && storage::is_object_store(attr(x, 'store'))
 
 
 #' @rdname history
@@ -45,9 +45,7 @@ filter <- function (x, ...)
   )
 
   ans <- rlang::eval_tidy(first(quo), conditions)
-  class(ans) <- cls
-  attr(x, 'store') <- str
-  ans
+  structure(ans, class = cls, store = str)
 }
 
 
