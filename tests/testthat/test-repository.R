@@ -90,6 +90,12 @@ test_that("updater identifies new object", {
 })
 
 
+test_that("parents not present", {
+  # if parent object is not present in the parent commit, e.g. iris
+  expect_true(FALSE)
+})
+
+
 test_that("updater identifies new plot", {
   r <- single_repository(last_plot = NULL)
   e <- list(a = 1)

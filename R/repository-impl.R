@@ -33,6 +33,7 @@ repository_updater <- function (repo, env, plot, expr) {
     .$tags <- napply(with_names(.$tags, names(.$new)), function (name, tags) {
       names <- extract_parents(env, expr)
       tags$parents <- .$last_commit$objects[names]
+      dbg(name, " parents: ", names, " [", tags$parents, "]")
       tags
     })
   }
