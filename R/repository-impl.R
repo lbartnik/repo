@@ -32,8 +32,16 @@ repository_updater <- function (repo, env, plot, expr) {
     .$tags <- lapply(names(.$new), function (name) auto_tags(.$objects[[name]]))
     .$tags <- napply(with_names(.$tags, names(.$new)), function (name, tags) {
       names <- extract_parents(env, expr)
-      tags$parents <- .$last_commit$objects[names]
-      dbg(name, " parents: ", names, " [", tags$parents, "]")
+      dbg(name, " parents: ", paste(names, collapse = ", "))
+
+      names2 <- intersect(names, names(.$last_commit$objects))
+      if (!setequal(names, names2)) {
+        warning("parents identified but not present in the previous commit ",
+                name, ": ", paste(setdiff(names, names2), collapse = ", "),
+                call. = FALSE)
+      }
+
+      tags$parents <- .$last_commit$objects[names2]
       tags
     })
   }

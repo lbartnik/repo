@@ -92,7 +92,25 @@ test_that("updater identifies new object", {
 
 test_that("parents not present", {
   # if parent object is not present in the parent commit, e.g. iris
-  expect_true(FALSE)
+  r <- single_repository()
+  e <- new.env(parent = globalenv())
+
+  e$x <- 100
+  u <- repository_updater(r, e, NULL, bquote(x <- lm(a ~ b, iris)))
+  u$process_objects()
+
+  expect_length(u$tags$x$parents, 0)
+  expect_type(u$tags$x$parents, "list")
+
+  e$a <- 1
+  u <- repository_updater(r, e, NULL, bquote(y <- a + lm(d ~ b, iris)))
+  u$process_objects()
+
+  p <- u$tags$x$parents
+  expect_length(p, 1)
+  expect_type(p, "list")
+  expect_named(p, "a")
+  expect_equal(first(p), storage::compute_id(1))
 })
 
 
