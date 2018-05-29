@@ -76,13 +76,9 @@ repository_history <- function (repo, mode = 'all') {
   stopifnot(is_repository(repo))
   stopifnot(mode %in% c("all", "current"))
 
-  query <- list(rlang::quo(class == 'commit'))
-  ids   <- storage::os_find(repo$store, query)
-  nodes <- map_lst(ids, function(id) commit(repo$store, id))
+  nodes <- all_commits(repo$store)
 
-  # when all nodes are extracted, assign children
-  nodes <- structure(nodes, class = c('history', 'graph'), store = store)
-
+  # assign children
   lapply(nodes, function (node) {
     if (!is.na(node$parent)) {
       nodes[[node$parent]]$children <<- append(nodes[[node$parent]]$children, node$id)
@@ -90,13 +86,16 @@ repository_history <- function (repo, mode = 'all') {
     node$new <- introduced(nodes, node$id)
   })
 
+
   # if only the current branch, filter out that branch
   if (identical(mode, 'current')) {
-    return(filter(nodes, ancestor_of(repo$last_commit$id)))
+    nodes <- if (is.na(repo$last_commit$id)) list()
+             else filter(nodes, ancestor_of(repo$last_commit$id))
   }
 
-  # else, return everything ("all")
-  nodes
+  # assign class and keep store handy
+  nodes <- structure(nodes, class = c('history', 'graph'), store = repo$store)
+
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
@@ -114,6 +113,14 @@ repository_history <- function (repo, mode = 'all') {
 #' @export
 #'
 repository_explain <- function (repo, id = NULL) {
+  if (is.null(id)) {
+    commits <- all_commits(repo$store)
+    objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
+    map_lst(objects, function (id) {
+      storage::os_read_tags(repo$store, id)$parents
+    })
+  }
+
   # 1. find object
   # 2. recursively find all parents
 

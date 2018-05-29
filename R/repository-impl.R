@@ -1,3 +1,15 @@
+all_commits <- function (store) {
+  guard()
+  query <- list(rlang::quo(class == 'commit'))
+  ids   <- storage::os_find(store, query)
+  map_lst(ids, function(id) commit(store, id))
+}
+
+
+print.commit <- function (x, ...) {
+  cat("<commit> ", paste(names(x$objects), collapse = ' '))
+}
+
 # --- private API: update ------------------------------------------------------
 
 

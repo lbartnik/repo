@@ -21,3 +21,21 @@ single_repository <- function (...) {
   r
 }
 
+many_repository <- function () {
+  r <- empty_repository()
+
+  append_commit(r, 'a', NA_character_, bquote(a <- 1), a = 1)
+  append_commit(r, 'b', 'a', bquote(b <- 2), a = 1, b = 2)
+}
+
+
+append_commit <- function (r, id, parent, expr, ..., plot = NA_character_) {
+  objects <- lapply(list(...), function (obj) {
+    id <- storage::compute_id(obj)
+    storage::os_write(r$store, obj, list(time = Sys.time()), id)
+  })
+
+  storage::os_write(r$store, list(objects = objects, expr = expr, plot = plot),
+                    list(parent = parent, time = Sys.time()), id)
+}
+

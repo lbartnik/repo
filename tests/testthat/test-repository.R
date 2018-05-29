@@ -230,6 +230,17 @@ test_that("changes are synchronized into the repository", {
 })
 
 
+test_that("empty history", {
+  r <- empty_repository()
+
+  x <- repository_history(r, 'current')
+  expect_s3_class(x, 'history')
+  expect_length(x, 0)
+})
+
+
+# --- commit -----------------------------------------------------------
+
 test_that("commit returns its data", {
   r <- single_repository()
   c <- commit(r$store, 'p')
