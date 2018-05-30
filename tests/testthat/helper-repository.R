@@ -1,3 +1,18 @@
+expect_node <- function (col, id, ...) {
+  expect_true(id %in% names(col))
+  node <- col[[id]]
+
+  cond <- list(...)
+  expect_true(all(names(cond) %in% names(node)))
+
+  lapply(names(cond), function (name) {
+    expect_equal(cond[[name]], node[[name]], info = name)
+  })
+
+  invisible(TRUE)
+}
+
+
 empty_repository <- function () {
   repository(storage::memory())
 }

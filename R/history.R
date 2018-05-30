@@ -69,7 +69,8 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
 
     extract <- function (id) {
       ans <- x[id]
-      if (!is.na(first(ans)$parent)) {
+      parent <- first(ans)$parent
+      if (match(parent, names(x), nomatch = FALSE) && !is.na(parent)) {
         ans <- c(extract(first(ans)$parent), ans)
       }
       ans

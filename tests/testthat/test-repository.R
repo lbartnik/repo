@@ -268,13 +268,31 @@ test_that("full explanation", {
 
   x <- repository_explain(r)
   expect_length(x, 4)
+  expect_named(x, letters[1:4])
 
-  # TODO finish the test
-  expect_true(FALSE)
+  expect_node(x, 'a', parents = list(), children = 'c')
+  expect_node(x, 'b', parents = list(), children = 'c')
+  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = 'd')
+  expect_node(x, 'd', parents = list(c = 'c'), children = character())
 })
 
 
+test_that("explain object", {
+  r <- many_repository()
 
+  x <- repository_explain(r, 'd')
+  expect_length(x, 4)
+
+  x <- repository_explain(r, 'c')
+  expect_length(x, 3)
+  expect_node(x, 'a', parents = list(), children = 'c')
+  expect_node(x, 'b', parents = list(), children = 'c')
+  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = character())
+
+  x <- repository_explain(r, 'b')
+  expect_length(x, 1)
+  expect_node(x, 'b', parents = list(), children = character())
+})
 
 
 # --- commit -----------------------------------------------------------
