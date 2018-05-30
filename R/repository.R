@@ -214,3 +214,12 @@ as_origin <- function (x) {
   stopifnot(is_history(x))
 }
 
+
+#' @rdname trees
+#' @export
+#'
+stratify <- function (x) {
+  stopifnot(is_graph(x))
+  graph_stratify(x)
+}
+

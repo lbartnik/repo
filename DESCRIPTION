@@ -23,6 +23,7 @@ Suggests:
   testthat
 Collate:
   'repo-package.R'
+  'graph.R'
   'history.R'
   'repository.R'
   'repository-impl.R'

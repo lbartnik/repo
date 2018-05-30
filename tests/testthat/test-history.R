@@ -1,20 +1,5 @@
 context("history")
 
-test_that("reduce graph", {
-  h <- sample_graph()
-
-  x <- graph_reduce(h, to = 'd')
-  expect_length(x, 3)
-  expect_named(x, c('a', 'b', 'd'))
-
-  x <- graph_reduce(h, from = 'b')
-  expect_length(x, 3)
-  expect_named(x, c('b', 'd', 'e'))
-
-  x <- graph_reduce(h, from = 'b', to = 'd')
-  expect_length(x, 2)
-  expect_named(x, c('b', 'd'))
-})
 
 test_that("find ancestors", {
   h <- sample_graph()

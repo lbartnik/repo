@@ -8,8 +8,6 @@ print.history <- function (x) {
   cat(length(x), 'node(s)')
 }
 
-is_graph <- function (x) inherits(x, 'graph')
-
 is_history <- function (x) inherits(x, 'history') && storage::is_object_store(attr(x, 'store'))
 
 
@@ -19,8 +17,6 @@ is_history <- function (x) inherits(x, 'history') && storage::is_object_store(at
 filter <- function (x, ...)
 {
   stopifnot(is_graph(x))
-  cls <- class(x)
-  str <- attr(x, 'store')
 
   quo <- rlang::enquos(...)
   stopifnot(identical(length(quo), 1L))
@@ -39,47 +35,20 @@ filter <- function (x, ...)
         setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
       })
     },
-    no_parent = function () {
-      Filter(x, f = function (commit) is.na(commit$parent))
-    }
+    no_parent = function () graph_roots(x)
   )
 
   ans <- rlang::eval_tidy(first(quo), conditions)
-  structure(ans, class = cls, store = str)
+  preserve_attributes(ans, x)
 }
 
 
+preserve_attributes <- function (x, from) {
+  stopifnot(is_history(from))
 
-graph_reduce <- function (x, from = NULL, to = NULL) {
-  stopifnot(is_graph(x))
-  cls <- class(x)
+  class(x) <- class(from)
+  attr(x, 'store') <- attr(from, 'store')
 
-  if (!is.null(from)) {
-    stopifnot(from %in% names(x))
-
-    extract <- function (id) {
-      c(x[id], unlist(lapply(x[[id]]$children, extract), recursive = FALSE))
-    }
-
-    x <- extract(from)
-  }
-
-  if (!is.null(to)) {
-    stopifnot(to %in% names(x))
-
-    extract <- function (id) {
-      ans <- x[id]
-      parent <- first(ans)$parent
-      if (match(parent, names(x), nomatch = FALSE) && !is.na(parent)) {
-        ans <- c(extract(first(ans)$parent), ans)
-      }
-      ans
-    }
-
-    x <- extract(to)
-  }
-
-  class(x) <- cls
   x
 }
 
