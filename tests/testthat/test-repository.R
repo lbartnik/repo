@@ -97,14 +97,14 @@ test_that("parents not present", {
 
   e$x <- 100
   u <- repository_updater(r, e, NULL, bquote(x <- lm(a ~ b, iris)))
-  u$process_objects()
+  expect_warning(u$process_objects())
 
   expect_length(u$tags$x$parents, 0)
   expect_type(u$tags$x$parents, "list")
 
   e$a <- 1
   u <- repository_updater(r, e, NULL, bquote(y <- a + lm(d ~ b, iris)))
-  u$process_objects()
+  expect_warning(u$process_objects())
 
   p <- u$tags$x$parents
   expect_length(p, 1)
@@ -140,7 +140,7 @@ test_that("updater ignores repeated plot", {
   expect_equal(u$plot, p)
   u$process_plot()
 
-  expect_true(is.na(u$plot_id))
+  expect_equal(u$plot_id, character(0))
   expect_false(exists('plot_tags', envir = u))
 })
 
@@ -263,6 +263,20 @@ test_that("empty history", {
 })
 
 
+test_that("full explanation", {
+  r <- many_repository()
+
+  x <- repository_explain(r)
+  expect_length(x, 4)
+
+  # TODO finish the test
+  expect_true(FALSE)
+})
+
+
+
+
+
 # --- commit -----------------------------------------------------------
 
 test_that("commit returns its data", {
@@ -273,9 +287,3 @@ test_that("commit returns its data", {
   expect_named(d, 'a')
   expect_equivalent(unlist(d), 1)
 })
-
-
-test_that("", {
-
-})
-

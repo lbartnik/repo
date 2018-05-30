@@ -1,4 +1,5 @@
 options(repository.debug = TRUE)
+options(repository.debug = FALSE)
 
 path  <- file.path(getwd(), 'tmp-repo')
 store <- storage::filesystem(path, create = FALSE)

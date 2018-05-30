@@ -51,7 +51,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
     # if the current plot looks the same as the last one, do not update at all
     if (is.null(.$svg) || svg_equal(.$svg, .$last_plot)) {
-      .$plot_id <- NA_character_
+      .$plot_id <- character()
       return()
     }
 
@@ -99,7 +99,7 @@ repository_updater <- function (repo, env, plot, expr) {
                         tags = c(.$tags[[name]], list(parent_commit = cid)))
     })
 
-    if (!is.na(.$plot_id)) {
+    if (length(.$plot_id)) {
       dbg("storing new plot [", id, "] with parents: ", paste(parents, collapse = ", "))
       storage::os_write(.$store, .$svg, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
@@ -272,6 +272,27 @@ commit <- function (store, id) {
   }
 
   stop('unknown key ', i)
+}
+
+
+# --- explain ----------------------------------------------------------
+
+object_origin <- function (repo, id) {
+  black <- vector()
+  grey  <- vector(id)
+  while (grey$size()) {
+    id <- grey$pop_front()
+    lapply(storage::os_read_tags(repo$store, id)$parents, function (id) {
+      if (!black$find(id)) grey$push_back(id)
+    })
+    black$push_back(id)
+  }
+  as.character(black$values)
+}
+
+
+print.origin <- function (x) {
+  cat('<origin-graph>', length(x), 'node(s)\n')
 }
 
 

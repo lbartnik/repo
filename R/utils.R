@@ -27,11 +27,12 @@ isFALSE <- function (x) identical(x, FALSE)
 
 # --- vector -----------------------------------------------------------
 
-vector <- function () {
+vector <- function (...) {
   proto(expr = {
-    values    <- list()
+    values    <- list(...)
     push_back <- function (., value) { .$values <- c(.$values, list(value)) }
     pop_front <- function (.) { ans <- first(.$values); .$values <- .$values[-1]; ans }
+    find      <- function (., value) as.logical(match(value, .$values, 0L, 0L))
     size      <- function (.) length(.$values)
     data      <- function (.) .$values
   })

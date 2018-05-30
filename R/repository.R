@@ -116,13 +116,41 @@ repository_explain <- function (repo, id = NULL) {
   if (is.null(id)) {
     commits <- all_commits(repo$store)
     objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
-    map_lst(objects, function (id) {
+    parents <- map_chr(objects, function (id) {
       storage::os_read_tags(repo$store, id)$parents
     })
+    plots <- unique(map_chr(commits, function (c) c$plot))
+    ids <- unique(c(objects, parents, plots))
+  }
+  else {
+    ids <- object_origin(repo, id)
   }
 
-  # 1. find object
-  # 2. recursively find all parents
+  # annotate objects with information about: name, parent, commit, type, etc.
+  objects <- lapply(ids, function (id) {
+    raw <- storage::os_read(repo$store, id)
+
+    stopifnot(has_name(raw$tags, 'parents'), has_name(raw$tags, 'time'),
+              has_name(raw$tags, 'parent_commit'))
+
+    obj <- raw$tags[c("parents", "time")]
+    obj$id <- id
+    obj$commit <- raw$tags$parent_commit
+    obj$description <- description(raw$object)
+    obj$children <- character()
+
+    obj
+  })
+  names(objects) <- ids
+
+  # add information about children
+  lapply(objects, function (obj) {
+    lapply(obj$parents, function (parent) {
+      objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+    })
+  })
+
+  structure(objects, class = c('origin', 'graph'))
 
   # 3. wrap explanation in a 'origin' object that can be
   # a) turned into a 'stratified' object
