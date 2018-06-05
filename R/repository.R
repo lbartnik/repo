@@ -2,11 +2,11 @@
 #'
 #' @param store Read and write objects into this storage.
 #'
-#' @import proto
-#' @name repository
 #' @rdname repository
 #'
+#' @importFrom proto proto
 #' @export
+#'
 repository <- function (store)
 {
   stopifnot(storage::is_object_store(store))
@@ -22,11 +22,27 @@ repository <- function (store)
 }
 
 
+#' @description `is_repository` verifies whether `x` is a repository
+#' object.
+#'
+#' @param x Object to be tested or converted.
+#'
+#' @rdname repository
+#' @export
+#'
 is_repository <- function (x) inherits(x, 'repository')
 
 
+#' @description `repository_update` appends a new commit to the repository.
+#'
+#' @param repo A repository object.
+#' @param env Environment to create a commit from (e.g. [globalenv]).
+#' @param plot A recorded plot (see [grDevices::recordPlot]).
+#' @param expr The expression related to the most recent changed in `env`.
+#'
 #' @rdname repository
 #' @export
+#'
 repository_update <-function (repo, env, plot, expr) {
   guard()
   stopifnot(is_repository(repo))
@@ -52,6 +68,7 @@ repository_update <-function (repo, env, plot, expr) {
 #' with `id` as the root.
 #'
 #' @rdname repository
+#'
 #' @export
 #'
 repository_history <- function (repo, mode = 'all') {
@@ -59,13 +76,9 @@ repository_history <- function (repo, mode = 'all') {
   stopifnot(is_repository(repo))
   stopifnot(mode %in% c("all", "current"))
 
-  query <- list(rlang::quo(class == 'commit'))
-  ids   <- storage::os_find(repo$store, query)
-  nodes <- map_lst(ids, function(id) commit(repo$store, id))
+  nodes <- all_commits(repo$store)
 
-  # when all nodes are extracted, assign children
-  nodes <- structure(nodes, class = c('history', 'graph'))
-
+  # assign children
   lapply(nodes, function (node) {
     if (!is.na(node$parent)) {
       nodes[[node$parent]]$children <<- append(nodes[[node$parent]]$children, node$id)
@@ -73,13 +86,16 @@ repository_history <- function (repo, mode = 'all') {
     node$new <- introduced(nodes, node$id)
   })
 
+
   # if only the current branch, filter out that branch
   if (identical(mode, 'current')) {
-    return(filter(nodes, ancestor_of(repo$last_commit$id)))
+    nodes <- if (is.na(repo$last_commit$id)) list()
+             else filter(nodes, ancestor_of(repo$last_commit$id))
   }
 
-  # else, return everything ("all")
-  nodes
+  # assign class and keep store handy
+  nodes <- structure(nodes, class = c('history', 'graph'), store = repo$store)
+
   # wrap in a 'commits' object that
   # 1. can be turned into a 'stratified' object
   # 2. can be turned into a 'deltas' object
@@ -89,15 +105,52 @@ repository_history <- function (repo, mode = 'all') {
 
 
 #' @description `repository_explain` returns a graph that describes
-#' the __origin__ of an artifact (an R object or a plot) with the given
+#' the _origin_ of an artifact (an R object or a plot) with the given
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
 #' @rdname repository
 #' @export
+#'
 repository_explain <- function (repo, id = NULL) {
-  # 1. find object
-  # 2. recursively find all parents
+  if (is.null(id)) {
+    commits <- all_commits(repo$store)
+    objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
+    parents <- map_chr(objects, function (id) {
+      storage::os_read_tags(repo$store, id)$parents
+    })
+    plots <- unique(map_chr(commits, function (c) c$plot))
+    ids <- unique(c(objects, parents, plots))
+  }
+  else {
+    ids <- object_origin(repo, id)
+  }
+
+  # annotate objects with information about: name, parent, commit, type, etc.
+  objects <- lapply(ids, function (id) {
+    raw <- storage::os_read(repo$store, id)
+
+    stopifnot(has_name(raw$tags, 'parents'), has_name(raw$tags, 'time'),
+              has_name(raw$tags, 'parent_commit'))
+
+    obj <- raw$tags[c("parents", "time")]
+    obj$id <- id
+    obj$commit <- raw$tags$parent_commit
+    obj$description <- description(raw$object)
+    obj$children <- character()
+
+    obj
+  })
+  names(objects) <- ids
+
+  # add information about children
+  lapply(objects, function (obj) {
+    lapply(obj$parents, function (parent) {
+      objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+    })
+  })
+
+  structure(objects, class = c('origin', 'graph'))
 
   # 3. wrap explanation in a 'origin' object that can be
   # a) turned into a 'stratified' object
@@ -106,7 +159,16 @@ repository_explain <- function (repo, id = NULL) {
 }
 
 
+#' @description `repository_rewind` changes the internal pointer to the
+#' _last commit_ and, if `id` denotes a historical commit, sets it to
+#' that value. Subsequent commits will be recorded as descendants of
+#' commit `id`.
+#'
+#' @param repo Repository object.
+#' @param id Commit identifier.
+#'
 #' @rdname repository
+#'
 #' @export
 #'
 repository_rewind <- function (repo, id) {
@@ -127,3 +189,37 @@ repository_rewind <- function (repo, id) {
 
   invisible()
 }
+
+
+#' @description `as_deltas` converts a `history` object (a tree of
+#' _commits_) into an equivalent tree of _artifacts_. Each node in the
+#' tree of artifacts represents a single artifact introduced in a given
+#' commit. It is still a representation of historical changes in R
+#' session but at the level of a single artifact rather than at the
+#' level of a snapshot of R session (a _commit_).
+#'
+#' @rdname repository
+#' @export
+#'
+as_deltas <- function (x) {
+  stopifnot(is_history(x))
+  history_to_deltas(x)
+}
+
+
+#' @rdname repository
+#' @export
+#'
+as_origin <- function (x) {
+  stopifnot(is_history(x))
+}
+
+
+#' @rdname trees
+#' @export
+#'
+stratify <- function (x) {
+  stopifnot(is_graph(x))
+  graph_stratify(x)
+}
+

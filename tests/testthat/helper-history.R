@@ -9,6 +9,7 @@ sample_graph <- function () {
       f = list(parent = "c", children = c(), objects = list()),
       g = list(parent = "c", children = c(), objects = list(x = storage::compute_id(1)))
     ),
-    class = c('history', 'graph')
+    class = c('history', 'graph'),
+    store = storage::memory()
   )
 }

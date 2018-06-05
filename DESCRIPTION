@@ -13,6 +13,7 @@ Depends:
 Imports:
   defer,
   proto,
+  rlang,
   rsvg,
   storage
 Suggests:
@@ -22,6 +23,7 @@ Suggests:
   testthat
 Collate:
   'repo-package.R'
+  'graph.R'
   'history.R'
   'repository.R'
   'repository-impl.R'

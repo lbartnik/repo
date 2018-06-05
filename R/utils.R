@@ -27,20 +27,36 @@ isFALSE <- function (x) identical(x, FALSE)
 
 # --- vector -----------------------------------------------------------
 
-vector <- function () {
+choose_data <- function (..., data) {
+  args <- list(...)
+  if (length(args)) {
+    if (length(data)) stop("both ... and data provided when constructing a container")
+    return(args)
+  }
+  data
+}
+
+vector <- function (..., data = list()) {
+  data <- choose_data(..., data = data)
   proto(expr = {
-    values    <- list()
+    values    <- data
     push_back <- function (., value) { .$values <- c(.$values, list(value)) }
     pop_front <- function (.) { ans <- first(.$values); .$values <- .$values[-1]; ans }
+    erase     <- function (., value) { .$values <- Filter(function(x)!identical(x,value), .$values) }
+    find      <- function (., value) as.logical(match(value, .$values, 0L, 0L))
     size      <- function (.) length(.$values)
     data      <- function (.) .$values
   })
 }
 
-map <- function () {
+map <- function (..., data = list()) {
+  data <- choose_data(..., data = data)
+  stopifnot(all_named(data))
+
   proto(expr = {
-    values <- list()
+    values <- data
     assign <- function (., key, value) { .$values[[key]] <- value }
+    erase  <- function (., key) { .$values[[key]] <- NULL }
     data      <- function (., key = NULL) if (is.null(key)) .$values else .$values[[key]]
   })
 }
@@ -68,6 +84,11 @@ map_lst <- function (x, f, ...) {
   if (!is.null(names(ans))) return(ans)
   names(ans) <- as.character(x)
   ans
+}
+
+map_chr <- function (x, f, ...) {
+  ans <- lapply(x, f, ...)
+  as.character(unlist(ans))
 }
 
 # TODO rename to map_names

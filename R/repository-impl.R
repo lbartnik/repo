@@ -1,3 +1,15 @@
+all_commits <- function (store) {
+  guard()
+  query <- list(rlang::quo(class == 'commit'))
+  ids   <- storage::os_find(store, query)
+  map_lst(ids, function(id) commit(store, id))
+}
+
+
+print.commit <- function (x, ...) {
+  cat("<commit> ", paste(names(x$objects), collapse = ' '))
+}
+
 # --- private API: update ------------------------------------------------------
 
 
@@ -20,7 +32,16 @@ repository_updater <- function (repo, env, plot, expr) {
     .$tags <- lapply(names(.$new), function (name) auto_tags(.$objects[[name]]))
     .$tags <- napply(with_names(.$tags, names(.$new)), function (name, tags) {
       names <- extract_parents(env, expr)
-      tags$parents <- .$last_commit$objects[names]
+      dbg(name, " parents: ", paste(names, collapse = ", "))
+
+      names2 <- intersect(names, names(.$last_commit$objects))
+      if (!setequal(names, names2)) {
+        warning("parents identified but not present in the previous commit ",
+                name, ": ", paste(setdiff(names, names2), collapse = ", "),
+                call. = FALSE)
+      }
+
+      tags$parents <- .$last_commit$objects[names2]
       tags
     })
   }
@@ -30,7 +51,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
     # if the current plot looks the same as the last one, do not update at all
     if (is.null(.$svg) || svg_equal(.$svg, .$last_plot)) {
-      .$plot_id <- NA_character_
+      .$plot_id <- character()
       return()
     }
 
@@ -78,7 +99,7 @@ repository_updater <- function (repo, env, plot, expr) {
                         tags = c(.$tags[[name]], list(parent_commit = cid)))
     })
 
-    if (!is.na(.$plot_id)) {
+    if (length(.$plot_id)) {
       dbg("storing new plot [", id, "] with parents: ", paste(parents, collapse = ", "))
       storage::os_write(.$store, .$svg, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
@@ -251,4 +272,108 @@ commit <- function (store, id) {
   }
 
   stop('unknown key ', i)
+}
+
+
+# --- explain ----------------------------------------------------------
+
+object_origin <- function (repo, id) {
+  black <- vector()
+  grey  <- vector(id)
+  while (grey$size()) {
+    id <- grey$pop_front()
+    lapply(storage::os_read_tags(repo$store, id)$parents, function (id) {
+      if (!black$find(id)) grey$push_back(id)
+    })
+    black$push_back(id)
+  }
+  as.character(black$values)
+}
+
+
+print.origin <- function (x) {
+  cat('<origin-graph>', length(x), 'node(s)\n')
+}
+
+
+# --- deltas -----------------------------------------------------------
+
+#' Transform a graph of commits into a graph of deltas.
+#'
+#' A _delta_ is an introduction of a new artifact (object, plot, printout)
+#' in the R session. Graph of deltas is easier to read for a person than
+#' a graph of commits becase only the relevant (new) information is shown
+#' in each node of the graph. Thus, translating from commits to deltas is
+#' the first step to present the history of changes in R session recorded
+#' in commits.
+#'
+#' @description `history_to_deltas` is the main function which orchestrates
+#' the transformation.
+#'
+#' @param hist Object returned by [repository_history].
+#' @return Object of S3 class `deltas`.
+#'
+#' @rdname deltas
+#' @importFrom utils head tail
+#'
+history_to_deltas <- function (hist)
+{
+  stopifnot(is_history(hist))
+  store <- attr(hist, 'store')
+
+  nodes <- map()
+  convert <- function (commit_id, parent_delta) {
+    commit  <- hist[[commit_id]]
+    new_ids <- commit$objects[introduced(hist, commit_id)]
+
+    mapply(new_ids, c(parent_delta, head(new_ids, -1)), FUN = function (child, parent) {
+      from_store <- storage::os_read(store, child)
+      delta <- from_store$tags
+      delta$id <- child
+      delta$parent <- parent
+      delta$description <- description(from_store$object)
+      nodes$assign(delta$id, delta)
+    })
+
+    parent_delta <- last(new_ids)
+    lapply(commit$children, function (commit_id) convert(commit_id, parent_delta))
+  }
+
+  roots <- names(filter(hist, no_parent()))
+  lapply(roots, function (id) convert(id, NA_character_))
+
+  # return the final "steps" structure
+  structure(nodes$values, class = 'deltas')
+}
+
+
+#' @description `is_deltas` verifies if the given object is a valid
+#' `deltas` structure.
+#'
+#' @rdname deltas
+#'
+is_deltas <- function (x) inherits(x, 'deltas')
+
+
+#' Provide a summary of an object.
+#'
+#' @param object Object to be described.
+#'
+#' @import broom
+#' @rdname internals
+#'
+description <- function (object)
+{
+  if (is_empty(object)) return(NA_character_)
+
+  if (is.data.frame(object)) return(paste0('data.frame[', nrow(object), ', ', ncol(object), ']'))
+
+  if (inherits(object, 'lm')) {
+    g <- broom::glance(object)
+    return(paste0('lm adjR2:', format(g$adj.r.squared, digits = 2),
+                  ' AIC:', format(g$AIC, digits = 2),
+                  ' df:', g$df))
+  }
+
+  paste(class(object), collapse = '::')
 }
