@@ -53,14 +53,13 @@ preserve_attributes <- function (x, from) {
 }
 
 
-introduced <- function (hist, id) {
-  stopifnot(is_history(hist))
-  stopifnot(id %in% names(hist))
+introduced <- function (commits, id) {
+  stopifnot(id %in% names(commits))
 
-  c <- hist[[id]]
+  c <- commits[[id]]
   if (is.na(c$parent)) return(names(c$objects))
 
-  p <- hist[[c$parent]]
+  p <- commits[[c$parent]]
   new_objs <- Filter(function (n) {
     is.na(match(n, names(p$objects))) || !identical(c$objects[[n]], p$objects[[n]])
   }, names(c$objects))
