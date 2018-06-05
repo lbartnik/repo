@@ -41,6 +41,16 @@ test_that("FALSE is recognized", {
 })
 
 
+test_that("vector erase", {
+  v <- vector(data = 1:10)
+  expect_equal(v$size(), 10)
+
+  v$erase(3L)
+  expect_equal(v$size(), 9)
+  expect_false(3L %in% v$data())
+})
+
+
 test_that("all_named requires names", {
   expect_true(all_named(list(a = 1, b = 2)))
   expect_false(all_named(list(a = 1, 2)))

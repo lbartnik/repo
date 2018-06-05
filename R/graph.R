@@ -44,11 +44,27 @@ graph_roots <- function (x) {
 graph_stratify <- function (x) {
   stopifnot(is_graph(x))
 
+  process_node <- function (id) {
+    nodes$erase(id)
+    node <- x[[id]]
+    node$children <- lapply(node$children, process_node)
+    node$parent <- NULL
+    node
+  }
+
+  nodes <- vector(data = names(x))
+  roots <- lapply(names(graph_roots(x)), process_node)
+  stopifnot(nodes$size() == 0)
+
+  if (length(roots) == 1) {
+    roots <- first(roots)
+  }
+
   # TODO
   # 1. find roots
   # 2. iterate over roots, descend over children
   # 3. if a child has more than one parent, issue a warning, choose the first parent
   #    and assign the child under that parent
 
-  structure(x, class = c('stratified', class(x)))
+  structure(roots, class = c('stratified', class(x)))
 }
