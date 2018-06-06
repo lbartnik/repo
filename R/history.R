@@ -14,7 +14,7 @@ is_history <- function (x) inherits(x, 'history') && storage::is_object_store(at
 #' @rdname history
 #' @export
 #'
-filter <- function (x, ...)
+filter.history <- function (x, ...)
 {
   stopifnot(is_graph(x))
 

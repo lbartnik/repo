@@ -12,6 +12,7 @@ Depends:
   R (>= 3.4.0)
 Imports:
   defer,
+  dplyr,
   proto,
   rlang,
   rsvg,
@@ -27,6 +28,7 @@ Collate:
   'history.R'
   'repository.R'
   'repository-impl.R'
+  'selection.R'
   'utils.R'
 Remotes:
   lbartnik/defer,

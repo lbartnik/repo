@@ -2,12 +2,12 @@
 % Please edit documentation in R/history.R
 \name{print.history}
 \alias{print.history}
-\alias{filter}
+\alias{filter.history}
 \title{History of R session(s).}
 \usage{
 \method{print}{history}(x)
 
-filter(x, ...)
+\method{filter}{history}(x, ...)
 }
 \description{
 History of R session(s).

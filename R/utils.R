@@ -141,6 +141,12 @@ ccat_ <- function (chunks, sep = ' ')
 }
 
 
+# --- string -----------------------------------------------------------
+
+join <- function (x, sep) {
+  paste(x, collapse = sep)
+}
+
 # --- log & debug ------------------------------------------------------
 
 log <- function (level, ...) {
