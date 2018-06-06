@@ -7,7 +7,7 @@ all_commits <- function (store) {
 
 
 print.commit <- function (x, ...) {
-  cat("<commit> ", paste(names(x$objects), collapse = ' '))
+  cat("<commit: ", join(names(x$objects), ' '), '>\n')
 }
 
 # --- private API: update ------------------------------------------------------
@@ -137,7 +137,7 @@ auto_tags <- function (obj, ...) {
   preset <- list(...)
   stopifnot(all_named(preset))
 
-  combine(preset, list(class = class(obj), time = Sys.time()))
+  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE))
 }
 
 
