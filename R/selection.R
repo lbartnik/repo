@@ -37,7 +37,7 @@ as_query <- function (x) {
 
 query <- function (x) {
   stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = list()),
+  structure(list(repository = x, filter = list(), arrange = list(), select = NULL),
             class = 'query')
 }
 
@@ -45,9 +45,8 @@ is_query <- function (x) inherits(x, 'query')
 
 #' @importFrom rlang expr_deparse get_expr
 #'
-qexpr_text <- function (qry, key) {
-  stopifnot(is_query(qry))
-  map_chr(qry[[key]], function (f) expr_deparse(get_expr(f)))
+quos_text <- function (x) {
+  map_chr(x, function (f) expr_deparse(get_expr(f)))
 }
 
 
@@ -57,7 +56,7 @@ print.query <- function (x, ...) {
 
   for (part in c('select', 'filter', 'arrange')) {
     if (length(x[[part]])) {
-      lines$push_back(paste0(part, '(', join(qexpr_text(x, part), ', '), ')'))
+      lines$push_back(paste0(part, '(', join(quos_text(x[[part]]), ', '), ')'))
     }
   }
 
@@ -76,8 +75,19 @@ filter.query <- function (qry, ...) {
 
 #' @importFrom rlang quos
 select.query <- function (qry, ...) {
-  # TODO intersect selections
-  qry$select <- quos(...)
+  sel <- quos(...)
+
+  if (is.null(qry$select)) {
+    qry$select <- sel
+    return(qry)
+  }
+
+  i <- (quos_text(qry$select) %in% quos_text(sel))
+  if (!any(i)) {
+    stop("selection reduced to an empty set", call. = FALSE)
+  }
+
+  qry$select <- qry$select[i]
   qry
 }
 
