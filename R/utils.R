@@ -24,7 +24,6 @@ is_error <- function (x) inherits(x, 'try-error') || inherits(x, 'simpleError')
 
 isFALSE <- function (x) identical(x, FALSE)
 
-
 # --- vector -----------------------------------------------------------
 
 choose_data <- function (..., data) {

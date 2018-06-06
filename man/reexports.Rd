@@ -8,6 +8,8 @@
 \alias{arrange}
 \alias{reexports}
 \alias{select}
+\alias{reexports}
+\alias{\%>\%}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -16,5 +18,7 @@ below to see their documentation.
 
 \describe{
   \item{dplyr}{\code{\link[dplyr]{filter}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr]{select}}}
+
+  \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
 }}
 

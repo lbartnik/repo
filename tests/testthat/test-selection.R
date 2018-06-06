@@ -33,3 +33,22 @@ test_that("select subsets", {
 
   expect_error(select(q, y), "selection reduced to an empty set")
 })
+
+
+test_that("execute runs the query", {
+  r <- many_repository()
+
+  x <- select(r, id) %>% execute
+  expect_named(x, "id")
+  expect_length(x$id, 4)
+  expect_equal(x$id, letters[1:4])
+
+  x <- select(r, id) %>% filter(class == "integer") %>% execute
+  expect_equal(x$id, "b")
+  x <- select(r, id) %>% filter(class == "numeric") %>% execute
+  expect_equal(x$id, c("a", "c"))
+
+  x <- select(r, id) %>% filter(class == "numeric") %>% arrange(desc(id)) %>% execute
+  expect_equal(x$id, c("c", "a"))
+})
+
