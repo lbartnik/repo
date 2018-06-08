@@ -52,3 +52,26 @@ test_that("execute runs the query", {
   expect_equal(x$id, c("c", "a"))
 })
 
+
+test_that("various types of select", {
+  r <- many_repository()
+
+  # a single column
+  x <- select(r, id) %>% execute
+  expect_named(x, "id")
+  expect_setequal(x$id, letters[1:4])
+
+  # from character
+  y <- select(r, "id") %>% execute
+  expect_equal(x, y)
+
+  # basically everything
+  x <- select(r, -artifact) %>% execute
+  expect_named(x, c("object", "id", "class", "parent_commit", "parents", "time"),
+               ignore.order = TRUE)
+  expect_equal(nrow(x), 4)
+})
+
+
+
+

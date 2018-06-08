@@ -68,6 +68,18 @@ print.query <- function (x, ...) {
 }
 
 
+#' @export
+tag_names <- function (x) {
+  all_tag_names(as_query(x)$repository$store)
+}
+
+
+#' @export
+tag_values <- function (qry) {
+  all_tag_values(as_query(x)$repository$store)
+}
+
+
 # --- impl -------------------------------------------------------------
 
 #' @importFrom rlang quos
@@ -110,7 +122,7 @@ execute <- function (x) {
   stopifnot(is_query(x))
   if (!length(x$select)) {
     warning("selection is empty, returning an empty set", call. = FALSE)
-    return(data.frame())
+    return(tibble::tibble())
   }
 
   store <- x$repository$store
@@ -119,20 +131,26 @@ execute <- function (x) {
   ids <- storage::os_find(store, c(quo(artifact), x$filter))
 
   # 2. decide what to read from the object store
-  sel <- quos_text(x$select)
+  available_tags <- c(all_tag_names(store), "id", "object")
+  sel <- tidyselect::vars_select(available_tags, !!!x$select, .exclude = "artifact")
+
+  # we will append to this one
   values <- list()
 
+  # object is the actual original data, be it an R object or a plot
   if ("object" %in% sel) {
     values <- c(values, list(object = lapply(ids, function (id) storage::os_read_object(store, id))))
     sel <- setdiff(sel, "object")
   }
 
+  # id is not present among tags
   if ("id" %in% sel) {
     values <- c(values, list(id = ids))
     sel <- setdiff(sel, "id")
   }
 
-  values2 <- map_lst(sel, function(x) base::vector("list", length(sel)))
+  # everything else can be read from tags
+  values2 <- map_lst(sel, function(x) base::vector("list", length(ids)))
 
   Map(ids, seq_along(ids), f = function (id, i) {
     tags <- storage::os_read_tags(store, id)
@@ -142,10 +160,25 @@ execute <- function (x) {
     })
   })
 
+  # simplify columns which hold single, atomic values
   values2 <- lapply(values2, function (column) {
-    type <- unique(map_chr(column, class))
-    if (length(type) == 1 && is.atomic(first(column))) as(column, type) else column
+    len <- map_int(column, length)
+    if (any(len != 1)) return(column)
+    cls <- unique(map_lst(column, class))
+    if (length(cls) > 1) return(column)
+    cls <- first(cls)
+    ref <- first(column)
+    if (is.atomic(ref)) `class<-`(as.vector(column, typeof(ref)), cls) else column
   })
+
+  # make sure there is at least one value in each column
+  i <- (map_dbl(values2, length) < 1)
+  if (any(i)) {
+    empty <- names(values2)[i]
+    warning("tags ", join(empty, ', '), " rendered no values, removing from result",
+            call. = FALSE)
+    values2 <- values2[setdiff(names(values2), empty)]
+  }
 
   values <- tibble::as_tibble(c(values, values2))
 

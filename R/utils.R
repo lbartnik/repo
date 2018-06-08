@@ -90,6 +90,17 @@ map_chr <- function (x, f, ...) {
   as.character(unlist(ans))
 }
 
+map_dbl <- function (x, f, ...) {
+  ans <- lapply(x, f, ...)
+  as.numeric(unlist(ans))
+}
+
+map_int <- function (x, f, ...) {
+  ans <- lapply(x, f, ...)
+  as.integer(unlist(ans))
+}
+
+
 # TODO rename to map_names
 napply <- function (lst, f, ...) {
   if (!length(lst)) return(list())

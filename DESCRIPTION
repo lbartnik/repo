@@ -16,7 +16,8 @@ Imports:
   proto,
   rlang,
   rsvg,
-  storage
+  storage,
+  tidyselect
 Suggests:
   data.table,
   devtools,
@@ -29,6 +30,7 @@ Collate:
   'repository.R'
   'repository-impl.R'
   'selection.R'
+  'selection-impl.R'
   'utils.R'
 Remotes:
   lbartnik/defer,
