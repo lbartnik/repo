@@ -1,12 +1,18 @@
 #' @importFrom rlang quo
-all_tag_names <- function (store) {
+all_tag_names <- function (query) {
+  stopifnot(is_query(query))
+  store <- query$repository$store
+
   ids <- storage::os_find(store, list(quo(artifact)))
   nms <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
   unique(unlist(nms))
 }
 
 #' @importFrom rlang quo
-all_tag_values <- function (store) {
+all_tag_values <- function (query) {
+  stopifnot(is_query(query))
+  store <- query$repository$store
+
   ids <- storage::os_find(store, list(quo(artifact)))
   raw <- lapply(ids, function (id) storage::os_read_tags(store, id))
 

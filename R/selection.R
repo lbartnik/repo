@@ -32,6 +32,9 @@ select.repository <- function (repo, ...) {
 
 
 as_query <- function (x) {
+  if (is_query(x)) {
+    return(x)
+  }
   if (is_repository(x)) {
     return(query(x))
   }
@@ -70,13 +73,18 @@ print.query <- function (x, ...) {
 
 #' @export
 tag_names <- function (x) {
-  all_tag_names(as_query(x)$repository$store)
+  # TODO take selection and filters into consideration
+  ans <- all_tag_names(as_query(x))
+  setdiff(ans, 'artifact')
 }
 
 
 #' @export
-tag_values <- function (qry) {
-  all_tag_values(as_query(x)$repository$store)
+tag_values <- function (x) {
+  # TODO take selection and filters into consideration
+  ans <- all_tag_values(as_query(x))
+  nms <- setdiff(names(ans), 'artifact')
+  ans[nms]
 }
 
 
@@ -131,7 +139,7 @@ execute <- function (x) {
   ids <- storage::os_find(store, c(quo(artifact), x$filter))
 
   # 2. decide what to read from the object store
-  available_tags <- c(all_tag_names(store), "id", "object")
+  available_tags <- c(all_tag_names(x), "id", "object")
   sel <- tidyselect::vars_select(available_tags, !!!x$select, .exclude = "artifact")
 
   # we will append to this one
