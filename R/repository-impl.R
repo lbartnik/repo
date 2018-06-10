@@ -96,7 +96,7 @@ repository_updater <- function (repo, env, plot, expr) {
     napply(.$new, function (name, id) {
       dbg("artifact `", name, "` not present, storing [", id, "]")
       storage::os_write(.$store, .$objects[[name]], id = id,
-                        tags = c(.$tags[[name]], list(parent_commit = cid)))
+                        tags = c(.$tags[[name]], list(parent_commit = cid, names = name)))
     })
 
     if (length(.$plot_id)) {

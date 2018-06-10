@@ -201,6 +201,7 @@ test_that("objects are written", {
   u$process_objects()
   u$process_plot()
   ct_id <- u$write()
+  o_id  <- storage::compute_id(2)
 
   ids <- storage::os_list(s)
   expect_length(ids, 4)
@@ -210,7 +211,11 @@ test_that("objects are written", {
   expect_named(x$tags, c("class", "parent", "time", "artifact"), ignore.order = TRUE)
   expect_named(x$object, c("expr", "objects", "plot"), ignore.order = TRUE)
   expect_named(x$object$objects, "a")
-  expect_equal(x$object$objects$a, storage::compute_id(2))
+  expect_equal(x$object$objects$a, o_id)
+
+  y <- storage::os_read(s, o_id)
+  expect_named(y$tags, c("artifact", "class", "names", "parents", "parent_commit", "time"),
+               ignore.order = TRUE)
 })
 
 
