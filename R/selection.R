@@ -16,6 +16,15 @@ magrittr::`%>%`
 
 
 #' @export
+top_n <- function (x, n, wt) UseMethod("top_n")
+
+#' @importFrom dplyr top_n
+#' @export
+top_n.default <- function (x, n, wt) dplyr::top_n(x, n, wt)
+
+
+
+#' @export
 filter.repository <- function (repo, ...) {
   filter(as_query(repo), ...)
 }
@@ -28,6 +37,11 @@ arrange.repository <- function (repo, ...) {
 #' @export
 select.repository <- function (repo, ...) {
   select(as_query(repo), ...)
+}
+
+#' @export
+top_n.repository <- function (repo, n, wt) {
+  top_n(as_query(repo), n, wt)
 }
 
 
@@ -44,7 +58,7 @@ as_query <- function (x) {
 
 query <- function (x) {
   stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = NULL),
+  structure(list(repository = x, filter = list(), arrange = list(), select = NULL, top = NULL),
             class = 'query')
 }
 
@@ -125,6 +139,23 @@ arrange.query <- function (qry, ...) {
   qry
 }
 
+
+#' @importFrom rlang quos quo abort
+#' @export
+top_n.query <- function (qry, n, wt) {
+  if (!missing(wt)) {
+    abort("wt not yet supported in top_n")
+  }
+  if (missing(n) || !is.numeric(n) || isFALSE(n > 0)) {
+    abort("n has to be a non-negative number")
+  }
+
+  qry$top <- n
+  qry
+}
+
+
+#' @importFrom rlang UQS
 #' @export
 execute <- function (x) {
   stopifnot(is_query(x))
@@ -140,7 +171,7 @@ execute <- function (x) {
 
   # 2. decide what to read from the object store
   available_tags <- c(all_tag_names(x), "id", "object")
-  sel <- tidyselect::vars_select(available_tags, !!!x$select, .exclude = "artifact")
+  sel <- tidyselect::vars_select(available_tags, UQS(x$select), .exclude = "artifact")
 
   # we will append to this one
   values <- list()
@@ -197,5 +228,14 @@ execute <- function (x) {
   # 3. arrange
   # TODO if arrange is malformed, maybe intercept the exception and provide
   #      a custom error message to the user?
-  dplyr::arrange_(values, .dots = x$arrange)
+  if (length(x$arrange)) {
+    values <- dplyr::arrange_(values, .dots = x$arrange)
+  }
+
+  # 4. top_n
+  if (!is.null(x$top)) {
+    values <- head(values, x$top)
+  }
+
+  values
 }

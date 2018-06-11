@@ -35,6 +35,19 @@ test_that("select subsets", {
 })
 
 
+test_that("top_n chooses top n entries", {
+  r <- many_repository()
+
+  q <- top_n(r, 2)
+  expect_equal(q$top, 2)
+
+  expect_error(top_n(r, 0))
+  expect_error(top_n(r, -1))
+  expect_error(top_n(r, "a"))
+  expect_error(top_n(r, 10, some_column))
+})
+
+
 test_that("execute runs the query", {
   r <- many_repository()
 
@@ -50,6 +63,11 @@ test_that("execute runs the query", {
 
   x <- select(r, id) %>% filter(class == "numeric") %>% arrange(desc(id)) %>% execute
   expect_equal(x$id, c("c", "a"))
+
+  x <- select(r, id) %>% arrange(id) %>% top_n(1) %>% execute
+  expect_equal(x$id, "a")
+  x <- select(r, id) %>% arrange(desc(id)) %>% top_n(1) %>% execute
+  expect_equal(x$id, "d")
 })
 
 
