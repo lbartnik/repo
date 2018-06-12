@@ -58,7 +58,7 @@ as_query <- function (x) {
 
 query <- function (x) {
   stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = NULL, top = NULL),
+  structure(list(repository = x, filter = list(), arrange = list(), select = NULL, top_n = NULL),
             class = 'query')
 }
 
@@ -75,7 +75,7 @@ quos_text <- function (x) {
 print.query <- function (x, ...) {
   lines <- vector(toString(x$repository))
 
-  for (part in c('select', 'filter', 'arrange')) {
+  for (part in c('select', 'filter', 'arrange', 'top_n')) {
     if (length(x[[part]])) {
       lines$push_back(paste0(part, '(', join(quos_text(x[[part]]), ', '), ')'))
     }
@@ -114,10 +114,11 @@ filter.query <- function (qry, ...) {
 
 #' @importFrom rlang quos
 #' @export
-select.query <- function (qry, ...) {
+#'
+select.query <- function (qry, ..., .force = FALSE) {
   sel <- quos(...)
 
-  if (is.null(qry$select)) {
+  if (is.null(qry$select) || isTRUE(.force)) {
     qry$select <- sel
     return(qry)
   }
@@ -150,17 +151,18 @@ top_n.query <- function (qry, n, wt) {
     abort("n has to be a non-negative number")
   }
 
-  qry$top <- n
+  qry$top_n <- n
   qry
 }
 
 
-#' @importFrom rlang UQS
+#' @importFrom rlang UQS warn
 #' @export
-execute <- function (x) {
+#'
+execute <- function (x, .warn = TRUE) {
   stopifnot(is_query(x))
   if (!length(x$select)) {
-    warning("selection is empty, returning an empty set", call. = FALSE)
+    if (isTRUE(.warn)) warn("selection is empty, returning an empty set")
     return(tibble::tibble())
   }
 
@@ -168,6 +170,10 @@ execute <- function (x) {
 
   # 1. find artifacts that match the filter
   ids <- storage::os_find(store, c(quo(artifact), x$filter))
+  if (!length(ids)) {
+    if (isTRUE(.warn)) warn("filter did not match any objects, returning an empty set")
+    return(tibble::tibble())
+  }
 
   # 2. decide what to read from the object store
   available_tags <- c(all_tag_names(x), "id", "object")
@@ -220,10 +226,6 @@ execute <- function (x) {
   }
 
   values <- tibble::as_tibble(c(values, values2))
-
-  if (!length(x$arrange)) {
-    return(values)
-  }
 
   # 3. arrange
   # TODO if arrange is malformed, maybe intercept the exception and provide
