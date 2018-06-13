@@ -11,6 +11,10 @@ dplyr::arrange
 dplyr::select
 
 #' @export
+#' @importFrom dplyr summarise
+dplyr::summarise
+
+#' @export
 #' @importFrom magrittr %>%
 magrittr::`%>%`
 
@@ -40,6 +44,11 @@ select.repository <- function (repo, ...) {
 }
 
 #' @export
+summarise.repository <- function (repo, ...) {
+  summarise(as_query(repo), ...)
+}
+
+#' @export
 top_n.repository <- function (repo, n, wt) {
   top_n(as_query(repo), n, wt)
 }
@@ -58,7 +67,8 @@ as_query <- function (x) {
 
 query <- function (x) {
   stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = NULL, top_n = NULL),
+  structure(list(repository = x, filter = list(), arrange = list(), select = NULL,
+                 top_n = NULL, summarise = list()),
             class = 'query')
 }
 
@@ -75,7 +85,7 @@ quos_text <- function (x) {
 print.query <- function (x, ...) {
   lines <- vector(toString(x$repository))
 
-  for (part in c('select', 'filter', 'arrange', 'top_n')) {
+  for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {
     if (length(x[[part]])) {
       lines$push_back(paste0(part, '(', join(quos_text(x[[part]]), ', '), ')'))
     }
@@ -156,6 +166,17 @@ top_n.query <- function (qry, n, wt) {
 }
 
 
+#' @export
+summarise.query <- function (qry, ...) {
+  if (length(qry$summarise)) {
+    warn("overwriting the query summary")
+  }
+
+  qry$summarise <- quos(...)
+  qry
+}
+
+
 #' @importFrom rlang UQS warn
 #' @export
 #'
@@ -170,6 +191,14 @@ execute <- function (x, .warn = TRUE) {
 
   # 1. find artifacts that match the filter
   ids <- storage::os_find(store, c(quo(artifact), x$filter))
+
+  # 1a. if there's a simple counting summary, this is where we can actually
+  #     return the result
+  if (summary_check(x)) {
+    ans <- tibble::tibble(length(ids))
+    return(with_names(ans, names(x$summarise)))
+  }
+
   if (!length(ids)) {
     if (isTRUE(.warn)) warn("filter did not match any objects, returning an empty set")
     return(tibble::tibble())
@@ -241,3 +270,23 @@ execute <- function (x, .warn = TRUE) {
 
   values
 }
+
+
+# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
+# If there is no summary at all, returns FALSE.
+# If there's an unsupported summary, throws an exception.
+#' @importFrom rlang abort quo_expr
+summary_check <- function (qry) {
+  if (!length(qry$summarise)) return(FALSE)
+  if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
+
+  lapply(qry$summarise, function (s) {
+    expr <- quo_expr(s)
+    if (!is.call(expr) || !identical(expr, quote(n()))) {
+      abort("only n() summary is currently supported")
+    }
+  })
+
+  TRUE
+}
+

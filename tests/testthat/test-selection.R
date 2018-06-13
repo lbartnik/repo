@@ -48,6 +48,18 @@ test_that("top_n chooses top n entries", {
 })
 
 
+test_that("summary is recorded", {
+  r <- many_repository()
+
+  q <- summarise(r, n = n())
+  expect_length(q$summarise, 1)
+
+  x <- select(q, id) %>% execute
+  expect_named(x, 'n')
+  expect_equal(x$n, 4)
+})
+
+
 test_that("execute runs the query", {
   r <- many_repository()
 

@@ -9,6 +9,8 @@
 \alias{reexports}
 \alias{select}
 \alias{reexports}
+\alias{summarise}
+\alias{reexports}
 \alias{\%>\%}
 \title{Objects exported from other packages}
 \keyword{internal}
@@ -17,7 +19,7 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{dplyr}{\code{\link[dplyr]{filter}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr]{select}}}
+  \item{dplyr}{\code{\link[dplyr]{filter}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{summarise}}}
 
   \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
 }}
