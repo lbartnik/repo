@@ -7,7 +7,7 @@ all_commits <- function (store) {
 
 
 print.commit <- function (x, ...) {
-  cat("<commit> ", paste(names(x$objects), collapse = ' '))
+  cat("<commit: ", join(names(x$objects), ' '), '>\n')
 }
 
 # --- private API: update ------------------------------------------------------
@@ -80,7 +80,7 @@ repository_updater <- function (repo, env, plot, expr) {
   u$write <- function (.) {
     # store list of object pointers + basic 'history' tags
     data <- list(expr = .$expr, objects = .$ids, plot = .$plot_id)
-    tags <- auto_tags(NULL, class = 'commit', parent = .$last_commit$id)
+    tags <- list(class = 'commit', parent = .$last_commit$id, time = Sys.time())
     cid  <- storage::compute_id(list(data, tags))
 
     # this should never happen because hash is computed from both objects
@@ -96,7 +96,7 @@ repository_updater <- function (repo, env, plot, expr) {
     napply(.$new, function (name, id) {
       dbg("artifact `", name, "` not present, storing [", id, "]")
       storage::os_write(.$store, .$objects[[name]], id = id,
-                        tags = c(.$tags[[name]], list(parent_commit = cid)))
+                        tags = c(.$tags[[name]], list(parent_commit = cid, names = name)))
     })
 
     if (length(.$plot_id)) {
@@ -137,7 +137,7 @@ auto_tags <- function (obj, ...) {
   preset <- list(...)
   stopifnot(all_named(preset))
 
-  combine(preset, list(class = class(obj), time = Sys.time()))
+  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE))
 }
 
 

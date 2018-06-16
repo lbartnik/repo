@@ -25,12 +25,29 @@ repository <- function (store)
 #' @description `is_repository` verifies whether `x` is a repository
 #' object.
 #'
-#' @param x Object to be tested or converted.
+#' @param x Object to be tested, converted or printed.
 #'
 #' @rdname repository
 #' @export
 #'
 is_repository <- function (x) inherits(x, 'repository')
+
+
+#' @rdname repository
+#' @export
+#'
+print.repository <- function (x, ...) {
+  cat(toString(x), '\n')
+  invisible(x)
+}
+
+
+#' @rdname repository
+#' @export
+#'
+toString.repository <- function (x) {
+  paste0('<repository:', toString(x$store), '>')
+}
 
 
 #' @description `repository_update` appends a new commit to the repository.
@@ -215,6 +232,8 @@ as_origin <- function (x) {
 }
 
 
+#' Tree-related operations.
+#'
 #' @rdname trees
 #' @export
 #'

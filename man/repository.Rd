@@ -4,6 +4,8 @@
 \alias{repository}
 \alias{repository}
 \alias{is_repository}
+\alias{print.repository}
+\alias{toString.repository}
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
@@ -15,6 +17,10 @@
 repository(store)
 
 is_repository(x)
+
+\method{print}{repository}(x, ...)
+
+\method{toString}{repository}(x)
 
 repository_update(repo, env, plot, expr)
 
@@ -31,7 +37,7 @@ as_origin(x)
 \arguments{
 \item{store}{Read and write objects into this storage.}
 
-\item{x}{Object to be tested or converted.}
+\item{x}{Object to be tested, converted or printed.}
 
 \item{repo}{A repository object.}
 

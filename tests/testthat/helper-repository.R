@@ -54,7 +54,7 @@ many_repository <- function () {
 
 add_object <- function (r, id, value, parent_commit, parents) {
   tags <- list(class = class(value), parent_commit = parent_commit,
-               parents = parents, time = Sys.time())
+               parents = parents, time = Sys.time(), artifact = TRUE)
   storage::os_write(r$store, value, tags, id)
 }
 

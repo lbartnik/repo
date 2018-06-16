@@ -2,9 +2,10 @@ options(repository.debug = TRUE)
 options(repository.debug = FALSE)
 
 path  <- file.path(getwd(), 'tmp-repo')
-store <- storage::filesystem(path, create = FALSE)
+store <- storage::filesystem(path, create = TRUE)
 repo  <- repository::repository(store)
 
+generate_simple(repo)
 
 
 #plot <- tryCatch(recordPlot(), error = function(e)'error')

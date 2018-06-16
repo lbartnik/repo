@@ -1,0 +1,3 @@
+* finish execute
+* store object/plot/artifact name under list of names "names" when
+  writing to object store
