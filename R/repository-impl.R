@@ -137,7 +137,8 @@ auto_tags <- function (obj, ...) {
   preset <- list(...)
   stopifnot(all_named(preset))
 
-  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE))
+  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
+                       session = r_session_id()))
 }
 
 

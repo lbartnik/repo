@@ -162,6 +162,14 @@ join <- function (x, sep) {
   paste(x, collapse = sep)
 }
 
+# --- R session --------------------------------------------------------
+
+crc32 <- function (x) digest::digest(x, 'crc32')
+
+r_session_id <- function () {
+  crc32(list(Sys.getpid(), sessionInfo()))
+}
+
 # --- log & debug ------------------------------------------------------
 
 log <- function (level, ...) {

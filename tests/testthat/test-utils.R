@@ -100,3 +100,8 @@ test_that("not negates a function", {
   expect_false(nf(2))
   expect_true(nf(1))
 })
+
+
+test_that("r session id does not change", {
+  expect_equal(r_session_id(), r_session_id())
+})
