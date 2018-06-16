@@ -229,7 +229,7 @@ execute <- function (x, .warn = TRUE) {
   Map(ids, seq_along(ids), f = function (id, i) {
     tags <- storage::os_read_tags(store, id)
     tags <- with_names(tags[sel], sel)
-    napply(tags, function (name, value) {
+    imap(tags, function (value, name) {
       values2[[name]][[i]] <<- value
     })
   })

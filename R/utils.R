@@ -101,15 +101,20 @@ map_int <- function (x, f, ...) {
 }
 
 
-# TODO rename to map_names
-napply <- function (lst, f, ...) {
+imap <- function (lst, f, ...) {
   if (!length(lst)) return(list())
+  lst <- as.list(lst)
 
-  stopifnot(is.list(lst), all_named(lst))
+  if (is.null(names(lst))) {
+    nms <- seq_along(lst)
+  }
+  else {
+    nms <- names(lst)
+  }
 
-  ans <- mapply(name = names(lst), value = lst, function (name, value) f(name, value, ...),
+  ans <- mapply(value = lst, name = nms, function (value, name) f(value, name, ...),
                 SIMPLIFY = FALSE, USE.NAMES = FALSE)
-  names(ans) <- names(lst)
+  names(ans) <- nms
   ans
 }
 
