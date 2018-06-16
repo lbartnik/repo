@@ -271,22 +271,3 @@ execute <- function (x, .warn = TRUE) {
   values
 }
 
-
-# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
-# If there is no summary at all, returns FALSE.
-# If there's an unsupported summary, throws an exception.
-#' @importFrom rlang abort quo_expr
-summary_check <- function (qry) {
-  if (!length(qry$summarise)) return(FALSE)
-  if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
-
-  lapply(qry$summarise, function (s) {
-    expr <- quo_expr(s)
-    if (!is.call(expr) || !identical(expr, quote(n()))) {
-      abort("only n() summary is currently supported")
-    }
-  })
-
-  TRUE
-}
-
