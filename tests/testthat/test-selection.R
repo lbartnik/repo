@@ -114,5 +114,12 @@ test_that("various types of select", {
 })
 
 
+test_that("filter by id", {
+  r <- many_repository()
 
+  x <- r %>% select(id) %>% filter(id == 'a') %>% execute
+  expect_length(x, 1)
+  expect_named(x, 'id')
+  expect_equal(x$id, 'a')
+})
 
