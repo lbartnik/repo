@@ -72,6 +72,7 @@ query <- function (x) {
             class = 'query')
 }
 
+#' @export
 is_query <- function (x) inherits(x, 'query')
 
 #' @importFrom rlang expr_deparse get_expr
@@ -187,6 +188,8 @@ execute <- function (x, .warn = TRUE) {
     return(tibble::tibble())
   }
 
+  # TODO summarise is mutually exclusive with top_n and arrange
+
   store <- x$repository$store
 
   # 1. find artifacts that match the filter
@@ -194,7 +197,7 @@ execute <- function (x, .warn = TRUE) {
 
   # 1a. if there's a simple counting summary, this is where we can actually
   #     return the result
-  if (summary_check(x)) {
+  if (only_n_summary(x)) {
     ans <- tibble::tibble(length(ids))
     return(with_names(ans, names(x$summarise)))
   }
@@ -256,14 +259,19 @@ execute <- function (x, .warn = TRUE) {
 
   values <- tibble::as_tibble(c(values, values2))
 
-  # 3. arrange
+  # 3. summarise goes before arrange and top_n and if defined is the last step
+  if (length(x$summarise)) {
+    return(dplyr::summarise(values, UQS(x$summarise)))
+  }
+
+  # 4. arrange
   # TODO if arrange is malformed, maybe intercept the exception and provide
   #      a custom error message to the user?
   if (length(x$arrange)) {
     values <- dplyr::arrange_(values, .dots = x$arrange)
   }
 
-  # 4. top_n
+  # 5. top_n
   if (!is.null(x$top)) {
     values <- head(values, x$top)
   }

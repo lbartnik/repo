@@ -31,16 +31,14 @@ all_tag_values <- function (query) {
 # If there is no summary at all, returns FALSE.
 # If there's an unsupported summary, throws an exception.
 #' @importFrom rlang abort quo_expr
-summary_check <- function (qry) {
+only_n_summary <- function (qry) {
   if (!length(qry$summarise)) return(FALSE)
   if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
 
-  lapply(qry$summarise, function (s) {
+  i <- map_lgl(qry$summarise, function (s) {
     expr <- quo_expr(s)
-    if (!is.call(expr) || !identical(expr, quote(n()))) {
-      abort("only n() summary is currently supported")
-    }
+    is.call(expr) && identical(expr, quote(n()))
   })
 
-  TRUE
+  all(i)
 }

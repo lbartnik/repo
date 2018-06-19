@@ -100,6 +100,10 @@ map_int <- function (x, f, ...) {
   as.integer(unlist(ans))
 }
 
+map_lgl <- function (x, f, ...) {
+  ans <- lapply(x, f, ...)
+  as.logical(unlist(ans))
+}
 
 imap <- function (lst, f, ...) {
   if (!length(lst)) return(list())

@@ -2,6 +2,8 @@ options(repository.debug = TRUE)
 options(repository.debug = FALSE)
 
 path  <- file.path(getwd(), 'tmp-repo')
+
+path  <- file.path(getwd(), '../ui/repository/')
 unlink(path, recursive = TRUE)
 
 store <- storage::filesystem(path, create = TRUE)

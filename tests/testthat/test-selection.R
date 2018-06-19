@@ -60,6 +60,17 @@ test_that("summary is recorded", {
 })
 
 
+test_that("simple summary", {
+  r <- many_repository()
+
+  q <- select(r, id) %>% summarise(id = min(id), n = n()) %>% execute
+  expect_length(q, 2)
+  expect_named(q, c("id", "n"))
+  expect_equal(q$id, 'a')
+  expect_equal(q$n, 4L)
+})
+
+
 test_that("execute runs the query", {
   r <- many_repository()
 
