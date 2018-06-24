@@ -26,3 +26,19 @@ all_tag_values <- function (query) {
 
   with_names(vls, nms)
 }
+
+# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
+# If there is no summary at all, returns FALSE.
+# If there's an unsupported summary, throws an exception.
+#' @importFrom rlang abort quo_expr
+only_n_summary <- function (qry) {
+  if (!length(qry$summarise)) return(FALSE)
+  if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
+
+  i <- map_lgl(qry$summarise, function (s) {
+    expr <- quo_expr(s)
+    is.call(expr) && identical(expr, quote(n()))
+  })
+
+  all(i)
+}

@@ -12,6 +12,7 @@ Depends:
   R (>= 3.4.0)
 Imports:
   defer,
+  digest,
   dplyr,
   proto,
   rlang,

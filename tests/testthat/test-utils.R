@@ -76,18 +76,18 @@ test_that("map_lst assigns names", {
   expect_named(x, 'a')
 })
 
-test_that("napply passes names and values", {
-  napply(list(a = 1), function (...) {
+test_that("imap passes names and values", {
+  imap(list(a = 1), function (...) {
     args <- list(...)
     expect_length(args, 2)
-    expect_equal(nth(args, 1), 'a')
-    expect_equal(nth(args, 2), 1)
+    expect_equal(nth(args, 1), 1)
+    expect_equal(nth(args, 2), 'a')
   })
 })
 
 
-test_that("napply handles edge cases", {
-  expect_length(napply(NULL, print), 0)
+test_that("imap handles edge cases", {
+  expect_length(imap(NULL, print), 0)
 })
 
 
@@ -99,4 +99,9 @@ test_that("not negates a function", {
   nf <- not(f)
   expect_false(nf(2))
   expect_true(nf(1))
+})
+
+
+test_that("r session id does not change", {
+  expect_equal(r_session_id(), r_session_id())
 })

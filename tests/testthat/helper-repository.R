@@ -23,7 +23,7 @@ single_repository <- function (...) {
 
   args <- list(...)
   stopifnot(all_named(args))
-  napply(args, function (name, value) {
+  imap(args, function (value, name) {
     assign(name, value, envir = r)
   })
 

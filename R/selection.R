@@ -72,6 +72,7 @@ query <- function (x) {
             class = 'query')
 }
 
+#' @export
 is_query <- function (x) inherits(x, 'query')
 
 #' @importFrom rlang expr_deparse get_expr
@@ -187,6 +188,8 @@ execute <- function (x, .warn = TRUE) {
     return(tibble::tibble())
   }
 
+  # TODO summarise is mutually exclusive with top_n and arrange
+
   store <- x$repository$store
 
   # 1. find artifacts that match the filter
@@ -194,7 +197,7 @@ execute <- function (x, .warn = TRUE) {
 
   # 1a. if there's a simple counting summary, this is where we can actually
   #     return the result
-  if (summary_check(x)) {
+  if (only_n_summary(x)) {
     ans <- tibble::tibble(length(ids))
     return(with_names(ans, names(x$summarise)))
   }
@@ -229,7 +232,7 @@ execute <- function (x, .warn = TRUE) {
   Map(ids, seq_along(ids), f = function (id, i) {
     tags <- storage::os_read_tags(store, id)
     tags <- with_names(tags[sel], sel)
-    napply(tags, function (name, value) {
+    imap(tags, function (value, name) {
       values2[[name]][[i]] <<- value
     })
   })
@@ -256,37 +259,23 @@ execute <- function (x, .warn = TRUE) {
 
   values <- tibble::as_tibble(c(values, values2))
 
-  # 3. arrange
+  # 3. summarise goes before arrange and top_n and if defined is the last step
+  if (length(x$summarise)) {
+    return(dplyr::summarise(values, UQS(x$summarise)))
+  }
+
+  # 4. arrange
   # TODO if arrange is malformed, maybe intercept the exception and provide
   #      a custom error message to the user?
   if (length(x$arrange)) {
     values <- dplyr::arrange_(values, .dots = x$arrange)
   }
 
-  # 4. top_n
+  # 5. top_n
   if (!is.null(x$top)) {
     values <- head(values, x$top)
   }
 
   values
-}
-
-
-# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
-# If there is no summary at all, returns FALSE.
-# If there's an unsupported summary, throws an exception.
-#' @importFrom rlang abort quo_expr
-summary_check <- function (qry) {
-  if (!length(qry$summarise)) return(FALSE)
-  if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
-
-  lapply(qry$summarise, function (s) {
-    expr <- quo_expr(s)
-    if (!is.call(expr) || !identical(expr, quote(n()))) {
-      abort("only n() summary is currently supported")
-    }
-  })
-
-  TRUE
 }
 

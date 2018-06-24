@@ -2,7 +2,7 @@ context("repository")
 
 test_that("auto tags generate class and time", {
   x <- auto_tags(1)
-  expect_named(x, c("class", "time", "artifact"))
+  expect_named(x, c("artifact", "class", "session", "time"), ignore.order = TRUE)
 })
 
 
@@ -70,7 +70,7 @@ test_that("updater processes objects", {
   expect_equal(u$objects, list(a = 1))
   expect_equal(u$ids, list(a = storage::compute_id(1)))
   expect_named(u$tags, 'a')
-  expect_named(u$tags$a, c('class', 'time', 'parents', 'artifact'), ignore.order = TRUE)
+  expect_named(u$tags$a, c('artifact', 'class', 'parents', 'session', 'time'), ignore.order = TRUE)
 
   expect_named(u$new, 'a')
 })
@@ -125,7 +125,7 @@ test_that("updater identifies new plot", {
   u$process_plot()
 
   expect_not_null(u$plot_id)
-  expect_named(u$plot_tags, c("class", "time", "parents", "artifact"), ignore.order = TRUE)
+  expect_named(u$plot_tags, c('artifact', 'class', 'parents', 'session', 'time'), ignore.order = TRUE)
   expect_named(u$plot_tags$parents, "a")
 })
 
@@ -214,7 +214,7 @@ test_that("objects are written", {
   expect_equal(x$object$objects$a, o_id)
 
   y <- storage::os_read(s, o_id)
-  expect_named(y$tags, c("artifact", "class", "names", "parents", "parent_commit", "time"),
+  expect_named(y$tags, c("artifact", "class", "names", "parents", "parent_commit", "session", "time"),
                ignore.order = TRUE)
 })
 

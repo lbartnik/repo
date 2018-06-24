@@ -30,7 +30,7 @@ repository_updater <- function (repo, env, plot, expr) {
     dbg("newly created: ", names(.$new))
 
     .$tags <- lapply(names(.$new), function (name) auto_tags(.$objects[[name]]))
-    .$tags <- napply(with_names(.$tags, names(.$new)), function (name, tags) {
+    .$tags <- imap(with_names(.$tags, names(.$new)), function (tags, name) {
       names <- extract_parents(env, expr)
       dbg(name, " parents: ", paste(names, collapse = ", "))
 
@@ -93,7 +93,7 @@ repository_updater <- function (repo, env, plot, expr) {
     storage::os_write(.$store, data, tags, id = cid)
 
     # write objects, append the parent commit id to tags
-    napply(.$new, function (name, id) {
+    imap(.$new, function (id, name) {
       dbg("artifact `", name, "` not present, storing [", id, "]")
       storage::os_write(.$store, .$objects[[name]], id = id,
                         tags = c(.$tags[[name]], list(parent_commit = cid, names = name)))
@@ -137,7 +137,8 @@ auto_tags <- function (obj, ...) {
   preset <- list(...)
   stopifnot(all_named(preset))
 
-  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE))
+  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
+                       session = r_session_id()))
 }
 
 
