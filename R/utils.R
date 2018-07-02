@@ -8,9 +8,11 @@ nth <- function(x, n) {
   x[[n]]
 }
 
-last <- function (x) nth(x, length(x))
+last <- function(x) nth(x, length(x))
 
 first <- function(x) nth(x, 1)
+
+second <- function(x) nth(x, 2)
 
 
 # --- tests ------------------------------------------------------------

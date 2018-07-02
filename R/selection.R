@@ -123,25 +123,38 @@ filter.query <- function (qry, ...) {
   qry
 }
 
-#' @importFrom rlang quos
+#' @importFrom rlang abort quos
+#' @importFrom tidyselect vars_select
 #' @export
 #'
-select.query <- function (qry, ..., .force = FALSE) {
+select.query <- function (qry, ...) {
   sel <- quos(...)
 
-  if (is.null(qry$select) || isTRUE(.force)) {
-    qry$select <- sel
-    return(qry)
+  if (!length(qry$select)) {
+    names <- all_select_names(qry)
+  }
+  else {
+    names <- qry$select
   }
 
-  i <- (quos_text(qry$select) %in% quos_text(sel))
-  if (!any(i)) {
-    stop("selection reduced to an empty set", call. = FALSE)
+  names <- vars_select(names, UQS(sel), .exclude = "artifact")
+  if (!length(names)) {
+    abort("selection reduced to an empty set")
   }
 
-  qry$select <- qry$select[i]
+  qry$select <- names
   qry
 }
+
+#' @export
+unselect <- function (qry) {
+  stopifnot(is_query(qry))
+  qry$select <- list()
+  qry
+}
+
+all_select_names <- function(qry) c(all_tag_names(qry), "id", "object")
+
 
 #' @importFrom rlang quos quo
 #' @export
@@ -193,7 +206,7 @@ execute <- function (x, .warn = TRUE) {
   store <- x$repository$store
 
   # 1. find artifacts that match the filter
-  ids <- storage::os_find(store, c(quo(artifact), x$filter))
+  ids <- select_ids(x)
 
   # 1a. if there's a simple counting summary, this is where we can actually
   #     return the result
@@ -208,8 +221,7 @@ execute <- function (x, .warn = TRUE) {
   }
 
   # 2. decide what to read from the object store
-  available_tags <- c(all_tag_names(x), "id", "object")
-  sel <- tidyselect::vars_select(available_tags, UQS(x$select), .exclude = "artifact")
+  sel <- if (length(x$select)) x$select else all_select_names()
 
   # we will append to this one
   values <- list()
@@ -278,4 +290,22 @@ execute <- function (x, .warn = TRUE) {
 
   values
 }
+
+
+#' @importFrom rlang quos
+write <- function (x, ...) {
+  stopifnot(is_query(x))
+  stopifnot(!length(x$select))
+  stopifnot(!length(x$summarise))
+  stopifnot(!length(x$arrange))
+  stopifnot(!length(x$top_n))
+
+  quo <- quos(...)
+
+  res <- x %>% select(id) %>% execute
+  lapply(res$id, function (id) {
+
+  })
+}
+
 

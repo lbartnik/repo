@@ -1,5 +1,34 @@
 context("selection")
 
+# --- library ----------------------------------------------------------
+
+test_that("symbol is matched", {
+  s <- quote(id)
+
+  expect_true(expr_match(quote(id), s))
+  expect_true(expr_match(quote(id == 1), s))
+  expect_true(expr_match(quote(f(id)), s))
+  expect_true(expr_match(quote(f(id) == 1), s))
+  expect_true(expr_match(quote(f(a, b, id ** 2) == 1), s))
+
+  expect_false(expr_match(quote(f(id = 2)), s))
+  expect_false(expr_match(quote(id(1)), s))
+})
+
+
+test_that("symbol in quos", {
+  q <- list(rlang::quo(id == 1), rlang::quo(f(z)))
+
+  expect_equal(quos_match(q, id), c(T, F))
+  expect_equal(quos_match(q, "id"), c(T, F))
+  expect_equal(quos_match(q, z), c(F, T))
+
+  expect_equal(quos_match(q, a), c(F, F))
+})
+
+
+# --- filter -----------------------------------------------------------
+
 test_that("filter adds up", {
   r <- many_repository()
 
@@ -10,6 +39,24 @@ test_that("filter adds up", {
   expect_equal(quos_text(q$filter), c("x == 1", "y == 2"))
 })
 
+test_that("filter by id", {
+  r <- many_repository()
+
+  # first special case
+  x <- r %>% select(id) %>% filter(id == 'a') %>% select_ids
+  expect_equal(x, 'a')
+
+  # second special case
+  x <- r %>% select(id) %>% filter(id %in% c('a', 'b')) %>% select_ids
+  expect_equal(x, letters[1:2])
+
+  # general case
+  x <- r %>% select(id) %>% filter(id != 'a') %>% select_ids
+  expect_equal(x, letters[2:4])
+})
+
+
+# --- arrange ----------------------------------------------------------
 
 test_that("arrange adds up", {
   r <- many_repository()
@@ -21,6 +68,8 @@ test_that("arrange adds up", {
   expect_equal(quos_text(q$arrange), c("x", "y"))
 })
 
+
+# --- select -----------------------------------------------------------
 
 test_that("select subsets", {
   r <- many_repository()
@@ -34,6 +83,27 @@ test_that("select subsets", {
   expect_error(select(q, y), "selection reduced to an empty set")
 })
 
+test_that("various types of select", {
+  r <- many_repository()
+
+  # a single column
+  x <- select(r, id) %>% execute
+  expect_named(x, "id")
+  expect_setequal(x$id, letters[1:4])
+
+  # from character
+  y <- select(r, "id") %>% execute
+  expect_equal(x, y)
+
+  # basically everything
+  x <- select(r, -artifact) %>% execute
+  expect_named(x, c("object", "id", "class", "parent_commit", "parents", "time"),
+               ignore.order = TRUE)
+  expect_equal(nrow(x), 4)
+})
+
+
+# --- top_n ------------------------------------------------------------
 
 test_that("top_n chooses top n entries", {
   r <- many_repository()
@@ -47,6 +117,8 @@ test_that("top_n chooses top n entries", {
   expect_error(top_n(r, 10, some_column))
 })
 
+
+# --- summary ----------------------------------------------------------
 
 test_that("summary is recorded", {
   r <- many_repository()
@@ -71,6 +143,8 @@ test_that("simple summary", {
 })
 
 
+# --- execute ----------------------------------------------------------
+
 test_that("execute runs the query", {
   r <- many_repository()
 
@@ -92,34 +166,3 @@ test_that("execute runs the query", {
   x <- select(r, id) %>% arrange(desc(id)) %>% top_n(1) %>% execute
   expect_equal(x$id, "d")
 })
-
-
-test_that("various types of select", {
-  r <- many_repository()
-
-  # a single column
-  x <- select(r, id) %>% execute
-  expect_named(x, "id")
-  expect_setequal(x$id, letters[1:4])
-
-  # from character
-  y <- select(r, "id") %>% execute
-  expect_equal(x, y)
-
-  # basically everything
-  x <- select(r, -artifact) %>% execute
-  expect_named(x, c("object", "id", "class", "parent_commit", "parents", "time"),
-               ignore.order = TRUE)
-  expect_equal(nrow(x), 4)
-})
-
-
-test_that("filter by id", {
-  r <- many_repository()
-
-  x <- r %>% select(id) %>% filter(id == 'a') %>% execute
-  expect_length(x, 1)
-  expect_named(x, 'id')
-  expect_equal(x$id, 'a')
-})
-
