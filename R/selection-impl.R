@@ -44,7 +44,7 @@ only_n_summary <- function (qry) {
 }
 
 
-#' @importFrom rlang quo eval_tidy
+#' @importFrom rlang caller_env eval_tidy quo quo_get_env
 select_ids <- function (qry) {
   stopifnot(is_query(qry))
 
@@ -58,9 +58,12 @@ select_ids <- function (qry) {
     abort("if `id` is used in filter, it must be the only expression")
   }
 
-  expr <- quo_expr(first(qry$filter))
+  flt <- first(qry$filter)
+  expr <- quo_expr(flt)
+
   if (is.call(expr) && identical(first(expr), quote(`==`))) {
-    if (identical(second(expr), quote(id))) return(expr[[3]]) else return(expr[[2]])
+    i <- if (identical(second(expr), quote(id))) 3 else 2
+    return(eval_tidy(expr[[i]], env = quo_get_env(flt)))
   }
 
   if (is.call(expr) && identical(first(expr), quote(`%in%`))) {
@@ -69,7 +72,7 @@ select_ids <- function (qry) {
   }
 
   ids <- storage::os_find(s, list(quo(artifact)))
-  i <- eval_tidy(first(qry$filter), list(id = ids))
+  i <- eval_tidy(flt, list(id = ids))
   ids[i]
 }
 

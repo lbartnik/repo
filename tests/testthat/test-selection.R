@@ -50,6 +50,11 @@ test_that("filter by id", {
   x <- r %>% select(id) %>% filter(id == 'a') %>% select_ids
   expect_equal(x, 'a')
 
+  # first special case: variable
+  i <- 'a'
+  x <- r %>% select(id) %>% filter(id == i) %>% select_ids
+  expect_equal(x, 'a')
+
   # second special case
   x <- r %>% select(id) %>% filter(id %in% c('a', 'b')) %>% select_ids
   expect_equal(x, letters[1:2])
