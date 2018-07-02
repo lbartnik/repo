@@ -42,6 +42,10 @@ test_that("filter adds up", {
 test_that("filter by id", {
   r <- many_repository()
 
+  # no filter
+  x <- r %>% select(id) %>% select_ids
+  expect_equal(x, letters[1:4])
+
   # first special case
   x <- r %>% select(id) %>% filter(id == 'a') %>% select_ids
   expect_equal(x, 'a')
@@ -74,13 +78,13 @@ test_that("arrange adds up", {
 test_that("select subsets", {
   r <- many_repository()
 
-  q <- select(r, x, y)
-  expect_equal(quos_text(q$select), c("x", "y"))
+  q <- select(r, time, id)
+  expect_equivalent(q$select, c("time", "id"))
 
-  q <- select(q, x)
-  expect_equal(quos_text(q$select), "x")
+  q <- select(q, time)
+  expect_equivalent(q$select, "time")
 
-  expect_error(select(q, y), "selection reduced to an empty set")
+  expect_error(select(q, id), "object 'id' not found")
 })
 
 test_that("various types of select", {

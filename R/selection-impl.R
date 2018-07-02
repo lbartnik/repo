@@ -51,7 +51,7 @@ select_ids <- function (qry) {
   s <- qry$repository$store
 
   if (!any(quos_match(qry$filter, id))) {
-    return(storage::os_find(s, c(quo(artifact), x$filter)))
+    return(storage::os_find(s, c(quo(artifact), qry$filter)))
   }
 
   if (length(qry$filter) > 1) {
