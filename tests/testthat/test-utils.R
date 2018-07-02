@@ -105,3 +105,10 @@ test_that("not negates a function", {
 test_that("r session id does not change", {
   expect_equal(r_session_id(), r_session_id())
 })
+
+
+test_that("stopif", {
+  expect_error(stopif(T))
+  expect_silent(stopif(F))
+  expect_error(stopif(F, F, length(1)), ".*length\\(1\\)")
+})

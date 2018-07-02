@@ -198,3 +198,10 @@ guard <- function () {
   invisible()
 }
 
+stopif <- function (...) {
+  i <- which(map_lgl(list(...), function(x)isTRUE(as.logical(x))))
+  if (!length(i)) return(invisible(FALSE))
+  mc <- match.call()
+  lb <- map_chr(mc[i+1], deparse)
+  stop('following conditions are true: ', join(lb, ', '), call. = FALSE)
+}
