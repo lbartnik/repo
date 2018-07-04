@@ -175,3 +175,29 @@ test_that("execute runs the query", {
   x <- select(r, id) %>% arrange(desc(id)) %>% top_n(1) %>% execute
   expect_equal(x$id, "d")
 })
+
+
+# --- update -----------------------------------------------------------
+
+test_that("update", {
+  r <- many_repository()
+  q <- filter(r, id == 'a')
+
+  expect_tag <- function (tag, value) {
+    expect_equal(nth(storage::os_read_tags(r$store, 'a'), tag), value, label = tag)
+  }
+
+  q %>% update(class = 'xyz')
+  expect_tag('class', 'xyz')
+
+  q %>% update(append(names, 'new_name'))
+  expect_tag('names', c('a', 'new_name'))
+
+  q %>% update(remove(names, 'new_name'))
+  expect_tag('names', 'a')
+
+  q %>% update(append(collections, 'new_col'))
+  expect_tag('collections', 'new_col')
+})
+
+

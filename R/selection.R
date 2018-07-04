@@ -137,7 +137,10 @@ select.query <- function (qry, ...) {
     names <- qry$select
   }
 
-  names <- vars_select(names, UQS(sel), .exclude = "artifact")
+  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
+  if (is_error(names)) {
+    abort(sprintf("could not select names: %s", names$message))
+  }
   if (!length(names)) {
     abort("selection reduced to an empty set")
   }
@@ -292,20 +295,45 @@ execute <- function (x, .warn = TRUE) {
 }
 
 
-#' @importFrom rlang quos
-write <- function (x, ...) {
+#' @importFrom rlang abort caller_env expr_text eval_tidy quos
+update <- function (x, ...) {
   stopifnot(is_query(x))
-  stopifnot(!length(x$select))
-  stopifnot(!length(x$summarise))
-  stopifnot(!length(x$arrange))
-  stopifnot(!length(x$top_n))
+  stopif(length(x$select), length(x$summarise), length(x$arrange), length(x$top_n))
 
-  quo <- quos(...)
+  quos <- quos(...)
 
-  res <- x %>% select(id) %>% execute
-  lapply(res$id, function (id) {
+  ids <- select_ids(x)
+  lapply(ids, function (id) {
+    tags <- storage::os_read_tags(x$repository$store, id)
 
+    newt <- unlist(lapply(seq_along(quos), function (i) {
+      n <- nth(names(quos), i)
+      q <- nth(quos, i)
+
+      if (nchar(n)) {
+        return(with_names(list(eval_tidy(q, tags, e)), n))
+      }
+
+      process_update(quo_get_expr(q), tags)
+    }), recursive = FALSE)
+
+    storage::os_update_tags(x$repository$store, id, combine(newt, tags))
   })
 }
 
+
+#' @importFrom rlang quo
+process_update <- function (expr, tags) {
+  what <- nth(expr, 1)
+  stopifnot(identical(what, quote(append)) || identical(what, quote(remove)))
+
+  where <- as.character(nth(expr, 2))
+  if (!has_name(tags, where)) tags[[where]] <- character()
+
+  e <- new.env(parent = emptyenv())
+  e$append <- function (where, what) union(where, what)
+  e$remove <- function (where, what) setdiff(where, what)
+
+  with_names(list(eval_tidy(expr, tags, e)), where)
+}
 
