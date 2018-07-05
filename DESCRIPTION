@@ -26,12 +26,12 @@ Suggests:
   mockery,
   testthat
 Collate:
-  'generate.R'
   'graph.R'
   'history.R'
   'repo-package.R'
   'repository.R'
   'repository-impl.R'
+  'sample.R'
   'selection.R'
   'selection-impl.R'
   'utils.R'

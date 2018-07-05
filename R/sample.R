@@ -1,3 +1,11 @@
+#' @export
+sample_repository <- function () {
+  path  <- system.file('sample-repository', package = 'repository')
+  store <- storage::filesystem(path, create = FALSE)
+  repository(store)
+}
+
+
 #' @import proto
 #'
 R_session_simulator <- function (repo) {
