@@ -109,6 +109,10 @@ test_that("various types of select", {
   expect_named(x, c("object", "id", "class", "names", "parent_commit", "parents", "time"),
                ignore.order = TRUE)
   expect_equal(nrow(x), 4)
+
+  # only an actual tag
+  y <- select(r, names) %>% execute
+  expect_equal(y$names, letters[1:4])
 })
 
 

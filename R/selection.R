@@ -156,8 +156,9 @@ unselect <- function (qry) {
   qry
 }
 
-all_select_names <- function(qry) c(all_tag_names(qry), "id", "object")
-
+all_select_names <- function(qry) {
+  c(all_tag_names(qry), "id", "object")
+}
 
 #' @importFrom rlang quos quo
 #' @export
@@ -226,25 +227,20 @@ execute <- function (x, .warn = TRUE) {
   # 2. decide what to read from the object store
   sel <- if (length(x$select)) x$select else all_select_names()
 
-  # we will append to this one
-  values <- list()
+  values <- read_tags(setdiff(sel, c("id", "object")), ids, store)
 
   # object is the actual original data, be it an R object or a plot
   if ("object" %in% sel) {
     values <- c(values, list(object = lapply(ids, function (id) storage::os_read_object(store, id))))
-    sel <- setdiff(sel, "object")
   }
 
   # id is not present among tags
   if ("id" %in% sel) {
     values <- c(values, list(id = ids))
-    sel <- setdiff(sel, "id")
   }
 
-  values2 <- read_tags(sel, ids, store)
-
   # simplify list-based tags into a tibble
-  values <- dplyr::bind_cols(tibble::as_tibble(values), flatten_lists(values2))
+  values <- flatten_lists(values)
 
   # 3. summarise goes before arrange and top_n and if defined is the last step
   if (length(x$summarise)) {

@@ -15,3 +15,7 @@ simulate_london_meters(repo)
 repo %>% select(id, object) %>% filter('input' %in% names) %>% execute
 
 repo %>% select(object) %% filter(id == '2b67f4934da0aa3baecfdd3001008539217d5719')
+
+
+repo <- sample_repository()
+repo %>% select(-artifact) %>% filter(isTRUE(artifact)) %>% execute
