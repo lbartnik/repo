@@ -241,20 +241,10 @@ execute <- function (x, .warn = TRUE) {
     sel <- setdiff(sel, "id")
   }
 
-  # everything else can be read from tags
-  values2 <- map_lst(sel, function(x) base::vector("list", length(ids)))
-
-  # read all tags' values for given ids
-  Map(ids, seq_along(ids), f = function (id, i) {
-    tags <- storage::os_read_tags(store, id)
-    tags <- with_names(tags[sel], sel)
-    imap(tags, function (value, name) {
-      values2[[name]][[i]] <<- value
-    })
-  })
+  values2 <- read_tags(sel, ids, store)
 
   # simplify list-based tags into a tibble
-  values <- dplyr::bind_cols(tibble::as_tibble(values), simplify_tags(values2))
+  values <- dplyr::bind_cols(tibble::as_tibble(values), flatten_lists(values2))
 
   # 3. summarise goes before arrange and top_n and if defined is the last step
   if (length(x$summarise)) {

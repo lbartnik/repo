@@ -101,8 +101,22 @@ expr_match <- function (expr, sym) {
 }
 
 
+read_tags <- function (tag_names, ids, store) {
+  columns <- map_lst(tag_names, function(x) base::vector("list", length(ids)))
 
-simplify_tags <- function (values) {
+  # read all tags' values for given ids
+  Map(ids, seq_along(ids), f = function (id, i) {
+    tags <- storage::os_read_tags(store, id)
+    imap(tags[tag_names], function (value, name) {
+      columns[[name]][[i]] <<- value
+    })
+  })
+
+  columns
+}
+
+
+flatten_lists <- function (values) {
 
   # simplify columns which hold single, atomic values
   values <- lapply(values, function (column) {
@@ -124,6 +138,6 @@ simplify_tags <- function (values) {
     values <- values2[setdiff(names(values), empty)]
   }
 
-  values <- tibble::as_tibble(values)
+  tibble::as_tibble(values)
 }
 

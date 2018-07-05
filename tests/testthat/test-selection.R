@@ -177,6 +177,13 @@ test_that("execute runs the query", {
 })
 
 
+test_that("simplify tags", {
+  flatten_lists(list(x = list(1, 2, 3), y = list(1, NULL, 2)))
+
+  y <- list(x = 1:4, y = list(c(1, 2), NULL, 3, 4))
+  flatten_lists(y)
+})
+
 # --- update -----------------------------------------------------------
 
 test_that("update", {
