@@ -102,3 +102,28 @@ expr_match <- function (expr, sym) {
 
 
 
+simplify_tags <- function (values) {
+
+  # simplify columns which hold single, atomic values
+  values <- lapply(values, function (column) {
+    len <- map_int(column, length)
+    if (any(len != 1)) return(column)
+    cls <- unique(map_lst(column, class))
+    if (length(cls) > 1) return(column)
+    cls <- first(cls)
+    ref <- first(column)
+    if (is.atomic(ref)) `class<-`(as.vector(column, typeof(ref)), cls) else column
+  })
+
+  # make sure there is at least one value in each column
+  i <- (map_dbl(values, length) < 1)
+  if (any(i)) {
+    empty <- names(values)[i]
+    warning("tags ", join(empty, ', '), " rendered no values, removing from result",
+            call. = FALSE)
+    values <- values2[setdiff(names(values), empty)]
+  }
+
+  values <- tibble::as_tibble(values)
+}
+

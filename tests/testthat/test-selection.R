@@ -106,7 +106,7 @@ test_that("various types of select", {
 
   # basically everything
   x <- select(r, -artifact) %>% execute
-  expect_named(x, c("object", "id", "class", "parent_commit", "parents", "time"),
+  expect_named(x, c("object", "id", "class", "names", "parent_commit", "parents", "time"),
                ignore.order = TRUE)
   expect_equal(nrow(x), 4)
 })

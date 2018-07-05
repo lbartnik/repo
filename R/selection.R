@@ -244,6 +244,7 @@ execute <- function (x, .warn = TRUE) {
   # everything else can be read from tags
   values2 <- map_lst(sel, function(x) base::vector("list", length(ids)))
 
+  # read all tags' values for given ids
   Map(ids, seq_along(ids), f = function (id, i) {
     tags <- storage::os_read_tags(store, id)
     tags <- with_names(tags[sel], sel)
@@ -252,27 +253,8 @@ execute <- function (x, .warn = TRUE) {
     })
   })
 
-  # simplify columns which hold single, atomic values
-  values2 <- lapply(values2, function (column) {
-    len <- map_int(column, length)
-    if (any(len != 1)) return(column)
-    cls <- unique(map_lst(column, class))
-    if (length(cls) > 1) return(column)
-    cls <- first(cls)
-    ref <- first(column)
-    if (is.atomic(ref)) `class<-`(as.vector(column, typeof(ref)), cls) else column
-  })
-
-  # make sure there is at least one value in each column
-  i <- (map_dbl(values2, length) < 1)
-  if (any(i)) {
-    empty <- names(values2)[i]
-    warning("tags ", join(empty, ', '), " rendered no values, removing from result",
-            call. = FALSE)
-    values2 <- values2[setdiff(names(values2), empty)]
-  }
-
-  values <- tibble::as_tibble(c(values, values2))
+  # simplify list-based tags into a tibble
+  values <- dplyr::bind_cols(tibble::as_tibble(values), simplify_tags(values2))
 
   # 3. summarise goes before arrange and top_n and if defined is the last step
   if (length(x$summarise)) {
@@ -295,7 +277,7 @@ execute <- function (x, .warn = TRUE) {
 }
 
 
-#' @importFrom rlang abort caller_env expr_text eval_tidy quos
+#' @importFrom rlang abort caller_env expr_text eval_tidy quos quo_get_expr
 update <- function (x, ...) {
   stopifnot(is_query(x))
   stopif(length(x$select), length(x$summarise), length(x$arrange), length(x$top_n))
