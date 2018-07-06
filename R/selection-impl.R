@@ -142,6 +142,13 @@ flatten_lists <- function (values) {
     len <- map_int(column, length)
     if (any(len != 1)) return(column)
 
+    # if there is a class, as long as it's the same (esp. POSIXct), apply that here
+    cls <- unique(map_lst(column, class))
+    if (length(cls) == 1) {
+      column <- unlist(column, recursive = FALSE)
+      return(structure(column, class = first(cls)))
+    }
+
     # if all are atomic, return a vector and let R choose the type
     if (all(map_lgl(column, is.atomic))) return(unlist(column))
 

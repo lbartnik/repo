@@ -191,6 +191,11 @@ test_that("simplify tags", {
   expect_named(r, c("x", "y"))
   expect_equal(r$x, 1:4)
   expect_equal(r$y, list(1:2, NA_integer_, 3L, 4L))
+
+  tm <- as.POSIXct(1:10, origin = '1970-01-01')
+  r <- flatten_lists(list(x = as.list(tm)))
+  expect_named(r, 'x')
+  expect_equal(r$x, tm)
 })
 
 # --- update -----------------------------------------------------------
