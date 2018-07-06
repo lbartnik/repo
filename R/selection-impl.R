@@ -116,28 +116,40 @@ read_tags <- function (tag_names, ids, store) {
 }
 
 
+#' @importFrom rlang warn
 flatten_lists <- function (values) {
 
   # simplify columns which hold single, atomic values
-  values <- lapply(values, function (column) {
+  values <- imap(values, function (column, name) {
+    # check which values are NULL
+    inl <- map_lgl(column, is.null)
+
+    # if all, drop the column
+    if (all(inl)) {
+      warn(sprintf("tag %s rendered no values, removing from result", name))
+      return(NULL)
+    }
+
+    # otherwise, replace NULLs with NAs
+    if (any(inl)) {
+      cls <- first(typeof(unlist(column[!inl])))
+      nav <- switch(cls, double = NA_real_, integer = NA_integer_, character = NA_character_,
+                         complex = NA_complex_, NA)
+      column[inl] <- nav
+    }
+
+    # if there are multi-valued elements, return a list
     len <- map_int(column, length)
     if (any(len != 1)) return(column)
-    cls <- unique(map_lst(column, class))
-    if (length(cls) > 1) return(column)
-    cls <- first(cls)
-    ref <- first(column)
-    if (is.atomic(ref)) `class<-`(as.vector(column, typeof(ref)), cls) else column
+
+    # if all are atomic, return a vector and let R choose the type
+    if (all(map_lgl(column, is.atomic))) return(unlist(column))
+
+    # finally return a list
+    column
   })
 
-  # make sure there is at least one value in each column
-  i <- (map_dbl(values, length) < 1)
-  if (any(i)) {
-    empty <- names(values)[i]
-    warning("tags ", join(empty, ', '), " rendered no values, removing from result",
-            call. = FALSE)
-    values <- values2[setdiff(names(values), empty)]
-  }
-
+  values <- Filter(not(is.null), values)
   tibble::as_tibble(values)
 }
 

@@ -182,10 +182,15 @@ test_that("execute runs the query", {
 
 
 test_that("simplify tags", {
-  flatten_lists(list(x = list(1, 2, 3), y = list(1, NULL, 2)))
+  r <- flatten_lists(list(x = list(1, 2, 3), y = list(1, NULL, 2)))
+  expect_named(r, c("x", "y"))
+  expect_equal(r$x, 1:3)
+  expect_equal(r$y, c(1, NA_real_, 2))
 
-  y <- list(x = 1:4, y = list(c(1, 2), NULL, 3, 4))
-  flatten_lists(y)
+  r <- flatten_lists(list(x = 1:4, y = list(c(1L, 2L), NULL, 3L, 4L)))
+  expect_named(r, c("x", "y"))
+  expect_equal(r$x, 1:4)
+  expect_equal(r$y, list(1:2, NA_integer_, 3L, 4L))
 })
 
 # --- update -----------------------------------------------------------
