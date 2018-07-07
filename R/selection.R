@@ -290,7 +290,7 @@ update <- function (x, ...) {
         return(with_names(list(eval_tidy(q, tags, e)), n))
       }
 
-      process_update(quo_get_expr(q), tags)
+      update_tag_values(quo_get_expr(q), tags)
     }), recursive = FALSE)
 
     storage::os_update_tags(x$repository$store, id, combine(newt, tags))
@@ -299,7 +299,7 @@ update <- function (x, ...) {
 
 
 #' @importFrom rlang quo
-process_update <- function (expr, tags) {
+update_tag_values <- function (expr, tags) {
   what <- nth(expr, 1)
   stopifnot(identical(what, quote(append)) || identical(what, quote(remove)))
 

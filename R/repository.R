@@ -126,10 +126,19 @@ repository_history <- function (repo, mode = 'all') {
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
+#' @param ancestors Retrieve ancestors at most that far in the ancestry
+#'        tree from specified `id`s.
+#'
+#' @importFrom rlang abort
+#'
 #' @rdname repository
 #' @export
 #'
-repository_explain <- function (repo, id = NULL) {
+repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
+  if (is.null(id) && !identical(ancestors, "unlimited")) {
+    abort("cannot limit the number of ancestors if `id` is NULL")
+  }
+
   if (is.null(id)) {
     commits <- all_commits(repo$store)
     objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
@@ -140,7 +149,8 @@ repository_explain <- function (repo, id = NULL) {
     ids <- unique(c(objects, parents, plots))
   }
   else {
-    ids <- object_origin(repo, id)
+    if (identical(ancestors, "unlimited")) ancestors <- 0xDEADBEEF
+    ids <- object_origin(repo, id, ancestors)
   }
 
   # annotate objects with information about: name, parent, commit, type, etc.

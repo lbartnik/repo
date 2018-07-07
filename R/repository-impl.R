@@ -278,16 +278,22 @@ commit <- function (store, id) {
 
 # --- explain ----------------------------------------------------------
 
-object_origin <- function (repo, id) {
+object_origin <- function (repo, id, ancestors) {
+  stopifnot(is.numeric(ancestors))
+
   black <- vector()
-  grey  <- vector(id)
+  grey  <- vector(list(id, 0))
+
   while (grey$size()) {
-    id <- grey$pop_front()
-    lapply(storage::os_read_tags(repo$store, id)$parents, function (id) {
-      if (!black$find(id)) grey$push_back(id)
-    })
-    black$push_back(id)
+    el <- grey$pop_front()
+    if (second(el) < ancestors) {
+      lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
+        if (!black$find(id)) grey$push_back(list(id, second(el)+1))
+      })
+    }
+    black$push_back(first(el))
   }
+
   as.character(black$values)
 }
 

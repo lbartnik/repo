@@ -26,7 +26,7 @@ repository_update(repo, env, plot, expr)
 
 repository_history(repo, mode = "all")
 
-repository_explain(repo, id = NULL)
+repository_explain(repo, id = NULL, ancestors = "unlimited")
 
 repository_rewind(repo, id)
 
@@ -48,6 +48,9 @@ as_origin(x)
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
 \item{id}{Commit identifier.}
+
+\item{ancestors}{Retrieve ancestors at most that far in the ancestry
+tree from specified \code{id}s.}
 
 \item{repo}{Repository object.}
 }

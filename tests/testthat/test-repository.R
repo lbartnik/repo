@@ -300,6 +300,20 @@ test_that("explain object", {
 })
 
 
+test_that("finding ancestors", {
+  r <- many_repository()
+
+  x <- object_origin(r, 'd', 0)
+  expect_equal(x, 'd')
+
+  x <- object_origin(r, 'd', 1)
+  expect_equal(sort(x), c('c', 'd'))
+
+  x <- object_origin(r, 'd', 2)
+  expect_equal(sort(x), letters[1:4])
+})
+
+
 # --- commit -----------------------------------------------------------
 
 test_that("commit returns its data", {
