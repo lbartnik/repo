@@ -314,6 +314,14 @@ test_that("finding ancestors", {
 })
 
 
+test_that("finding ancestors for multiple artifacts", {
+  r <- many_repository()
+
+  x <- object_origin(r, c('a', 'd'), 0)
+  expect_equal(x, c('a', 'd'))
+})
+
+
 # --- commit -----------------------------------------------------------
 
 test_that("commit returns its data", {

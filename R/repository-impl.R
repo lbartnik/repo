@@ -278,11 +278,11 @@ commit <- function (store, id) {
 
 # --- explain ----------------------------------------------------------
 
-object_origin <- function (repo, id, ancestors) {
+object_origin <- function (repo, ids, ancestors) {
   stopifnot(is.numeric(ancestors))
 
   black <- vector()
-  grey  <- vector(list(id, 0))
+  grey  <- vector(data = lapply(ids, list, 0))
 
   while (grey$size()) {
     el <- grey$pop_front()
