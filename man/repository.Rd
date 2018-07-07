@@ -9,6 +9,7 @@
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
+\alias{print.explained}
 \alias{repository_rewind}
 \alias{as_deltas}
 \alias{as_origin}
@@ -27,6 +28,8 @@ repository_update(repo, env, plot, expr)
 repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL, ancestors = "unlimited")
+
+\method{print}{explained}(x, ...)
 
 repository_rewind(repo, id)
 
@@ -76,6 +79,9 @@ with \code{id} as the root.
 the \emph{origin} of an artifact (an R object or a plot) with the given
 identifier \code{id}. If no \code{id} is provided, an aggregated graph containing
 all artifacts is returned.
+
+\code{print.explained} pretty-prints a description of an
+artifact.
 
 \code{repository_rewind} changes the internal pointer to the
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to

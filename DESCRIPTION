@@ -18,6 +18,7 @@ Imports:
   rlang,
   rsvg,
   storage,
+  styler,
   tibble,
   tidyselect
 Suggests:

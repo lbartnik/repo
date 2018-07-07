@@ -157,16 +157,22 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   objects <- lapply(ids, function (id) {
     raw <- storage::os_read(repo$store, id)
 
-    stopifnot(has_name(raw$tags, 'parents'), has_name(raw$tags, 'time'),
-              has_name(raw$tags, 'parent_commit'))
+    tags_copy <- c("class", "parents", "time")
+    stopifnot(has_name(raw$tags, c(tags_copy, 'parent_commit')))
 
-    obj <- raw$tags[c("parents", "time")]
+    obj <- raw$tags[tags_copy]
     obj$id <- id
     obj$commit <- raw$tags$parent_commit
     obj$description <- description(raw$object)
     obj$children <- character()
+    obj$names <- raw$tags$names
 
-    obj
+    # read parent commit and assign expression
+    cmt <- storage::os_read_object(repo$store, obj$commit)
+    obj$expr <- cmt$expr
+
+    # finally, add a S3 class for pretty-printing
+    structure(obj, class = 'explained')
   })
   names(objects) <- ids
 
@@ -183,6 +189,33 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   # a) turned into a 'stratified' object
   # b) turned into JSON
   # c) iterated over
+}
+
+
+#' @description `print.explained` pretty-prints a description of an
+#' artifact.
+#'
+#' @importFrom storage shorten
+#'
+#' @rdname repository
+#' @export
+print.explained <- function (x, ...) {
+
+  is_plot <- ('plot' %in% x$class)
+
+  # preamble
+  ccat0(silver = "Artifact: ", shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
+
+  # expression that produced this artifact
+  expr <- stri_replace_all_regex(stri_paste(deparse(x$expr), collapse = ''), '\\s', '')
+  expr <- stri_replace_all_fixed(expr, '%>%', '%>%\n')
+  ccat(silver = 'Expression: ', styler::style_text(expr), sep = '\n')
+
+  # more meta-data
+  if (!is_plot) ccat(silver = '\nName:   ', x$names)
+  ccat(silver = '\nClass:  ', x$class)
+  ccat(silver = '\nCreated:', x$time)
+  ccat(silver = '\nSummary:', x$description)
 }
 
 
