@@ -137,6 +137,10 @@ select.query <- function (qry, ...) {
     names <- qry$select
   }
 
+  if (!length(names)) {
+    abort("no tag names to select from, filter matches no objects?")
+  }
+
   names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
   if (is_error(names)) {
     abort(sprintf("could not select names: %s", names$message))
@@ -156,8 +160,12 @@ unselect <- function (qry) {
   qry
 }
 
+
 all_select_names <- function(qry) {
-  c(all_tag_names(qry), "id", "object")
+  regular_names <- all_tag_names(qry)
+  if (is.null(regular_names)) return(character())
+
+  c(regular_names, "id", "object")
 }
 
 #' @importFrom rlang quos quo

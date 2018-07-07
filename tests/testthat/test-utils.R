@@ -41,6 +41,15 @@ test_that("FALSE is recognized", {
 })
 
 
+test_that("atomic class", {
+  expect_true(is_atomic_class("numeric"))
+  expect_true(is_atomic_class("integer"))
+  expect_true(is_atomic_class("character"))
+  expect_true(is_atomic_class("logical"))
+  expect_true(is_atomic_class("complex"))
+})
+
+
 test_that("vector erase", {
   v <- vector(data = 1:10)
   expect_equal(v$size(), 10)

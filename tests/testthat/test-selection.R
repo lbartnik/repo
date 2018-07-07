@@ -39,6 +39,7 @@ test_that("filter adds up", {
   expect_equal(quos_text(q$filter), c("x == 1", "y == 2"))
 })
 
+
 test_that("filter by id", {
   r <- many_repository()
 
@@ -113,6 +114,20 @@ test_that("various types of select", {
   # only an actual tag
   y <- select(r, names) %>% execute
   expect_equal(y$names, letters[1:4])
+})
+
+
+test_that("no tag names for empty query", {
+  r <- many_repository()
+
+  q <- as_query(r)
+  expect_length(all_select_names(q), 8)
+
+  q <- filter(r, TRUE)
+  expect_length(all_select_names(q), 8)
+
+  q <- filter(r, FALSE)
+  expect_length(all_select_names(q), 0)
 })
 
 

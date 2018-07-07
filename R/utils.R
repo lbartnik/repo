@@ -26,6 +26,8 @@ is_error <- function (x) inherits(x, c('error', 'try-error', 'simpleError'))
 
 isFALSE <- function (x) identical(x, FALSE)
 
+is_atomic_class <- function (x) isTRUE(x %in% c("numeric", "character", "integer", "logical", "complex"))
+
 # --- vector -----------------------------------------------------------
 
 choose_data <- function (..., data) {

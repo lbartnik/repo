@@ -3,7 +3,9 @@ all_tag_names <- function (query) {
   stopifnot(is_query(query))
   store <- query$repository$store
 
-  ids <- storage::os_find(store, list(quo(artifact)))
+  ids <- storage::os_find(store, c(query$filter, list(quo(artifact))))
+  if (!length(ids)) return(NULL)
+
   nms <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
   unique(unlist(nms))
 }
@@ -144,7 +146,7 @@ flatten_lists <- function (values) {
 
     # if there is a class, as long as it's the same (esp. POSIXct), apply that here
     cls <- unique(map_lst(column, class))
-    if (length(cls) == 1) {
+    if (length(cls) == 1 && !is_atomic_class(first(cls))) {
       column <- unlist(column, recursive = FALSE)
       return(structure(column, class = first(cls)))
     }
