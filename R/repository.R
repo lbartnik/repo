@@ -179,7 +179,9 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   # add information about children
   lapply(objects, function (obj) {
     lapply(obj$parents, function (parent) {
-      objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+      if (parent %in% names(objects)) {
+        objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+      }
     })
   })
 
@@ -217,6 +219,8 @@ print.explained <- function (x, ...) {
   ccat(silver = '\nClass:  ', x$class)
   ccat(silver = '\nCreated:', x$time)
   ccat(silver = '\nSummary:', x$description)
+
+  invisible(x)
 }
 
 
