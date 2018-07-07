@@ -196,6 +196,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 #' artifact.
 #'
 #' @importFrom storage shorten
+#' @importFrom stringi stri_paste stri_replace_all_fixed stri_replace_all_regex
 #'
 #' @rdname repository
 #' @export
