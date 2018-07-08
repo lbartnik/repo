@@ -198,7 +198,6 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 #' artifact.
 #'
 #' @importFrom storage shorten
-#' @importFrom stringi stri_paste stri_replace_all_fixed stri_replace_all_regex
 #'
 #' @rdname repository
 #' @export
@@ -210,9 +209,7 @@ print.explained <- function (x, ...) {
   ccat0(silver = "Artifact: ", shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
 
   # expression that produced this artifact
-  expr <- stri_replace_all_regex(stri_paste(deparse(x$expr), collapse = ''), '\\s', '')
-  expr <- stri_replace_all_fixed(expr, '%>%', '%>%\n')
-  ccat(silver = 'Expression: ', styler::style_text(expr), sep = '\n')
+  ccat0(silver = 'Expression:\n', format_expr(x$expr))
 
   # more meta-data
   if (!is_plot) ccat(silver = '\nName:   ', x$names)
