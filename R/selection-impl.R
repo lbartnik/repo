@@ -3,7 +3,7 @@ all_tag_names <- function (query) {
   stopifnot(is_query(query))
   store <- query$repository$store
 
-  ids <- storage::os_find(store, c(query$filter, list(quo(artifact))))
+  ids <- select_ids(query)
   if (!length(ids)) return(NULL)
 
   nms <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
@@ -15,7 +15,7 @@ all_tag_values <- function (query) {
   stopifnot(is_query(query))
   store <- query$repository$store
 
-  ids <- storage::os_find(store, list(quo(artifact)))
+  ids <- select_ids(query)
   raw <- lapply(ids, function (id) storage::os_read_tags(store, id))
 
   nms <- unique(unlist(lapply(raw, names)))

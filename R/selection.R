@@ -98,7 +98,6 @@ print.query <- function (x, ...) {
 
 #' @export
 tag_names <- function (x) {
-  # TODO take selection and filters into consideration
   ans <- all_tag_names(as_query(x))
   setdiff(ans, 'artifact')
 }
@@ -106,7 +105,6 @@ tag_names <- function (x) {
 
 #' @export
 tag_values <- function (x) {
-  # TODO take selection and filters into consideration
   ans <- all_tag_values(as_query(x))
   nms <- setdiff(names(ans), 'artifact')
   ans[nms]
@@ -138,15 +136,15 @@ select.query <- function (qry, ...) {
   }
 
   if (!length(names)) {
-    abort("no tag names to select from, filter matches no objects?")
+    abort("select: no tag names to select from, filter matches no objects?")
   }
 
   names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
   if (is_error(names)) {
-    abort(sprintf("could not select names: %s", names$message))
+    abort(sprintf("select: could not select names: %s", names$message))
   }
   if (!length(names)) {
-    abort("selection reduced to an empty set")
+    abort("select: selection reduced to an empty set")
   }
 
   qry$select <- names

@@ -27,6 +27,35 @@ test_that("symbol in quos", {
 })
 
 
+# --- tags -------------------------------------------------------------
+
+known_tags <- c("artifact", "class", "names", "parent_commit", "parents", "time")
+
+
+test_that("all tag names", {
+  q <- as_query(many_repository())
+
+  n <- all_tag_names(q)
+  expect_equal(sort(n), known_tags)
+
+  n <- q %>% filter(id == 'a') %>% all_tag_names
+  expect_equal(sort(n), known_tags)
+})
+
+
+test_that("all tag values", {
+  q <- as_query(many_repository())
+
+  n <- all_tag_values(q)
+  expect_named(n, known_tags, ignore.order = TRUE)
+  expect_equal(n$names, letters[1:4])
+
+  n <- q %>% filter(id == 'a') %>% all_tag_values
+  expect_named(n, known_tags, ignore.order = TRUE)
+  expect_equal(n$names, 'a')
+})
+
+
 # --- filter -----------------------------------------------------------
 
 test_that("filter adds up", {
