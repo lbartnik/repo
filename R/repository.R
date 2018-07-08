@@ -219,6 +219,7 @@ print.explained <- function (x, ...) {
   ccat(silver = '\nClass:  ', x$class)
   ccat(silver = '\nCreated:', x$time)
   ccat(silver = '\nSummary:', x$description)
+  cat('\n')
 
   invisible(x)
 }
