@@ -246,7 +246,7 @@ print.explained <- function (x, ...) {
   is_plot <- ('plot' %in% x$class)
 
   # preamble
-  ccat0(silver = "Artifact: ", shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
+  ccat0(silver = "Artifact: ", green = shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
 
   # expression that produced this artifact
   ccat0(silver = 'Expression:\n', format_expr(x$expr))
