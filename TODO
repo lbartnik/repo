@@ -1,3 +1,1 @@
-* finish execute
-* store object/plot/artifact name under list of names "names" when
-  writing to object store
+* describe objects in line, repo::describe
