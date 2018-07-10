@@ -29,6 +29,7 @@ Suggests:
 Collate:
   'graph.R'
   'history.R'
+  'plotting.R'
   'repo-package.R'
   'repository.R'
   'repository-impl.R'
