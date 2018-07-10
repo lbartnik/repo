@@ -304,11 +304,12 @@ print.origin <- function (x) {
 
 
 #' @importFrom stringi stri_paste stri_replace_all_fixed stri_replace_all_regex
-format_expr <- function (expr) {
+#' @export
+format_expr <- function (expr, indent = '  ') {
   expr <- stri_replace_all_regex(stri_paste(deparse(expr), collapse = ''), '\\s', '')
   expr <- stri_replace_all_fixed(expr, '%>%', '%>%\n')
   lines <- styler::style_text(expr)
-  stri_paste('  ', lines, collapse = '\n')
+  stri_paste(indent, lines, collapse = '\n')
 }
 
 

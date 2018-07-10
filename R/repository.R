@@ -226,6 +226,7 @@ print.explained <- function (x, ...) {
 #' S3 object.
 #'
 #' @rdname repository
+#' @export
 expl_get <- function (x, i) {
   nth(x, i)
 }
