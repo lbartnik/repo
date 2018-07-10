@@ -135,7 +135,7 @@ extract_parents <- function (env, expr)
 # TODO could be turned into a S3 method
 auto_tags <- function (obj, ...) {
   preset <- list(...)
-  stopifnot(all_named(preset))
+  stopifnot(is_all_named(preset))
 
   combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
                        session = r_session_id()))
@@ -295,11 +295,6 @@ object_origin <- function (repo, ids, ancestors) {
   }
 
   as.character(black$values)
-}
-
-
-print.origin <- function (x) {
-  cat('<origin-graph>', length(x), 'node(s)\n')
 }
 
 

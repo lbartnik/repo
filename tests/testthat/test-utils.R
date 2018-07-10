@@ -60,9 +60,9 @@ test_that("vector erase", {
 })
 
 
-test_that("all_named requires names", {
-  expect_true(all_named(list(a = 1, b = 2)))
-  expect_false(all_named(list(a = 1, 2)))
+test_that("is_all_named requires names", {
+  expect_true(is_all_named(list(a = 1, b = 2)))
+  expect_false(is_all_named(list(a = 1, 2)))
 })
 
 test_that("combine merges lists", {

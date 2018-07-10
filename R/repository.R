@@ -194,6 +194,35 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 }
 
 
+#' @export
+print.origin <- function (x, ..., sort_by = 'time') {
+
+  # this is the only currently supported method
+  stopifnot(identical(sort_by, 'time'))
+
+  print_ancestor <- function (obj) {
+    ccat0(green = storage::shorten(obj$id))
+
+    if (length(obj$parents)) {
+      ccat0(silver = '  parents:')
+      imap(obj$parents, function(id, name) {
+        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
+      })
+    }
+    else {
+      ccat0(silver = '  no parents')
+    }
+
+    ccat0('\n', format_expr(obj$expr), '\n\n')
+  }
+
+  i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
+  lapply(x[i], print_ancestor)
+
+  invisible(x)
+}
+
+
 #' @description `print.explained` pretty-prints a description of an
 #' artifact.
 #'

@@ -35,7 +35,7 @@ all_tag_values <- function (query) {
 #' @importFrom rlang abort quo_expr
 only_n_summary <- function (qry) {
   if (!length(qry$summarise)) return(FALSE)
-  if (!all_named(qry$summarise)) abort("all summaries expressions need to be named")
+  if (!is_all_named(qry$summarise)) abort("all summaries expressions need to be named")
 
   i <- map_lgl(qry$summarise, function (s) {
     expr <- quo_expr(s)

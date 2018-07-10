@@ -54,7 +54,7 @@ vector <- function (..., data = list()) {
 
 map <- function (..., data = list()) {
   data <- choose_data(..., data = data)
-  stopifnot(all_named(data))
+  stopifnot(is_all_named(data))
 
   proto(expr = {
     values <- data
@@ -66,14 +66,26 @@ map <- function (..., data = list()) {
 
 # --- lists ------------------------------------------------------------
 
-all_named <- function (x) {
+with_names <- function (lst, names) {
+  stopifnot(identical(length(lst), length(names)))
+  names(lst) <- names
+  lst
+}
+
+all_named <- function (lst) {
+  nms <- names(lst)
+  if (is.null(nms)) return(with_names(lst, rep("", length(lst))))
+  lst
+}
+
+is_all_named <- function (x) {
   all(names(x) != "")
 }
 
 combine <- function (...) {
   lsts <- list(...)
   stopifnot(all(vapply(lsts, is.list, logical(1))),
-            all(vapply(lsts, all_named, logical(1))))
+            all(vapply(lsts, is_all_named, logical(1))))
 
   Reduce(x = lsts, init = list(), function (a, b) {
     c(a, b[setdiff(names(b), names(a))])
@@ -126,11 +138,6 @@ imap <- function (lst, f, ...) {
   ans
 }
 
-with_names <- function (lst, names) {
-  stopifnot(identical(length(lst), length(names)))
-  names(lst) <- names
-  lst
-}
 
 not <- function (f) {
   stopifnot(is.function(f))
@@ -156,7 +163,7 @@ ccat <- function (..., sep = ' ', default = 'default')
   get_color <- function (color) get(color, envir = asNamespace("crayon"), inherits = FALSE)
 
   default <- if (identical(default, 'default')) as.character else get_color(default)
-  chunks <- lapply(list(...), stri_paste, collapse = sep)
+  chunks <- lapply(all_named(list(...)), stri_paste, collapse = sep)
   Map(cat_chunk, names(chunks), chunks, c(rep(sep, length(chunks)-1), ''))
 }
 

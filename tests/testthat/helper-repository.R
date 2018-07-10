@@ -22,7 +22,7 @@ single_repository <- function (...) {
   r$last_commit <- list(objects = list(a = storage::compute_id(1)), id = 'p')
 
   args <- list(...)
-  stopifnot(all_named(args))
+  stopifnot(is_all_named(args))
   imap(args, function (value, name) {
     assign(name, value, envir = r)
   })
