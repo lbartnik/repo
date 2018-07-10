@@ -4,7 +4,7 @@ sample_repository <- function () {
   target_path <- file.path(tempdir(TRUE), basename(source_path))
 
   if (!dir.exists(target_path)) {
-    dir.create(dirname(target_path), recursive = TRUE)
+    dir.create(dirname(target_path), recursive = TRUE, showWarnings = FALSE)
     file.copy(source_path, dirname(target_path), recursive = TRUE)
   }
 

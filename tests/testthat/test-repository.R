@@ -311,6 +311,13 @@ test_that("order origin", {
 })
 
 
+test_that("print origin", {
+  r <- sample_repository()
+  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
+  expect_output_file(print(x), "text-output/print-origin.txt")
+})
+
+
 test_that("finding ancestors", {
   r <- many_repository()
 

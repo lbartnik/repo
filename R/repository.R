@@ -194,13 +194,23 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 }
 
 
+#' @importFrom rlang warn
 #' @export
 print.origin <- function (x, ..., sort_by = 'time') {
 
   # this is the only currently supported method
   stopifnot(identical(sort_by, 'time'))
 
+  # if there is nothing to print
+  if (!length(x)) {
+    warn("origin object empty")
+  }
+
+  # print a single entry
+  first <- TRUE
   print_ancestor <- function (obj) {
+    if (first) first <<- FALSE else cat('\n')
+
     ccat0(green = storage::shorten(obj$id))
 
     if (length(obj$parents)) {
@@ -213,9 +223,10 @@ print.origin <- function (x, ..., sort_by = 'time') {
       ccat0(silver = '  no parents')
     }
 
-    ccat0('\n', format_expr(obj$expr), '\n\n')
+    ccat0('\n', format_expr(obj$expr), '\n')
   }
 
+  # sort entries and then print them
   i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
   lapply(x[i], print_ancestor)
 

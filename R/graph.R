@@ -61,17 +61,19 @@ graph_stratify <- function (x) {
   nodes <- vector(data = names(x))
   stopifnot(nodes$size() != 0)
 
-  # 1. find roots
+  # iterate over roots, descend over children
   roots <- lapply(names(graph_roots(x)), process_node)
   stopifnot(length(roots) != 0)
 
-  # 2. iterate over roots, descend over children
-  lapply(roots, function (id) {
-    abort("not implemented yet")
-  })
 
-  # 4. if there is more than one top-level root, create an "abstract" root
-  if (length(roots) == 1) {
+  # if there is more than one top-level root, create an "abstract" root
+  if (length(roots) > 1) {
+    roots <- list(
+      class = 'abstract_root',
+      children = roots
+    )
+  }
+  else {
     roots <- first(roots)
   }
 
