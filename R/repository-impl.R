@@ -47,21 +47,23 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
-    .$svg <- plot_as_svg(.$plot)
+    png <- plot_as_png(.$plot)
 
     # if the current plot looks the same as the last one, do not update at all
-    if (is.null(.$svg) || svg_equal(.$svg, .$last_plot)) {
+    if (is.null(png) || png_equal(png, .$last_png)) {
       .$plot_id <- character()
       return()
     }
 
-    .$plot_id <- storage::compute_id(.$svg)
+    .$plot <- structure(list(png = png, svg = plot_as_svg(.$plot)), class = 'rawplot')
+    .$plot_id <- storage::compute_id(.$plot)
+
     if (storage::os_exists(.$store, .$plot_id)) {
       dbg("plot already present")
       return()
     }
 
-    .$plot_tags <- auto_tags(.$svg, class = 'plot')
+    .$plot_tags <- auto_tags(.$plot, class = c('rawplot', 'plot'))
     names <- extract_parents(env, expr)
     .$plot_tags$parents <- .$last_commit$objects[names]
   }
@@ -74,7 +76,7 @@ repository_updater <- function (repo, env, plot, expr) {
     an <- sorted_names(ia)
     bn <- sorted_names(ib)
 
-    return(!identical(ia[an], ib[bn]) || (!is.null(.$svg) && !svg_equal(.$svg, .$last_plot)))
+    return(!identical(ia[an], ib[bn]) || (!is.null(.$plot$png) && !png_equal(.$plot$png, .$last_png)))
   }
 
   u$write <- function (.) {
@@ -100,8 +102,8 @@ repository_updater <- function (repo, env, plot, expr) {
     })
 
     if (length(.$plot_id)) {
-      dbg("storing new plot [", id, "] with parents: ", paste(parents, collapse = ", "))
-      storage::os_write(.$store, .$svg, id = .$plot_id,
+      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(parents, collapse = ", "))
+      storage::os_write(.$store, .$plot, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
     }
 
@@ -111,7 +113,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
   u$sync_repo <- function (.) {
     .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
-    .$.super$last_plot   <- .$svg
+    .$.super$last_png    <- .$plot$png
   }
 
   u
@@ -148,8 +150,9 @@ auto_tags <- function (obj, ...) {
 #' @return `character` string, base64-encoded SVG plot.
 #' @import jsonlite
 #'
-plot_as_svg <- function (pl)
-{
+#' @rdname plots
+#'
+plot_as_svg <- function (pl) {
   guard()
   if (is.null(pl)) return(NULL)
 
@@ -170,6 +173,28 @@ plot_as_svg <- function (pl)
 
 
 
+#' Returns a base64-encoded, PNG plot.
+#'
+#' @param pl Plot recorded by [recordPlot()].
+#' @return `character` string, base64-encoded PNG plot.
+#' @import jsonlite
+#'
+#' @rdname plots
+#'
+plot_as_png <- function (pl) {
+  guard()
+  if (is.null(pl)) return(NULL)
+
+  path <- tempfile(fileext = ".png")
+  png(path, 1280, 720)
+  replayPlot(pl)
+  dev.off()
+
+  contents <- readBin(path, "raw", n = file.size(path))
+  jsonlite::base64_enc(contents)
+}
+
+
 #' Compare two SVG images.
 #'
 #' SVG images are processed in this package as base64-encoded, XML text
@@ -186,6 +211,8 @@ plot_as_svg <- function (pl)
 #' @import rsvg
 #' @import jsonlite
 #'
+#' @rdname plots
+#'
 svg_equal <- function (a, b)
 {
   if (is_empty(a)) return(is_empty(b))
@@ -195,6 +222,12 @@ svg_equal <- function (a, b)
   b <- try(rsvg(base64_dec(b), 100, 100), silent = TRUE)
   if (is_error(a) && is_error(b)) return(TRUE)
 
+  isTRUE(all.equal(a, b))
+}
+
+
+#' @rdname plots
+png_equal <- function (a, b) {
   isTRUE(all.equal(a, b))
 }
 

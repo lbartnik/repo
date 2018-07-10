@@ -13,7 +13,7 @@ repository <- function (store)
 
   r <- proto::proto(expr = {
     store       = store
-    last_plot   = NULL
+    last_png    = NULL
     last_commit = list(objects = list(), id = NA_character_)
   })
 

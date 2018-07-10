@@ -115,12 +115,12 @@ test_that("parents not present", {
 
 
 test_that("updater identifies new plot", {
-  r <- single_repository(last_plot = NULL)
+  r <- single_repository(last_png = NULL)
   e <- list(a = 1)
   p <- dummy_plot()
   u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
 
-  expect_null(u$last_plot)
+  expect_null(u$last_png)
   expect_equal(u$plot, p)
   u$process_plot()
 
@@ -132,11 +132,11 @@ test_that("updater identifies new plot", {
 
 test_that("updater ignores repeated plot", {
   p <- dummy_plot()
-  r <- single_repository(last_plot = plot_as_svg(p))
+  r <- single_repository(last_png = plot_as_png(p))
   e <- list(a = 1)
   u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
 
-  expect_not_null(u$last_plot)
+  expect_not_null(u$last_png)
   expect_equal(u$plot, p)
   u$process_plot()
 
@@ -167,8 +167,8 @@ test_that("updater recognizes changes among objects", {
 
 
 test_that("updater recognizes changes to plots", {
-  process_plot <- function (plot, last_plot = NULL) {
-    u <- repository_updater(single_repository(last_plot = last_plot),
+  process_plot <- function (plot, last_png = NULL) {
+    u <- repository_updater(single_repository(last_png = last_png),
                             as.environment(list(a = 1)), plot, bquote(plot(a)))
     u$process_objects()
     u$process_plot()
@@ -182,7 +182,7 @@ test_that("updater recognizes changes to plots", {
   u <- process_plot(dummy_plot())
   expect_true(u$introduced_changes())
 
-  u <- process_plot(dummy_plot(), plot_as_svg(dummy_plot()))
+  u <- process_plot(dummy_plot(), plot_as_png(dummy_plot()))
   expect_false(u$introduced_changes())
 
   # removing a plot should not trigger a new commit
@@ -238,7 +238,8 @@ test_that("plot is written", {
   expect_true(x$object$plot %in% ids)
 
   t <- storage::os_read_object(s, x$object$plot)
-  expect_true(svg_equal(t, plot_as_svg(p)))
+  expect_true(svg_equal(t$svg, plot_as_svg(p)))
+  expect_true(png_equal(t$png, plot_as_png(p)))
 })
 
 
@@ -248,14 +249,14 @@ test_that("changes are synchronized into the repository", {
 
   u$last_commit_id <- 'last_commit_id'
   u$ids <- list(a = 'id1', b = 'id2')
-  u$svg <- 'svg'
+  u$plot <- list(png = 'png', svg = 'svg')
 
   u$sync_repo()
 
   expect_named(r$last_commit, c("id", "objects"), ignore.order = TRUE)
   expect_equal(r$last_commit$id, 'last_commit_id')
   expect_equal(r$last_commit$objects, u$ids)
-  expect_equal(r$last_plot, u$svg)
+  expect_equal(r$last_png, u$plot$png)
 })
 
 
