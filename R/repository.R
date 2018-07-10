@@ -222,6 +222,15 @@ print.explained <- function (x, ...) {
 }
 
 
+#' @description `expl_get` extracts a member `i` from the `"explained"`
+#' S3 object.
+#'
+#' @rdname repository
+expl_get <- function (x, i) {
+  nth(x, i)
+}
+
+
 #' @description `repository_rewind` changes the internal pointer to the
 #' _last commit_ and, if `id` denotes a historical commit, sets it to
 #' that value. Subsequent commits will be recorded as descendants of

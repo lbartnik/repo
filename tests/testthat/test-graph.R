@@ -38,3 +38,11 @@ test_that("stratify", {
   lapply(b$children, expect_named)
   lapply(c$children, expect_named)
 })
+
+
+test_that("stratify", {
+  r <- sample_repository()
+
+  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
+  graph_stratify(x)
+})

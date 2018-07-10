@@ -300,6 +300,17 @@ test_that("explain object", {
 })
 
 
+test_that("order origin", {
+  r <- sample_repository()
+
+  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
+  i <- order(unlist(lapply(x, expl_get, "time")), decreasing = FALSE)
+  x <- x[i]
+  i <- substr(unlist(lapply(x, expl_get, "id")), 1, 2)
+  expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
+})
+
+
 test_that("finding ancestors", {
   r <- many_repository()
 
@@ -328,6 +339,7 @@ test_that("format expr", {
                    mutate_at(vars(hour, dow), funs(as.factor)))
   expect_output_file(format_expr(expr), 'text-output/format-expr.txt')
 })
+
 
 # --- commit -----------------------------------------------------------
 

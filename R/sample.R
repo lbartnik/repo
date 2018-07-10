@@ -1,8 +1,14 @@
 #' @export
 sample_repository <- function () {
-  path  <- system.file('sample-repository', package = 'repository')
-  store <- storage::filesystem(path, create = FALSE)
-  repository(store)
+  source_path <- system.file('sample-repository/', package = 'repository')
+  target_path <- file.path(tempdir(TRUE), basename(source_path))
+
+  if (!dir.exists(target_path)) {
+    dir.create(dirname(target_path), recursive = TRUE)
+    file.copy(source_path, dirname(target_path), recursive = TRUE)
+  }
+
+  repository(storage::filesystem(target_path, create = FALSE))
 }
 
 
