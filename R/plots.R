@@ -37,7 +37,7 @@ plot.rawplot <- function (x, ...) {
 #' @return `character` string, base64-encoded SVG or PNG plot.
 #' @import jsonlite
 #'
-#' @rdname plots
+#' @rdname rawplot
 #'
 replot_as <- function (pl, type, ...) {
   guard()
@@ -63,11 +63,13 @@ replot_as <- function (pl, type, ...) {
 }
 
 
+#' @rdname rawplot
 as_png <- function (x, width = 1280, height = 720) {
   stopifnot(is_rawplot(x))
   replot_as(x$recordedplot, 'png', width = width, height = height)
 }
 
+#' @rdname rawplot
 as_svg <- function (x) {
   stopifnot(is_rawplot(x))
   replot_as(x$recordedplot, 'svg')
@@ -75,12 +77,13 @@ as_svg <- function (x) {
 
 
 
-#' @rdname plots
+#' @rdname rawplot
 png_equal <- function (a, b) {
   isTRUE(all.equal(a, b))
 }
 
 
+#' @rdname rawplot
 for_store <- function (x, store) {
   stopifnot(is_rawplot(x))
 
