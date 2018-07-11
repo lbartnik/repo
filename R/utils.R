@@ -28,6 +28,9 @@ isFALSE <- function (x) identical(x, FALSE)
 
 is_atomic_class <- function (x) isTRUE(x %in% c("numeric", "character", "integer", "logical", "complex"))
 
+is_recorded_plot <- function (x) inherits(x, 'recordedplot')
+
+
 # --- vector -----------------------------------------------------------
 
 choose_data <- function (..., data) {

@@ -132,7 +132,7 @@ test_that("updater identifies new plot", {
 
 test_that("updater ignores repeated plot", {
   p <- dummy_plot()
-  r <- single_repository(last_png = plot_as_png(p))
+  r <- single_repository(last_png = replot_as(p, 'png', width = 150, height = 150))
   e <- list(a = 1)
   u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
 
@@ -182,7 +182,7 @@ test_that("updater recognizes changes to plots", {
   u <- process_plot(dummy_plot())
   expect_true(u$introduced_changes())
 
-  u <- process_plot(dummy_plot(), plot_as_png(dummy_plot()))
+  u <- process_plot(dummy_plot(), replot_as(dummy_plot(), 'png', width = 150, height = 150))
   expect_false(u$introduced_changes())
 
   # removing a plot should not trigger a new commit
@@ -238,8 +238,7 @@ test_that("plot is written", {
   expect_true(x$object$plot %in% ids)
 
   t <- storage::os_read_object(s, x$object$plot)
-  expect_true(svg_equal(t$svg, plot_as_svg(p)))
-  expect_true(png_equal(t$png, plot_as_png(p)))
+  expect_true(png_equal(t$png, replot_as(p, 'png', width = 1280, height = 720)))
 })
 
 

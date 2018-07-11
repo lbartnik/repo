@@ -47,23 +47,34 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
-    png <- plot_as_png(.$plot)
+    # reset the plot processing state
+    .$plot_id <- character()
+    .$png <- NULL
 
-    # if the current plot looks the same as the last one, do not update at all
-    if (is.null(png) || png_equal(png, .$last_png)) {
-      .$plot_id <- character()
+    if (is.null(.$plot)) {
       return()
     }
 
-    .$plot <- structure(list(png = png, svg = plot_as_svg(.$plot)), class = 'rawplot')
+    # rawplot wraps all plotting logic
+    .$plot <- rawplot(.$plot)
+    .$png <- as_png(.$plot, 150, 150)
+
+    # if the current plot looks the same as the last one, do not update at all
+    if (png_equal(.$png, .$last_png)) {
+      return()
+    }
+
+    # prepare the rawplot wrapper for storing
+    .$plot <- for_store(.$plot)
     .$plot_id <- storage::compute_id(.$plot)
 
+    # no need to store, just remember the id
     if (storage::os_exists(.$store, .$plot_id)) {
       dbg("plot already present")
       return()
     }
 
-    .$plot_tags <- auto_tags(.$plot, class = c('rawplot', 'plot'))
+    .$plot_tags <- auto_tags(.$plot, class = base::union(class(.$plot), 'plot'))
     names <- extract_parents(env, expr)
     .$plot_tags$parents <- .$last_commit$objects[names]
   }
@@ -141,94 +152,6 @@ auto_tags <- function (obj, ...) {
 
   combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
                        session = r_session_id()))
-}
-
-
-#' Returns a base64-encoded, SVG plot.
-#'
-#' @param pl Plot recorded by [recordPlot()].
-#' @return `character` string, base64-encoded SVG plot.
-#' @import jsonlite
-#'
-#' @rdname plots
-#'
-plot_as_svg <- function (pl) {
-  guard()
-  if (is.null(pl)) return(NULL)
-
-  # TODO use svglite::stringSVG
-
-  path <- tempfile(fileext = ".svg")
-
-  # TODO if `pl` has been recorded without dev.control("enable"), the
-  #      plot might be empty; it might be necessary to check for that
-
-  svg(path)
-  replayPlot(pl)
-  dev.off()
-
-  contents <- readBin(path, "raw", n = file.size(path))
-  jsonlite::base64_enc(contents)
-}
-
-
-
-#' Returns a base64-encoded, PNG plot.
-#'
-#' @param pl Plot recorded by [recordPlot()].
-#' @return `character` string, base64-encoded PNG plot.
-#' @import jsonlite
-#'
-#' @rdname plots
-#'
-plot_as_png <- function (pl) {
-  guard()
-  if (is.null(pl)) return(NULL)
-
-  path <- tempfile(fileext = ".png")
-  png(path, 1280, 720)
-  replayPlot(pl)
-  dev.off()
-
-  contents <- readBin(path, "raw", n = file.size(path))
-  jsonlite::base64_enc(contents)
-}
-
-
-#' Compare two SVG images.
-#'
-#' SVG images are processed in this package as base64-encoded, XML text
-#' data. When produced, certain differences are introduced in XML
-#' attributes that have no effect on the final plots. That is why,
-#' however, SVG plots need to be compared graphically and not textually.
-#' This function produces a thumbnail of each SVG image and then
-#' compares the raster graphic.
-#'
-#' @param a First SVG image.
-#' @param b Second SVG image.
-#' @return `TRUE` if SVGs are the same plot-wise.
-#'
-#' @import rsvg
-#' @import jsonlite
-#'
-#' @rdname plots
-#'
-svg_equal <- function (a, b)
-{
-  if (is_empty(a)) return(is_empty(b))
-  if (is_empty(b)) return(FALSE)
-
-  a <- try(rsvg(base64_dec(a), 100, 100), silent = TRUE)
-  b <- try(rsvg(base64_dec(b), 100, 100), silent = TRUE)
-  if (is_error(a) && is_error(b)) return(TRUE)
-
-  isTRUE(all.equal(a, b))
-}
-
-
-#' @rdname plots
-png_equal <- function (a, b) {
-  isTRUE(all.equal(a, b))
 }
 
 
