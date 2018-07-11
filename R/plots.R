@@ -14,7 +14,7 @@ is_rawplot <- function (x) inherits(x, 'rawplot')
 #' @export
 #' @rdname rawplot
 print.rawplot <- function (x, ...) {
-  ccat(grey = "<rawplot>\n", silver = "# use the plot() method to re-plot\n")
+  ccat0(grey = "<rawplot>\n", silver = "# use the plot() method to re-plot\n")
 }
 
 
