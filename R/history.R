@@ -28,7 +28,7 @@ filter.history <- function (x, ...)
     },
     data_matches = function (..., data) {
       data <- if (missing(data)) list(...) else c(data, list(...))
-      stopifnot(all_named(data))
+      stopifnot(is_all_named(data))
 
       data <- lapply(data, storage::compute_id)
       Filter(x, f = function (commit) {

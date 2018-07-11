@@ -98,7 +98,6 @@ print.query <- function (x, ...) {
 
 #' @export
 tag_names <- function (x) {
-  # TODO take selection and filters into consideration
   ans <- all_tag_names(as_query(x))
   setdiff(ans, 'artifact')
 }
@@ -106,7 +105,6 @@ tag_names <- function (x) {
 
 #' @export
 tag_values <- function (x) {
-  # TODO take selection and filters into consideration
   ans <- all_tag_values(as_query(x))
   nms <- setdiff(names(ans), 'artifact')
   ans[nms]
@@ -123,24 +121,49 @@ filter.query <- function (qry, ...) {
   qry
 }
 
-#' @importFrom rlang quos
+#' @importFrom rlang abort quos
+#' @importFrom tidyselect vars_select
 #' @export
 #'
-select.query <- function (qry, ..., .force = FALSE) {
+select.query <- function (qry, ...) {
   sel <- quos(...)
 
-  if (is.null(qry$select) || isTRUE(.force)) {
-    qry$select <- sel
-    return(qry)
+  if (!length(qry$select)) {
+    names <- all_select_names(qry)
+  }
+  else {
+    names <- qry$select
   }
 
-  i <- (quos_text(qry$select) %in% quos_text(sel))
-  if (!any(i)) {
-    stop("selection reduced to an empty set", call. = FALSE)
+  if (!length(names)) {
+    abort("select: no tag names to select from, filter matches no objects?")
   }
 
-  qry$select <- qry$select[i]
+  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
+  if (is_error(names)) {
+    abort(sprintf("select: could not select names: %s", names$message))
+  }
+  if (!length(names)) {
+    abort("select: selection reduced to an empty set")
+  }
+
+  qry$select <- names
   qry
+}
+
+#' @export
+unselect <- function (qry) {
+  stopifnot(is_query(qry))
+  qry$select <- list()
+  qry
+}
+
+
+all_select_names <- function(qry) {
+  regular_names <- all_tag_names(qry)
+  if (is.null(regular_names)) return(character())
+
+  c(regular_names, "id", "object")
 }
 
 #' @importFrom rlang quos quo
@@ -193,7 +216,7 @@ execute <- function (x, .warn = TRUE) {
   store <- x$repository$store
 
   # 1. find artifacts that match the filter
-  ids <- storage::os_find(store, c(quo(artifact), x$filter))
+  ids <- select_ids(x)
 
   # 1a. if there's a simple counting summary, this is where we can actually
   #     return the result
@@ -208,56 +231,22 @@ execute <- function (x, .warn = TRUE) {
   }
 
   # 2. decide what to read from the object store
-  available_tags <- c(all_tag_names(x), "id", "object")
-  sel <- tidyselect::vars_select(available_tags, UQS(x$select), .exclude = "artifact")
+  sel <- if (length(x$select)) x$select else all_select_names()
 
-  # we will append to this one
-  values <- list()
+  values <- read_tags(setdiff(sel, c("id", "object")), ids, store)
 
   # object is the actual original data, be it an R object or a plot
   if ("object" %in% sel) {
     values <- c(values, list(object = lapply(ids, function (id) storage::os_read_object(store, id))))
-    sel <- setdiff(sel, "object")
   }
 
   # id is not present among tags
   if ("id" %in% sel) {
     values <- c(values, list(id = ids))
-    sel <- setdiff(sel, "id")
   }
 
-  # everything else can be read from tags
-  values2 <- map_lst(sel, function(x) base::vector("list", length(ids)))
-
-  Map(ids, seq_along(ids), f = function (id, i) {
-    tags <- storage::os_read_tags(store, id)
-    tags <- with_names(tags[sel], sel)
-    imap(tags, function (value, name) {
-      values2[[name]][[i]] <<- value
-    })
-  })
-
-  # simplify columns which hold single, atomic values
-  values2 <- lapply(values2, function (column) {
-    len <- map_int(column, length)
-    if (any(len != 1)) return(column)
-    cls <- unique(map_lst(column, class))
-    if (length(cls) > 1) return(column)
-    cls <- first(cls)
-    ref <- first(column)
-    if (is.atomic(ref)) `class<-`(as.vector(column, typeof(ref)), cls) else column
-  })
-
-  # make sure there is at least one value in each column
-  i <- (map_dbl(values2, length) < 1)
-  if (any(i)) {
-    empty <- names(values2)[i]
-    warning("tags ", join(empty, ', '), " rendered no values, removing from result",
-            call. = FALSE)
-    values2 <- values2[setdiff(names(values2), empty)]
-  }
-
-  values <- tibble::as_tibble(c(values, values2))
+  # simplify list-based tags into a tibble
+  values <- flatten_lists(values)
 
   # 3. summarise goes before arrange and top_n and if defined is the last step
   if (length(x$summarise)) {
@@ -277,5 +266,48 @@ execute <- function (x, .warn = TRUE) {
   }
 
   values
+}
+
+
+#' @importFrom rlang abort caller_env expr_text eval_tidy quos quo_get_expr
+update <- function (x, ...) {
+  stopifnot(is_query(x))
+  stopif(length(x$select), length(x$summarise), length(x$arrange), length(x$top_n))
+
+  quos <- quos(...)
+
+  ids <- select_ids(x)
+  lapply(ids, function (id) {
+    tags <- storage::os_read_tags(x$repository$store, id)
+
+    newt <- unlist(lapply(seq_along(quos), function (i) {
+      n <- nth(names(quos), i)
+      q <- nth(quos, i)
+
+      if (nchar(n)) {
+        return(with_names(list(eval_tidy(q, tags, e)), n))
+      }
+
+      update_tag_values(quo_get_expr(q), tags)
+    }), recursive = FALSE)
+
+    storage::os_update_tags(x$repository$store, id, combine(newt, tags))
+  })
+}
+
+
+#' @importFrom rlang quo
+update_tag_values <- function (expr, tags) {
+  what <- nth(expr, 1)
+  stopifnot(identical(what, quote(append)) || identical(what, quote(remove)))
+
+  where <- as.character(nth(expr, 2))
+  if (!has_name(tags, where)) tags[[where]] <- character()
+
+  e <- new.env(parent = emptyenv())
+  e$append <- function (where, what) union(where, what)
+  e$remove <- function (where, what) setdiff(where, what)
+
+  with_names(list(eval_tidy(expr, tags, e)), where)
 }
 

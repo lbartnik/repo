@@ -9,6 +9,8 @@
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
+\alias{print.explained}
+\alias{expl_get}
 \alias{repository_rewind}
 \alias{as_deltas}
 \alias{as_origin}
@@ -26,7 +28,11 @@ repository_update(repo, env, plot, expr)
 
 repository_history(repo, mode = "all")
 
-repository_explain(repo, id = NULL)
+repository_explain(repo, id = NULL, ancestors = "unlimited")
+
+\method{print}{explained}(x, ...)
+
+expl_get(x, i)
 
 repository_rewind(repo, id)
 
@@ -48,6 +54,9 @@ as_origin(x)
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
 \item{id}{Commit identifier.}
+
+\item{ancestors}{Retrieve ancestors at most that far in the ancestry
+tree from specified \code{id}s.}
 
 \item{repo}{Repository object.}
 }
@@ -73,6 +82,12 @@ with \code{id} as the root.
 the \emph{origin} of an artifact (an R object or a plot) with the given
 identifier \code{id}. If no \code{id} is provided, an aggregated graph containing
 all artifacts is returned.
+
+\code{print.explained} pretty-prints a description of an
+artifact.
+
+\code{expl_get} extracts a member \code{i} from the \code{"explained"}
+S3 object.
 
 \code{repository_rewind} changes the internal pointer to the
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to

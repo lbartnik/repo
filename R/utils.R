@@ -1,5 +1,5 @@
 
-has_name <- function (x, name) isTRUE(name %in% names(x))
+has_name <- function (x, name) isTRUE(all(name %in% names(x)))
 
 # --- access -----------------------------------------------------------
 
@@ -8,9 +8,11 @@ nth <- function(x, n) {
   x[[n]]
 }
 
-last <- function (x) nth(x, length(x))
+last <- function(x) nth(x, length(x))
 
 first <- function(x) nth(x, 1)
+
+second <- function(x) nth(x, 2)
 
 
 # --- tests ------------------------------------------------------------
@@ -20,9 +22,14 @@ is_empty <- function (x) {
   is.null(x) || is.na(x) || !length(x) || (is.character(x) && !nchar(x))
 }
 
-is_error <- function (x) inherits(x, 'try-error') || inherits(x, 'simpleError')
+is_error <- function (x) inherits(x, c('error', 'try-error', 'simpleError'))
 
 isFALSE <- function (x) identical(x, FALSE)
+
+is_atomic_class <- function (x) isTRUE(x %in% c("numeric", "character", "integer", "logical", "complex"))
+
+is_recorded_plot <- function (x) inherits(x, 'recordedplot')
+
 
 # --- vector -----------------------------------------------------------
 
@@ -50,7 +57,7 @@ vector <- function (..., data = list()) {
 
 map <- function (..., data = list()) {
   data <- choose_data(..., data = data)
-  stopifnot(all_named(data))
+  stopifnot(is_all_named(data))
 
   proto(expr = {
     values <- data
@@ -62,14 +69,26 @@ map <- function (..., data = list()) {
 
 # --- lists ------------------------------------------------------------
 
-all_named <- function (x) {
+with_names <- function (lst, names) {
+  stopifnot(identical(length(lst), length(names)))
+  names(lst) <- names
+  lst
+}
+
+all_named <- function (lst) {
+  nms <- names(lst)
+  if (is.null(nms)) return(with_names(lst, rep("", length(lst))))
+  lst
+}
+
+is_all_named <- function (x) {
   all(names(x) != "")
 }
 
 combine <- function (...) {
   lsts <- list(...)
   stopifnot(all(vapply(lsts, is.list, logical(1))),
-            all(vapply(lsts, all_named, logical(1))))
+            all(vapply(lsts, is_all_named, logical(1))))
 
   Reduce(x = lsts, init = list(), function (a, b) {
     c(a, b[setdiff(names(b), names(a))])
@@ -122,11 +141,6 @@ imap <- function (lst, f, ...) {
   ans
 }
 
-with_names <- function (lst, names) {
-  stopifnot(identical(length(lst), length(names)))
-  names(lst) <- names
-  lst
-}
 
 not <- function (f) {
   stopifnot(is.function(f))
@@ -136,28 +150,45 @@ not <- function (f) {
 
 # --- ccat -------------------------------------------------------------
 
+#' @importFrom stringi stri_paste
+cpaste <- function (..., sep = ' ', default = 'default')
+{
+  cat_chunk <- function (color, chunk, sep) {
+    if (identical(color, 'default') || identical(color, '')) {
+      color <- default
+    } else {
+      color <- get_color(color)
+    }
+    stri_paste(color(chunk), sep, sep = '')
+  }
+
+  grey_style <- crayon::make_style(grDevices::grey(.6), grey = TRUE)
+  grey <- function(...) crayon::style(paste0(...), grey_style)
+
+  get_color <- function (color) {
+    if (identical(color, "grey")) return(grey)
+    get(color, envir = asNamespace("crayon"), inherits = FALSE)
+  }
+
+  default <- if (identical(default, 'default')) as.character else get_color(default)
+  chunks <- lapply(list(...), stri_paste, collapse = sep)
+  if (!length(names(chunks))) names(chunks) <- rep("", length(chunks))
+
+  chunks <- Map(cat_chunk, names(chunks), chunks, c(rep(sep, length(chunks)-1), ''))
+  stri_paste(chunks, collapse = '')
+}
+
+
 cat0 <- function (..., sep = '') cat(..., sep = sep)
 
-ccat <- function (color, ..., sep = ' ')
-{
-  if (identical(color, 'default'))
-    cat(..., sep = sep)
-  else {
-    color <- get(color, envir = asNamespace("crayon"), inherits = FALSE)
-    cat(color(paste(..., sep = sep)))
-  }
-}
+ccat <- function (..., sep = ' ', default = 'default') cat(cpaste(..., sep = sep, default = default))
 
-ccat0 <- function (color, ...) ccat(color, ..., sep = '')
+ccat0 <- function (..., default = 'default') ccat(..., sep = '', default = default)
 
-ccat_ <- function (chunks, sep = ' ')
-{
-  mapply(color = names(chunks), chunk = chunks,
-         function (color, chunk)
-         {
-           ccat0(color, paste(chunk, collapse = sep))
-         })
-}
+#' @importFrom rlang inform
+cinform <- function (..., sep = ' ', default = 'default') inform(cpaste(..., sep = sep, default = default))
+
+cinform0 <- function (..., default = 'default') cinform(..., sep = '', default = default)
 
 
 # --- string -----------------------------------------------------------
@@ -196,3 +227,10 @@ guard <- function () {
   invisible()
 }
 
+stopif <- function (...) {
+  i <- which(map_lgl(list(...), function(x)isTRUE(as.logical(x))))
+  if (!length(i)) return(invisible(FALSE))
+  mc <- match.call()
+  lb <- map_chr(mc[i+1], deparse)
+  stop('following conditions are true: ', join(lb, ', '), call. = FALSE)
+}

@@ -41,6 +41,15 @@ test_that("FALSE is recognized", {
 })
 
 
+test_that("atomic class", {
+  expect_true(is_atomic_class("numeric"))
+  expect_true(is_atomic_class("integer"))
+  expect_true(is_atomic_class("character"))
+  expect_true(is_atomic_class("logical"))
+  expect_true(is_atomic_class("complex"))
+})
+
+
 test_that("vector erase", {
   v <- vector(data = 1:10)
   expect_equal(v$size(), 10)
@@ -51,9 +60,9 @@ test_that("vector erase", {
 })
 
 
-test_that("all_named requires names", {
-  expect_true(all_named(list(a = 1, b = 2)))
-  expect_false(all_named(list(a = 1, 2)))
+test_that("is_all_named requires names", {
+  expect_true(is_all_named(list(a = 1, b = 2)))
+  expect_false(is_all_named(list(a = 1, 2)))
 })
 
 test_that("combine merges lists", {
@@ -104,4 +113,11 @@ test_that("not negates a function", {
 
 test_that("r session id does not change", {
   expect_equal(r_session_id(), r_session_id())
+})
+
+
+test_that("stopif", {
+  expect_error(stopif(T))
+  expect_silent(stopif(F))
+  expect_error(stopif(F, F, length(1)), ".*length\\(1\\)")
 })

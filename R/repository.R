@@ -13,7 +13,7 @@ repository <- function (store)
 
   r <- proto::proto(expr = {
     store       = store
-    last_plot   = NULL
+    last_png    = NULL
     last_commit = list(objects = list(), id = NA_character_)
   })
 
@@ -126,10 +126,19 @@ repository_history <- function (repo, mode = 'all') {
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
+#' @param ancestors Retrieve ancestors at most that far in the ancestry
+#'        tree from specified `id`s.
+#'
+#' @importFrom rlang abort
+#'
 #' @rdname repository
 #' @export
 #'
-repository_explain <- function (repo, id = NULL) {
+repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
+  if (is.null(id) && !identical(ancestors, "unlimited")) {
+    abort("cannot limit the number of ancestors if `id` is NULL")
+  }
+
   if (is.null(id)) {
     commits <- all_commits(repo$store)
     objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
@@ -140,30 +149,39 @@ repository_explain <- function (repo, id = NULL) {
     ids <- unique(c(objects, parents, plots))
   }
   else {
-    ids <- object_origin(repo, id)
+    if (identical(ancestors, "unlimited")) ancestors <- 0xDEADBEEF
+    ids <- object_origin(repo, id, ancestors)
   }
 
   # annotate objects with information about: name, parent, commit, type, etc.
   objects <- lapply(ids, function (id) {
     raw <- storage::os_read(repo$store, id)
 
-    stopifnot(has_name(raw$tags, 'parents'), has_name(raw$tags, 'time'),
-              has_name(raw$tags, 'parent_commit'))
+    tags_copy <- c("class", "parents", "time")
+    stopifnot(has_name(raw$tags, c(tags_copy, 'parent_commit')))
 
-    obj <- raw$tags[c("parents", "time")]
+    obj <- raw$tags[tags_copy]
     obj$id <- id
     obj$commit <- raw$tags$parent_commit
     obj$description <- description(raw$object)
     obj$children <- character()
+    obj$names <- raw$tags$names
 
-    obj
+    # read parent commit and assign expression
+    cmt <- storage::os_read_object(repo$store, obj$commit)
+    obj$expr <- cmt$expr
+
+    # finally, add a S3 class for pretty-printing
+    structure(obj, class = 'explained')
   })
   names(objects) <- ids
 
   # add information about children
   lapply(objects, function (obj) {
     lapply(obj$parents, function (parent) {
-      objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+      if (parent %in% names(objects)) {
+        objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
+      }
     })
   })
 
@@ -173,6 +191,84 @@ repository_explain <- function (repo, id = NULL) {
   # a) turned into a 'stratified' object
   # b) turned into JSON
   # c) iterated over
+}
+
+
+#' @importFrom rlang warn
+#' @export
+print.origin <- function (x, ..., sort_by = 'time') {
+
+  # this is the only currently supported method
+  stopifnot(identical(sort_by, 'time'))
+
+  # if there is nothing to print
+  if (!length(x)) {
+    warn("origin object empty")
+  }
+
+  # print a single entry
+  first <- TRUE
+  print_ancestor <- function (obj) {
+    if (first) first <<- FALSE else cat('\n')
+
+    ccat0(green = storage::shorten(obj$id))
+
+    if (length(obj$parents)) {
+      ccat0(silver = '  parents:')
+      imap(obj$parents, function(id, name) {
+        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
+      })
+    }
+    else {
+      ccat0(silver = '  no parents')
+    }
+
+    ccat0('\n', format_expr(obj$expr), '\n')
+  }
+
+  # sort entries and then print them
+  i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
+  lapply(x[i], print_ancestor)
+
+  invisible(x)
+}
+
+
+#' @description `print.explained` pretty-prints a description of an
+#' artifact.
+#'
+#' @importFrom storage shorten
+#'
+#' @rdname repository
+#' @export
+print.explained <- function (x, ...) {
+
+  is_plot <- ('plot' %in% x$class)
+
+  # preamble
+  ccat0(silver = "Artifact: ", green = shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
+
+  # expression that produced this artifact
+  ccat0(silver = 'Expression:\n', format_expr(x$expr))
+
+  # more meta-data
+  if (!is_plot) ccat(silver = '\nName:   ', x$names)
+  ccat(silver = '\nClass:  ', x$class)
+  ccat(silver = '\nCreated:', x$time)
+  ccat(silver = '\nSummary:', x$description)
+  cat('\n')
+
+  invisible(x)
+}
+
+
+#' @description `expl_get` extracts a member `i` from the `"explained"`
+#' S3 object.
+#'
+#' @rdname repository
+#' @export
+expl_get <- function (x, i) {
+  nth(x, i)
 }
 
 

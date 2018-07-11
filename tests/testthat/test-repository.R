@@ -115,12 +115,12 @@ test_that("parents not present", {
 
 
 test_that("updater identifies new plot", {
-  r <- single_repository(last_plot = NULL)
+  r <- single_repository(last_png = NULL)
   e <- list(a = 1)
   p <- dummy_plot()
   u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
 
-  expect_null(u$last_plot)
+  expect_null(u$last_png)
   expect_equal(u$plot, p)
   u$process_plot()
 
@@ -132,11 +132,11 @@ test_that("updater identifies new plot", {
 
 test_that("updater ignores repeated plot", {
   p <- dummy_plot()
-  r <- single_repository(last_plot = plot_as_svg(p))
+  r <- single_repository(last_png = replot_as(p, 'png', width = 150, height = 150))
   e <- list(a = 1)
   u <- repository_updater(r, as.environment(e), p, bquote(plot(a)))
 
-  expect_not_null(u$last_plot)
+  expect_not_null(u$last_png)
   expect_equal(u$plot, p)
   u$process_plot()
 
@@ -167,8 +167,8 @@ test_that("updater recognizes changes among objects", {
 
 
 test_that("updater recognizes changes to plots", {
-  process_plot <- function (plot, last_plot = NULL) {
-    u <- repository_updater(single_repository(last_plot = last_plot),
+  process_plot <- function (plot, last_png = NULL) {
+    u <- repository_updater(single_repository(last_png = last_png),
                             as.environment(list(a = 1)), plot, bquote(plot(a)))
     u$process_objects()
     u$process_plot()
@@ -182,7 +182,7 @@ test_that("updater recognizes changes to plots", {
   u <- process_plot(dummy_plot())
   expect_true(u$introduced_changes())
 
-  u <- process_plot(dummy_plot(), plot_as_svg(dummy_plot()))
+  u <- process_plot(dummy_plot(), replot_as(dummy_plot(), 'png', width = 150, height = 150))
   expect_false(u$introduced_changes())
 
   # removing a plot should not trigger a new commit
@@ -238,7 +238,7 @@ test_that("plot is written", {
   expect_true(x$object$plot %in% ids)
 
   t <- storage::os_read_object(s, x$object$plot)
-  expect_true(svg_equal(t, plot_as_svg(p)))
+  expect_true(png_equal(t$png, replot_as(p, 'png', width = 1280, height = 720)))
 })
 
 
@@ -248,14 +248,14 @@ test_that("changes are synchronized into the repository", {
 
   u$last_commit_id <- 'last_commit_id'
   u$ids <- list(a = 'id1', b = 'id2')
-  u$svg <- 'svg'
+  u$plot <- list(png = 'png', svg = 'svg')
 
   u$sync_repo()
 
   expect_named(r$last_commit, c("id", "objects"), ignore.order = TRUE)
   expect_equal(r$last_commit$id, 'last_commit_id')
   expect_equal(r$last_commit$objects, u$ids)
-  expect_equal(r$last_plot, u$svg)
+  expect_equal(r$last_png, u$plot$png)
 })
 
 
@@ -297,6 +297,54 @@ test_that("explain object", {
   x <- repository_explain(r, 'b')
   expect_length(x, 1)
   expect_node(x, 'b', parents = list(), children = character())
+})
+
+
+test_that("order origin", {
+  r <- sample_repository()
+
+  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
+  i <- order(unlist(lapply(x, expl_get, "time")), decreasing = FALSE)
+  x <- x[i]
+  i <- substr(unlist(lapply(x, expl_get, "id")), 1, 2)
+  expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
+})
+
+
+test_that("print origin", {
+  r <- sample_repository()
+  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
+  expect_output_file(print(x), "text-output/print-origin.txt")
+})
+
+
+test_that("finding ancestors", {
+  r <- many_repository()
+
+  x <- object_origin(r, 'd', 0)
+  expect_equal(x, 'd')
+
+  x <- object_origin(r, 'd', 1)
+  expect_equal(sort(x), c('c', 'd'))
+
+  x <- object_origin(r, 'd', 2)
+  expect_equal(sort(x), letters[1:4])
+})
+
+
+test_that("finding ancestors for multiple artifacts", {
+  r <- many_repository()
+
+  x <- object_origin(r, c('a', 'd'), 0)
+  expect_equal(x, c('a', 'd'))
+})
+
+
+test_that("format expr", {
+  expr <- bquote(x <- input %>%
+                   mutate(hour = hour(timestamp), dow = wday(timestamp)) %>%
+                   mutate_at(vars(hour, dow), funs(as.factor)))
+  expect_output_file(format_expr(expr), 'text-output/format-expr.txt')
 })
 
 

@@ -22,7 +22,7 @@ single_repository <- function (...) {
   r$last_commit <- list(objects = list(a = storage::compute_id(1)), id = 'p')
 
   args <- list(...)
-  stopifnot(all_named(args))
+  stopifnot(is_all_named(args))
   imap(args, function (value, name) {
     assign(name, value, envir = r)
   })
@@ -42,7 +42,7 @@ many_repository <- function () {
   add_object(r, 'a', 1, 'p', list())
   add_object(r, 'b', 2L, 'q', list())
   add_object(r, 'c', 3, 'r', list(a = 'a', b = 'b'))
-  add_object(r, 'd', plot_as_svg(dummy_plot()), 's', list(c = 'c'))
+  add_object(r, 'd', replot_as(dummy_plot(), 'svg'), 's', list(c = 'c'))
 
   add_commit(r, 'p', NA_character_, bquote(a <- 1), list(a = 'a'))
   add_commit(r, 'q', 'p', bquote(b <- 2L), list(a = 'a', b = 'b'))
@@ -54,7 +54,8 @@ many_repository <- function () {
 
 add_object <- function (r, id, value, parent_commit, parents) {
   tags <- list(class = class(value), parent_commit = parent_commit,
-               parents = parents, time = Sys.time(), artifact = TRUE)
+               parents = parents, time = Sys.time(), artifact = TRUE,
+               names = id)
   storage::os_write(r$store, value, tags, id)
 }
 

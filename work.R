@@ -10,19 +10,12 @@ store <- storage::filesystem(path, create = TRUE)
 repo  <- repository::repository(store)
 
 generate_simple(repo)
+simulate_london_meters(repo)
+
+repo %>% select(id, object) %>% filter('input' %in% names) %>% execute
+
+repo %>% select(object) %% filter(id == '2b67f4934da0aa3baecfdd3001008539217d5719')
 
 
-#plot <- tryCatch(recordPlot(), error = function(e)'error')
-#repository_update(repo, globalenv(), plot, bquote(a <- 1))
-
-h <- repository_history(repo)
-
-storage::os_read_tags(repo$store, 'd8db7af5fca4437d45c7b5d09705cb077614caf9')
-
-zzz <- lapply(filter(h, ancestor_of('d8db7af5fca4437d45c7b5d09705cb077614caf9'))$data, function (commit) {
-  cat(deparse(commit$expr), "\n")
-})
-
-filter(h, ancestor_of('d8db7af5fca4437d45c7b5d09705cb077614caf9'))
-
-filter(h, data_matches(x = 1))
+repo <- sample_repository()
+repo %>% select(-artifact) %>% filter(isTRUE(artifact)) %>% execute

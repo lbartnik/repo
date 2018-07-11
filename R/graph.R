@@ -44,6 +44,12 @@ graph_roots <- function (x) {
 graph_stratify <- function (x) {
   stopifnot(is_graph(x))
 
+  # TODO if a parent has more than one child, displaying the tree might
+  #      tricky: the branch that the parent is assigned to needs to be
+  #      displayed first if the sequence of commands is to produce the
+  #      final object; but even then, if names collide, the actual parent
+  #      might be overwritten before the child is created based on it
+
   process_node <- function (id) {
     nodes$erase(id)
     node <- x[[id]]
@@ -53,18 +59,23 @@ graph_stratify <- function (x) {
   }
 
   nodes <- vector(data = names(x))
-  roots <- lapply(names(graph_roots(x)), process_node)
-  stopifnot(nodes$size() == 0)
+  stopifnot(nodes$size() != 0)
 
-  if (length(roots) == 1) {
+  # iterate over roots, descend over children
+  roots <- lapply(names(graph_roots(x)), process_node)
+  stopifnot(length(roots) != 0)
+
+
+  # if there is more than one top-level root, create an "abstract" root
+  if (length(roots) > 1) {
+    roots <- list(
+      class = 'abstract_root',
+      children = roots
+    )
+  }
+  else {
     roots <- first(roots)
   }
-
-  # TODO
-  # 1. find roots
-  # 2. iterate over roots, descend over children
-  # 3. if a child has more than one parent, issue a warning, choose the first parent
-  #    and assign the child under that parent
 
   structure(roots, class = c('stratified', class(x)))
 }

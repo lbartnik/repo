@@ -1,4 +1,4 @@
 library(testthat)
-library(experiment)
+library(repository)
 
-test_check("experiment")
+test_check("repository")

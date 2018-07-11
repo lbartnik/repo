@@ -47,21 +47,34 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
-    .$svg <- plot_as_svg(.$plot)
+    # reset the plot processing state
+    .$plot_id <- character()
+    .$png <- NULL
 
-    # if the current plot looks the same as the last one, do not update at all
-    if (is.null(.$svg) || svg_equal(.$svg, .$last_plot)) {
-      .$plot_id <- character()
+    if (is.null(.$plot)) {
       return()
     }
 
-    .$plot_id <- storage::compute_id(.$svg)
+    # rawplot wraps all plotting logic
+    .$plot <- rawplot(.$plot)
+    .$png <- as_png(.$plot, 150, 150)
+
+    # if the current plot looks the same as the last one, do not update at all
+    if (png_equal(.$png, .$last_png)) {
+      return()
+    }
+
+    # prepare the rawplot wrapper for storing
+    .$plot <- for_store(.$plot)
+    .$plot_id <- storage::compute_id(.$plot)
+
+    # no need to store, just remember the id
     if (storage::os_exists(.$store, .$plot_id)) {
       dbg("plot already present")
       return()
     }
 
-    .$plot_tags <- auto_tags(.$svg, class = 'plot')
+    .$plot_tags <- auto_tags(.$plot, class = base::union(class(.$plot), 'plot'))
     names <- extract_parents(env, expr)
     .$plot_tags$parents <- .$last_commit$objects[names]
   }
@@ -74,7 +87,7 @@ repository_updater <- function (repo, env, plot, expr) {
     an <- sorted_names(ia)
     bn <- sorted_names(ib)
 
-    return(!identical(ia[an], ib[bn]) || (!is.null(.$svg) && !svg_equal(.$svg, .$last_plot)))
+    return(!identical(ia[an], ib[bn]) || (!is.null(.$plot$png) && !png_equal(.$plot$png, .$last_png)))
   }
 
   u$write <- function (.) {
@@ -100,8 +113,8 @@ repository_updater <- function (repo, env, plot, expr) {
     })
 
     if (length(.$plot_id)) {
-      dbg("storing new plot [", id, "] with parents: ", paste(parents, collapse = ", "))
-      storage::os_write(.$store, .$svg, id = .$plot_id,
+      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(parents, collapse = ", "))
+      storage::os_write(.$store, .$plot, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
     }
 
@@ -111,7 +124,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
   u$sync_repo <- function (.) {
     .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
-    .$.super$last_plot   <- .$svg
+    .$.super$last_png    <- .$plot$png
   }
 
   u
@@ -135,67 +148,10 @@ extract_parents <- function (env, expr)
 # TODO could be turned into a S3 method
 auto_tags <- function (obj, ...) {
   preset <- list(...)
-  stopifnot(all_named(preset))
+  stopifnot(is_all_named(preset))
 
   combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
                        session = r_session_id()))
-}
-
-
-#' Returns a base64-encoded, SVG plot.
-#'
-#' @param pl Plot recorded by [recordPlot()].
-#' @return `character` string, base64-encoded SVG plot.
-#' @import jsonlite
-#'
-plot_as_svg <- function (pl)
-{
-  guard()
-  if (is.null(pl)) return(NULL)
-
-  # TODO use svglite::stringSVG
-
-  path <- tempfile(fileext = ".svg")
-
-  # TODO if `pl` has been recorded without dev.control("enable"), the
-  #      plot might be empty; it might be necessary to check for that
-
-  svg(path)
-  replayPlot(pl)
-  dev.off()
-
-  contents <- readBin(path, "raw", n = file.size(path))
-  jsonlite::base64_enc(contents)
-}
-
-
-
-#' Compare two SVG images.
-#'
-#' SVG images are processed in this package as base64-encoded, XML text
-#' data. When produced, certain differences are introduced in XML
-#' attributes that have no effect on the final plots. That is why,
-#' however, SVG plots need to be compared graphically and not textually.
-#' This function produces a thumbnail of each SVG image and then
-#' compares the raster graphic.
-#'
-#' @param a First SVG image.
-#' @param b Second SVG image.
-#' @return `TRUE` if SVGs are the same plot-wise.
-#'
-#' @import rsvg
-#' @import jsonlite
-#'
-svg_equal <- function (a, b)
-{
-  if (is_empty(a)) return(is_empty(b))
-  if (is_empty(b)) return(FALSE)
-
-  a <- try(rsvg(base64_dec(a), 100, 100), silent = TRUE)
-  b <- try(rsvg(base64_dec(b), 100, 100), silent = TRUE)
-  if (is_error(a) && is_error(b)) return(TRUE)
-
-  isTRUE(all.equal(a, b))
 }
 
 
@@ -278,22 +234,33 @@ commit <- function (store, id) {
 
 # --- explain ----------------------------------------------------------
 
-object_origin <- function (repo, id) {
+object_origin <- function (repo, ids, ancestors) {
+  stopifnot(is.numeric(ancestors))
+
   black <- vector()
-  grey  <- vector(id)
+  grey  <- vector(data = lapply(ids, list, 0))
+
   while (grey$size()) {
-    id <- grey$pop_front()
-    lapply(storage::os_read_tags(repo$store, id)$parents, function (id) {
-      if (!black$find(id)) grey$push_back(id)
-    })
-    black$push_back(id)
+    el <- grey$pop_front()
+    if (second(el) < ancestors) {
+      lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
+        if (!black$find(id)) grey$push_back(list(id, second(el)+1))
+      })
+    }
+    black$push_back(first(el))
   }
+
   as.character(black$values)
 }
 
 
-print.origin <- function (x) {
-  cat('<origin-graph>', length(x), 'node(s)\n')
+#' @importFrom stringi stri_paste stri_replace_all_fixed stri_replace_all_regex
+#' @export
+format_expr <- function (expr, indent = '  ') {
+  expr <- stri_replace_all_regex(stri_paste(deparse(expr), collapse = ''), '\\s', '')
+  expr <- stri_replace_all_fixed(expr, '%>%', '%>%\n')
+  lines <- styler::style_text(expr)
+  stri_paste(indent, lines, collapse = '\n')
 }
 
 

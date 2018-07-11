@@ -1,3 +1,5 @@
-* finish execute
-* store object/plot/artifact name under list of names "names" when
-  writing to object store
+* describe objects in line, repo::describe
+
+* store full info on R session (esp. loaded packages and their versions)
+
+* move plots-related code to plotting.R; rename to plots.R
