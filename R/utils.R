@@ -154,6 +154,8 @@ not <- function (f) {
 cpaste <- function (..., sep = ' ', default = 'default')
 {
   cat_chunk <- function (color, chunk, sep) {
+    if (is_empty(chunk)) return('')
+
     if (identical(color, 'default') || identical(color, '')) {
       color <- default
     } else {
@@ -171,13 +173,16 @@ cpaste <- function (..., sep = ' ', default = 'default')
   }
 
   default <- if (identical(default, 'default')) as.character else get_color(default)
-  chunks <- lapply(list(...), stri_paste, collapse = sep)
+
+  chunks <- list(...)
+  chunks <- chunks[!map_lgl(chunks, is.null)]
+  chunks <- lapply(chunks, stri_paste, collapse = sep)
+
   if (!length(names(chunks))) names(chunks) <- rep("", length(chunks))
 
-  chunks <- Map(cat_chunk, names(chunks), chunks, c(rep(sep, length(chunks)-1), ''))
+  chunks <- unlist(Map(cat_chunk, names(chunks), chunks, c(rep(sep, length(chunks)-1), '')))
   stri_paste(chunks, collapse = '')
 }
-
 
 cat0 <- function (..., sep = '') cat(..., sep = sep)
 

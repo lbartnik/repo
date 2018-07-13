@@ -242,11 +242,11 @@ object_origin <- function (repo, ids, ancestors) {
 
   while (grey$size()) {
     el <- grey$pop_front()
-    if (second(el) < ancestors) {
-      lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
-        if (!black$find(id)) grey$push_back(list(id, second(el)+1))
-      })
-    }
+    lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
+      if (!black$find(id) && second(el) < ancestors) {
+        grey$push_back(list(id, second(el)+1))
+      }
+    })
     black$push_back(first(el))
   }
 

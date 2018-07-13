@@ -2,4 +2,5 @@
 
 * store full info on R session (esp. loaded packages and their versions)
 
-* move plots-related code to plotting.R; rename to plots.R
+* generate artif. description upon write; do not read the whole object
+  (only metadata) in repository_explain
