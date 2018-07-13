@@ -30,7 +30,7 @@ repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
-\method{print}{artifact.meta}(x, ...)
+\method{print}{artifact.meta}(x, ..., style = "full")
 
 expl_get(x, i)
 
