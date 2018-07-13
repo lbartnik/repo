@@ -9,7 +9,7 @@
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
-\alias{print.explained}
+\alias{print.artifact.meta}
 \alias{expl_get}
 \alias{repository_rewind}
 \alias{as_deltas}
@@ -30,7 +30,7 @@ repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
-\method{print}{explained}(x, ...)
+\method{print}{artifact.meta}(x, ...)
 
 expl_get(x, i)
 

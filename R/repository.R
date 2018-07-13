@@ -172,7 +172,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     obj$expr <- cmt$expr
 
     # finally, add a S3 class for pretty-printing
-    structure(obj, class = 'explained')
+    structure(obj, class = 'artifact.meta')
   })
   names(objects) <- ids
 
@@ -185,7 +185,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     })
   })
 
-  structure(objects, class = c('origin', 'graph'))
+  structure(objects, class = c('origin', 'artifact.set', 'graph'))
 
   # 3. wrap explanation in a 'origin' object that can be
   # a) turned into a 'stratified' object
@@ -196,7 +196,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
 #' @importFrom rlang warn
 #' @export
-print.origin <- function (x, ..., sort_by = 'time') {
+print.artifact.set <- function (x, ..., sort_by = 'time') {
 
   # this is the only currently supported method
   stopifnot(identical(sort_by, 'time'))
@@ -241,7 +241,7 @@ print.origin <- function (x, ..., sort_by = 'time') {
 #'
 #' @rdname repository
 #' @export
-print.explained <- function (x, ...) {
+print.artifact.meta <- function (x, ...) {
 
   is_plot <- ('plot' %in% x$class)
 
