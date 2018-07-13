@@ -22,7 +22,8 @@ Imports:
   storage,
   styler,
   tibble,
-  tidyselect
+  tidyselect,
+  utils
 Suggests:
   data.table,
   devtools,
@@ -38,10 +39,10 @@ Collate:
   'sample.R'
   'selection.R'
   'selection-impl.R'
-  'utils.R'
 Remotes:
   lbartnik/defer,
-  lbartnik/storage
+  lbartnik/storage,
+  lbartnik/utils
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
