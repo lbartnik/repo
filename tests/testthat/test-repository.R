@@ -130,6 +130,18 @@ test_that("updater identifies new plot", {
 })
 
 
+test_that("updater stores the miniature", {
+  p <- dummy_plot()
+  r <- single_repository(last_commit_id = 'a', ids = 'x')
+  u <- repository_updater(r, as.environment(list(a = 1)), p, bquote(plot(a)))
+
+  u$process_plot()
+  u$sync_repo()
+  arr <- png::readPNG(jsonlite::base64_dec(u$last_png), native = FALSE)
+  expect_equal(dim(arr), c(150, 150, 3))
+})
+
+
 test_that("updater ignores repeated plot", {
   p <- dummy_plot()
   r <- single_repository(last_png = replot_as(p, 'png', width = 150, height = 150))
@@ -255,7 +267,7 @@ test_that("changes are synchronized into the repository", {
   expect_named(r$last_commit, c("id", "objects"), ignore.order = TRUE)
   expect_equal(r$last_commit$id, 'last_commit_id')
   expect_equal(r$last_commit$objects, u$ids)
-  expect_equal(r$last_png, u$plot$png)
+  expect_equal(r$last_png, u$png)
 })
 
 

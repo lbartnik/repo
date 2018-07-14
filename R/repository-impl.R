@@ -21,6 +21,8 @@ repository_updater <- function (repo, env, plot, expr) {
   u$env  <- env
   u$plot <- plot
   u$expr <- expr
+  u$png  <- NULL
+  u$plot_id <- character()
 
   u$process_objects <- function (.) {
     .$objects <- lapply(as.list(env), strip_object)
@@ -47,10 +49,6 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
-    # reset the plot processing state
-    .$plot_id <- character()
-    .$png <- NULL
-
     if (is.null(.$plot)) {
       return()
     }
@@ -124,7 +122,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
   u$sync_repo <- function (.) {
     .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
-    .$.super$last_png    <- .$plot$png
+    .$.super$last_png    <- .$png
   }
 
   u
