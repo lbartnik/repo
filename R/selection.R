@@ -84,7 +84,7 @@ quos_text <- function (x) {
 
 #' @export
 print.query <- function (x, ...) {
-  lines <- vector(toString(x$repository))
+  lines <- new_vector(toString(x$repository))
 
   for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {
     if (length(x[[part]])) {

@@ -104,7 +104,7 @@ expr_match <- function (expr, sym) {
 
 
 read_tags <- function (tag_names, ids, store) {
-  columns <- map_lst(tag_names, function(x) base::vector("list", length(ids)))
+  columns <- map(tag_names, function(x) base::vector("list", length(ids)))
 
   # read all tags' values for given ids
   Map(ids, seq_along(ids), f = function (id, i) {
@@ -145,7 +145,7 @@ flatten_lists <- function (values) {
     if (any(len != 1)) return(column)
 
     # if there is a class, as long as it's the same (esp. POSIXct), apply that here
-    cls <- unique(map_lst(column, class))
+    cls <- unique(map(column, class))
     if (length(cls) == 1 && !is_atomic_class(first(cls))) {
       column <- unlist(column, recursive = FALSE)
       return(structure(column, class = first(cls)))
@@ -158,7 +158,7 @@ flatten_lists <- function (values) {
     column
   })
 
-  values <- Filter(not(is.null), values)
+  values <- Filter(function(x)!is.null(x), values)
   tibble::as_tibble(values)
 }
 

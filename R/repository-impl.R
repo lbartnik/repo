@@ -2,7 +2,7 @@ all_commits <- function (store) {
   guard()
   query <- list(rlang::quo(class == 'commit'))
   ids   <- storage::os_find(store, query)
-  map_lst(ids, function(id) commit(store, id))
+  map(ids, function(id) commit(store, id))
 }
 
 
@@ -224,7 +224,7 @@ commit <- function (store, id) {
   if (i %in% names(x)) return(x[[i]])
   if (identical(i, 'data')) {
     store <- attr(x, 'store')
-    x$data <- map_lst(x$objects, function (id) storage::os_read_object(store, id))
+    x$data <- map(x$objects, function (id) storage::os_read_object(store, id))
     return(x[["data"]])
   }
 
@@ -237,8 +237,8 @@ commit <- function (store, id) {
 object_origin <- function (repo, ids, ancestors) {
   stopifnot(is.numeric(ancestors))
 
-  black <- vector()
-  grey  <- vector(data = lapply(ids, list, 0))
+  black <- new_vector()
+  grey  <- new_vector(data = lapply(ids, list, 0))
 
   while (grey$size()) {
     el <- grey$pop_front()
@@ -289,7 +289,7 @@ history_to_deltas <- function (hist)
   stopifnot(is_history(hist))
   store <- attr(hist, 'store')
 
-  nodes <- map()
+  nodes <- new_map()
   convert <- function (commit_id, parent_delta) {
     commit  <- hist[[commit_id]]
     new_ids <- commit$objects[introduced(hist, commit_id)]

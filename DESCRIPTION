@@ -39,6 +39,7 @@ Collate:
   'sample.R'
   'selection.R'
   'selection-impl.R'
+  'utils.R'
 Remotes:
   lbartnik/defer,
   lbartnik/storage,
