@@ -22,7 +22,7 @@ is_repository(x)
 
 \method{print}{repository}(x, ...)
 
-\method{toString}{repository}(x)
+\method{toString}{repository}(x, ...)
 
 repository_update(repo, env, plot, expr)
 

@@ -45,7 +45,7 @@ print.repository <- function (x, ...) {
 #' @rdname repository
 #' @export
 #'
-toString.repository <- function (x) {
+toString.repository <- function (x, ...) {
   paste0('<repository:', toString(x$store), '>')
 }
 
