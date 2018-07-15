@@ -111,7 +111,7 @@ repository_updater <- function (repo, env, plot, expr) {
     })
 
     if (length(.$plot_id)) {
-      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(parents, collapse = ", "))
+      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(.$plot_tags$parents, collapse = ", "))
       storage::os_write(.$store, .$plot, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
     }
