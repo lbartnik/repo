@@ -2,7 +2,7 @@ all_commits <- function (store) {
   guard()
   query <- list(rlang::quo(class == 'commit'))
   ids   <- storage::os_find(store, query)
-  map_lst(ids, function(id) commit(store, id))
+  map(ids, function(id) commit(store, id))
 }
 
 
@@ -21,6 +21,8 @@ repository_updater <- function (repo, env, plot, expr) {
   u$env  <- env
   u$plot <- plot
   u$expr <- expr
+  u$png  <- NULL
+  u$plot_id <- character()
 
   u$process_objects <- function (.) {
     .$objects <- lapply(as.list(env), strip_object)
@@ -47,10 +49,6 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
-    # reset the plot processing state
-    .$plot_id <- character()
-    .$png <- NULL
-
     if (is.null(.$plot)) {
       return()
     }
@@ -113,7 +111,7 @@ repository_updater <- function (repo, env, plot, expr) {
     })
 
     if (length(.$plot_id)) {
-      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(parents, collapse = ", "))
+      dbg("storing new plot [", .$plot_id, "] with parents: ", paste(.$plot_tags$parents, collapse = ", "))
       storage::os_write(.$store, .$plot, id = .$plot_id,
                         tags = c(.$plot_tags, list(parent_commit = cid)))
     }
@@ -124,7 +122,7 @@ repository_updater <- function (repo, env, plot, expr) {
 
   u$sync_repo <- function (.) {
     .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
-    .$.super$last_png    <- .$plot$png
+    .$.super$last_png    <- .$png
   }
 
   u
@@ -224,7 +222,7 @@ commit <- function (store, id) {
   if (i %in% names(x)) return(x[[i]])
   if (identical(i, 'data')) {
     store <- attr(x, 'store')
-    x$data <- map_lst(x$objects, function (id) storage::os_read_object(store, id))
+    x$data <- map(x$objects, function (id) storage::os_read_object(store, id))
     return(x[["data"]])
   }
 
@@ -237,16 +235,16 @@ commit <- function (store, id) {
 object_origin <- function (repo, ids, ancestors) {
   stopifnot(is.numeric(ancestors))
 
-  black <- vector()
-  grey  <- vector(data = lapply(ids, list, 0))
+  black <- new_vector()
+  grey  <- new_vector(data = lapply(ids, list, 0))
 
   while (grey$size()) {
     el <- grey$pop_front()
-    if (second(el) < ancestors) {
-      lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
-        if (!black$find(id)) grey$push_back(list(id, second(el)+1))
-      })
-    }
+    lapply(storage::os_read_tags(repo$store, first(el))$parents, function (id) {
+      if (!black$find(id) && second(el) < ancestors) {
+        grey$push_back(list(id, second(el)+1))
+      }
+    })
     black$push_back(first(el))
   }
 
@@ -289,7 +287,7 @@ history_to_deltas <- function (hist)
   stopifnot(is_history(hist))
   store <- attr(hist, 'store')
 
-  nodes <- map()
+  nodes <- new_map()
   convert <- function (commit_id, parent_delta) {
     commit  <- hist[[commit_id]]
     new_ids <- commit$objects[introduced(hist, commit_id)]

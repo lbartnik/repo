@@ -45,7 +45,7 @@ print.repository <- function (x, ...) {
 #' @rdname repository
 #' @export
 #'
-toString.repository <- function (x) {
+toString.repository <- function (x, ...) {
   paste0('<repository:', toString(x$store), '>')
 }
 
@@ -172,7 +172,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     obj$expr <- cmt$expr
 
     # finally, add a S3 class for pretty-printing
-    structure(obj, class = 'explained')
+    structure(obj, class = 'artifact.meta')
   })
   names(objects) <- ids
 
@@ -185,7 +185,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     })
   })
 
-  structure(objects, class = c('origin', 'graph'))
+  structure(objects, class = c('origin', 'artifact.set', 'graph'))
 
   # 3. wrap explanation in a 'origin' object that can be
   # a) turned into a 'stratified' object
@@ -196,7 +196,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
 #' @importFrom rlang warn
 #' @export
-print.origin <- function (x, ..., sort_by = 'time') {
+print.artifact.set <- function (x, ..., sort_by = 'time') {
 
   # this is the only currently supported method
   stopifnot(identical(sort_by, 'time'))
@@ -206,29 +206,13 @@ print.origin <- function (x, ..., sort_by = 'time') {
     warn("origin object empty")
   }
 
-  # print a single entry
-  first <- TRUE
-  print_ancestor <- function (obj) {
-    if (first) first <<- FALSE else cat('\n')
-
-    ccat0(green = storage::shorten(obj$id))
-
-    if (length(obj$parents)) {
-      ccat0(silver = '  parents:')
-      imap(obj$parents, function(id, name) {
-        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
-      })
-    }
-    else {
-      ccat0(silver = '  no parents')
-    }
-
-    ccat0('\n', format_expr(obj$expr), '\n')
-  }
-
   # sort entries and then print them
   i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
-  lapply(x[i], print_ancestor)
+  x <- x[i]
+
+  # insert \n between two printouts
+  print(first(x), style = 'short')
+  lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
 
   invisible(x)
 }
@@ -241,22 +225,43 @@ print.origin <- function (x, ..., sort_by = 'time') {
 #'
 #' @rdname repository
 #' @export
-print.explained <- function (x, ...) {
+print.artifact.meta <- function (x, ..., style = 'full') {
 
+  stopifnot(style %in% c('full', 'short'))
   is_plot <- ('plot' %in% x$class)
 
-  # preamble
-  ccat0(silver = "Artifact: ", green = shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
+  # full artifact description
+  if (identical(style, 'full')) {
+    # preamble
+    ccat0(silver = "Artifact: ", green = shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
 
-  # expression that produced this artifact
-  ccat0(silver = 'Expression:\n', format_expr(x$expr))
+    # expression that produced this artifact
+    ccat0(silver = 'Expression:\n', format_expr(x$expr))
 
-  # more meta-data
-  if (!is_plot) ccat(silver = '\nName:   ', x$names)
-  ccat(silver = '\nClass:  ', x$class)
-  ccat(silver = '\nCreated:', x$time)
-  ccat(silver = '\nSummary:', x$description)
-  cat('\n')
+    # more meta-data
+    if (!is_plot) ccat(silver = '\nName:   ', x$names)
+    ccat(silver = '\nClass:  ', x$class)
+    ccat(silver = '\nCreated:', x$time)
+    ccat(silver = '\nSummary:', x$description)
+    cat('\n')
+  }
+
+  # shortened artifact description
+  if (identical(style, 'short')) {
+    ccat0(green = storage::shorten(x$id))
+
+    if (length(x$parents)) {
+      ccat0(silver = '  parents:')
+      imap(x$parents, function(id, name) {
+        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
+      })
+    }
+    else {
+      ccat0(silver = '  no parents')
+    }
+
+    ccat0('\n', format_expr(x$expr), '\n')
+  }
 
   invisible(x)
 }

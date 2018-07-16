@@ -9,7 +9,7 @@
 \alias{repository_update}
 \alias{repository_history}
 \alias{repository_explain}
-\alias{print.explained}
+\alias{print.artifact.meta}
 \alias{expl_get}
 \alias{repository_rewind}
 \alias{as_deltas}
@@ -22,7 +22,7 @@ is_repository(x)
 
 \method{print}{repository}(x, ...)
 
-\method{toString}{repository}(x)
+\method{toString}{repository}(x, ...)
 
 repository_update(repo, env, plot, expr)
 
@@ -30,7 +30,7 @@ repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
-\method{print}{explained}(x, ...)
+\method{print}{artifact.meta}(x, ..., style = "full")
 
 expl_get(x, i)
 

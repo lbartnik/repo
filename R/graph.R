@@ -1,6 +1,7 @@
 is_graph <- function (x) inherits(x, 'graph')
 
 
+#' @import utilities
 graph_reduce <- function (x, from = NULL, to = NULL) {
   stopifnot(is_graph(x))
   cls <- class(x)
@@ -58,7 +59,7 @@ graph_stratify <- function (x) {
     node
   }
 
-  nodes <- vector(data = names(x))
+  nodes <- new_vector(data = names(x))
   stopifnot(nodes$size() != 0)
 
   # iterate over roots, descend over children

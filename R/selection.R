@@ -83,9 +83,13 @@ quos_text <- function (x) {
 
 
 #' @export
-print.query <- function (x, ...) {
-  lines <- vector(toString(x$repository))
+print.query <- function (x, ..., simplify = FALSE) {
 
+  # describe the source repo
+  lines <- new_vector()
+  lines$push_back(if (isTRUE(simplify)) '<repository>' else toString(x$repository))
+
+  # print the full query
   for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {
     if (length(x[[part]])) {
       lines$push_back(paste0(part, '(', join(quos_text(x[[part]]), ', '), ')'))

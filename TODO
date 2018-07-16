@@ -1,5 +1,12 @@
+* handle mutable objects: dplyr 0.7.6 injects a number of attributes (e.g.
+  "indices" on a grouped df) when seemingly unrelated operations are
+  carried out on that df (e.g. ggplot()); this will be very confusing as
+  repository will contain multiple copies of the same object, differing
+  only by those extra, "dplyr-private" attributes
+
 * describe objects in line, repo::describe
 
 * store full info on R session (esp. loaded packages and their versions)
 
-* move plots-related code to plotting.R; rename to plots.R
+* generate artif. description upon write; do not read the whole object
+  (only metadata) in repository_explain
