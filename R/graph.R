@@ -38,12 +38,14 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
 
 graph_roots <- function (x) {
   stopifnot(is_graph(x))
-  Filter(x, f = function (node) is.na(node$parent))
+  Filter(x, f = function (node) is_empty(node$parents))
 }
 
 
 graph_stratify <- function (x) {
   stopifnot(is_graph(x))
+  stopifnot(length(x) > 0)
+  stopif(is_stratified(x))
 
   # TODO if a parent has more than one child, displaying the tree might
   #      tricky: the branch that the parent is assigned to needs to be
@@ -55,7 +57,6 @@ graph_stratify <- function (x) {
     nodes$erase(id)
     node <- x[[id]]
     node$children <- lapply(node$children, process_node)
-    node$parent <- NULL
     node
   }
 
@@ -65,7 +66,7 @@ graph_stratify <- function (x) {
   # iterate over roots, descend over children
   roots <- lapply(names(graph_roots(x)), process_node)
   stopifnot(length(roots) != 0)
-
+  stopifnot(nodes$size() == 0)
 
   # if there is more than one top-level root, create an "abstract" root
   if (length(roots) > 1) {
@@ -78,5 +79,8 @@ graph_stratify <- function (x) {
     roots <- first(roots)
   }
 
-  structure(roots, class = c('stratified', class(x)))
+  structure(roots, class = c('stratified', class(roots)))
 }
+
+is_stratified <- function (x) inherits(x, 'stratified')
+

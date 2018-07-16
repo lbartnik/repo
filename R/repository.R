@@ -88,6 +88,8 @@ repository_update <-function (repo, env, plot, expr) {
 #'
 #' @export
 #'
+# TODO is it needed at all anymore?
+# TODO if it stays, node keys need to be agreed with repository_explain
 repository_history <- function (repo, mode = 'all') {
   guard()
   stopifnot(is_repository(repo))
@@ -196,23 +198,41 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
 #' @importFrom rlang warn
 #' @export
-print.artifact.set <- function (x, ..., sort_by = 'time') {
+print.artifact.set <- function (x, ..., style = 'by_time') {
 
   # this is the only currently supported method
-  stopifnot(identical(sort_by, 'time'))
+  stopifnot(identical(style, 'by_time'))
 
   # if there is nothing to print
   if (!length(x)) {
     warn("origin object empty")
   }
 
-  # sort entries and then print them
-  i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
-  x <- x[i]
+  if (identical(style, 'by_time')) {
+    # sort entries and then print them
+    i <- order(map_dbl(x, `[[`, 'time'), decreasing = FALSE)
+    x <- x[i]
 
-  # insert \n between two printouts
-  print(first(x), style = 'short')
-  lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
+    # insert \n between two printouts
+    print(first(x), style = 'short')
+    lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
+  }
+
+  if (identical(style, 'tree')) {
+    fork <- '├'
+    vert <- '│   '
+    lead <- '── '
+    last <- '└'
+    print_level <- function (x, l) {
+      cat(stri_paste(rep(vert, l), collapse = ''))
+      cat0(fork, lead)
+      print(x, style = 'line')
+      i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
+      lapply(x$children[i], print_level, l = l + 1)
+      invisible(x)
+    }
+    print_level(remove_class(graph_stratify(x), 'artifact.set'), 0)
+  }
 
   invisible(x)
 }
@@ -227,7 +247,7 @@ print.artifact.set <- function (x, ..., sort_by = 'time') {
 #' @export
 print.artifact.meta <- function (x, ..., style = 'full') {
 
-  stopifnot(style %in% c('full', 'short'))
+  stopifnot(style %in% c('full', 'short', 'line'))
   is_plot <- ('plot' %in% x$class)
 
   # full artifact description
@@ -263,17 +283,15 @@ print.artifact.meta <- function (x, ..., style = 'full') {
     ccat0('\n', format_expr(x$expr), '\n')
   }
 
+  # a single line
+  if (identical(style, 'line')) {
+    if ('plot' %in% x$class)
+      cat('<plot>\n')
+    else
+      cat0(first(x$names), ' ', first(x$class), '\n')
+  }
+
   invisible(x)
-}
-
-
-#' @description `expl_get` extracts a member `i` from the `"explained"`
-#' S3 object.
-#'
-#' @rdname repository
-#' @export
-expl_get <- function (x, i) {
-  nth(x, i)
 }
 
 
