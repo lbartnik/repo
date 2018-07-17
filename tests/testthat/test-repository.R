@@ -316,9 +316,9 @@ test_that("order origin", {
   r <- sample_repository()
 
   x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  i <- order(unlist(lapply(x, expl_get, "time")), decreasing = FALSE)
+  i <- order(unlist(lapply(x, `[[`, "time")), decreasing = FALSE)
   x <- x[i]
-  i <- substr(unlist(lapply(x, expl_get, "id")), 1, 2)
+  i <- substr(unlist(lapply(x, `[[`, "id")), 1, 2)
   expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
 })
 

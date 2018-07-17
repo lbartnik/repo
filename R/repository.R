@@ -157,24 +157,24 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
   # annotate objects with information about: name, parent, commit, type, etc.
   objects <- lapply(ids, function (id) {
-    raw_tags <- storage::os_read_tags(repo$store, id)
+    tags <- storage::os_read_tags(repo$store, id)
 
-    tags_copy <- c("class", "parents", "time")
-    stopifnot(has_name(raw$tags, c(tags_copy, 'parent_commit')))
+    stopifnot(hasName(tags, c("class", "parents", "time", 'parent_commit')))
 
-    obj <- raw_tags[tags_copy]
-    obj$id <- id
-    obj$commit <- raw_tags$parent_commit
-    obj$children <- character()
-    obj$names <- raw_tags$names # plots don't have names
-    obj$description <- description(raw_tags)
+    tags$id <- id
+    tags$commit <- tags$parent_commit
+    tags$children <- character()
+    tags$description <- description(tags)
+    if (is_empty(tags$names)) tags$names <- character() # plots don't have names
+
+    tags$parent_commit <- NULL
 
     # read parent commit and assign expression
-    cmt <- storage::os_read_object(repo$store, obj$commit)
-    obj$expr <- cmt$expr
+    cmt <- storage::os_read_object(repo$store, tags$commit)
+    tags$expr <- cmt$expr
 
     # finally, add a S3 class for pretty-printing
-    structure(obj, class = 'artifact.meta')
+    structure(tags, class = 'artifact.meta')
   })
   names(objects) <- ids
 
@@ -288,7 +288,7 @@ print.artifact.meta <- function (x, ..., style = 'full') {
     if ('plot' %in% x$class)
       cat('<plot>\n')
     else
-      cat0(first(x$names), ' ', first(x$class), '\n')
+      cat0(description(x), '\n')
   }
 
   invisible(x)

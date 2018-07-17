@@ -29,7 +29,10 @@ describe <- function (tags) UseMethod("describe")
 
 #' @importFrom stringi stri_paste
 describe.default <- function (tags) {
-  values <- map_chr(tags, function(v)stri_paste(unlist(v), collapse = ','))
+  values <- map_chr(tags, function(v) {
+    if (is_empty(v)) return('')
+    stri_paste(unlist(v), collapse = ',')
+  })
   stri_paste(names(tags), values, sep = ':', collapse = ' ')
 }
 
