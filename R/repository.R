@@ -197,8 +197,13 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
 
 #' @importFrom rlang warn
+#' @import utilities
+#'
 #' @export
 print.artifact.set <- function (x, ..., style = 'by_time') {
+
+  # use the default style if attached
+  style <- get_default(x, 'style', style)
 
   # this is the only currently supported method
   stopifnot(style %in% c('by_time', 'tree'))
