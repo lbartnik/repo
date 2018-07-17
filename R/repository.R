@@ -201,7 +201,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 print.artifact.set <- function (x, ..., style = 'by_time') {
 
   # this is the only currently supported method
-  stopifnot(identical(style, 'by_time'))
+  stopifnot(style %in% c('by_time', 'tree'))
 
   # if there is nothing to print
   if (!length(x)) {

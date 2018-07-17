@@ -39,3 +39,20 @@ test_that("stratify", {
   lapply(b$children, expect_named)
   lapply(c$children, expect_named)
 })
+
+
+test_that("preserve class", {
+  g <- sample_graph()
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('stratified', 'list'))
+
+  g <- structure(list(a = structure(list(), class = c('a', 'b', 'c'))), class = 'graph')
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
+
+  g <- structure(list(a = structure(list(1), class = c('a', 'b', 'c')),
+                      b = structure(list(2), class = c('a', 'b', 'c'))),
+                 class = 'graph')
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
+})

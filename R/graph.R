@@ -79,7 +79,7 @@ graph_stratify <- function (x) {
     roots <- first(roots)
   }
 
-  structure(roots, class = c('stratified', class(roots)))
+  structure(roots, class = c('stratified', class(first(x))))
 }
 
 is_stratified <- function (x) inherits(x, 'stratified')
