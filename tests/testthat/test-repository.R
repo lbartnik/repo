@@ -352,6 +352,13 @@ test_that("finding ancestors for multiple artifacts", {
 })
 
 
+test_that("print tree", {
+  r <- sample_repository()
+  x <- repository_explain(r)
+  expect_output_file(print(x, style = 'tree'), "text-output/print-origin-tree.txt")
+})
+
+
 test_that("format expr", {
   expr <- bquote(x <- input %>%
                    mutate(hour = hour(timestamp), dow = wday(timestamp)) %>%

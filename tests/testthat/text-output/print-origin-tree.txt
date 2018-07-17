@@ -1,0 +1,17 @@
+data.frame[52560, 3]
+└── data.frame[26280, 3]
+    └── data.frame[8760, 3]
+        ├── <plot>
+        ├── data.frame[168, 3]
+        │   ├── <plot>
+        │   ├── data.frame[168, 3]
+        │   └── <plot>
+        ├── data.frame[8760, 5]
+        │   ├── <plot>
+        │   └── lm adjR2:0.33 AIC:7164 df:168
+        └── data.frame[8760, 3]
+            ├── data.frame[8760, 5]
+            │   └── <plot>
+            └── data.frame[8760, 3]
+                └── data.frame[8760, 5]
+                    └── <plot>

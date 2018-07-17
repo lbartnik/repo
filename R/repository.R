@@ -219,19 +219,29 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
   }
 
   if (identical(style, 'tree')) {
-    fork <- '├'
-    vert <- '│   '
-    lead <- '── '
-    last <- '└'
-    print_level <- function (x, l) {
-      cat(stri_paste(rep(vert, l), collapse = ''))
-      cat0(fork, lead)
-      print(x, style = 'line')
+    vert  <- '│   '
+    vert0 <- '    '
+    fork  <- '├── '
+    fork0 <- '└── '
+
+    print_level <- function (x, indent, exdent) {
       i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
-      lapply(x$children[i], print_level, l = l + 1)
+      chld <- x$children[i]
+
+      cat0(indent)
+      print(x, style = 'line')
+
+      Map(y = chld, k = seq_along(chld), f = function (y, k) {
+        if (k == length(chld)) {
+          print_level(y, paste0(exdent, fork0), paste0(exdent, vert0))
+        } else {
+          print_level(y, paste0(exdent, fork), paste0(exdent, vert))
+        }
+      })
       invisible(x)
     }
-    print_level(remove_class(graph_stratify(x), 'artifact.set'), 0)
+
+    print_level(graph_stratify(x), '', '')
   }
 
   invisible(x)
