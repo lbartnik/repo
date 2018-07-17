@@ -20,7 +20,8 @@ test_that("reduce graph", {
 test_that("stratify", {
   h <- sample_graph()
 
-  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects'), ignore.order = TRUE)
+  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects', 'parents'),
+                                                      ignore.order = TRUE)
 
   x <- graph_stratify(h)
   expect_s3_class(x, 'stratified')

@@ -71,7 +71,7 @@ graph_stratify <- function (x) {
   # if there is more than one top-level root, create an "abstract" root
   if (length(roots) > 1) {
     roots <- list(
-      class = 'abstract_root',
+      class = c('abstract_root', class(roots)),
       children = roots
     )
   }
