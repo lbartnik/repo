@@ -143,16 +143,6 @@ extract_parents <- function (env, expr)
 }
 
 
-# TODO could be turned into a S3 method
-auto_tags <- function (obj, ...) {
-  preset <- list(...)
-  stopifnot(is_all_named(preset))
-
-  combine(preset, list(class = class(obj), time = Sys.time(), artifact = TRUE,
-                       session = r_session_id()))
-}
-
-
 #' Removes references to environments.
 #'
 #' Some objects (e.g. formula, lm) store references to environments
@@ -293,11 +283,9 @@ history_to_deltas <- function (hist)
     new_ids <- commit$objects[introduced(hist, commit_id)]
 
     mapply(new_ids, c(parent_delta, head(new_ids, -1)), FUN = function (child, parent) {
-      from_store <- storage::os_read(store, child)
-      delta <- from_store$tags
+      delta <- storage::os_read_tags(store, child)
       delta$id <- child
       delta$parent <- parent
-      delta$description <- description(from_store$object)
       nodes$assign(delta$id, delta)
     })
 
@@ -319,27 +307,3 @@ history_to_deltas <- function (hist)
 #' @rdname deltas
 #'
 is_deltas <- function (x) inherits(x, 'deltas')
-
-
-#' Provide a summary of an object.
-#'
-#' @param object Object to be described.
-#'
-#' @import broom
-#' @rdname internals
-#'
-description <- function (object)
-{
-  if (is_empty(object)) return(NA_character_)
-
-  if (is.data.frame(object)) return(paste0('data.frame[', nrow(object), ', ', ncol(object), ']'))
-
-  if (inherits(object, 'lm')) {
-    g <- broom::glance(object)
-    return(paste0('lm adjR2:', format(g$adj.r.squared, digits = 2),
-                  ' AIC:', format(g$AIC, digits = 2),
-                  ' df:', g$df))
-  }
-
-  paste(class(object), collapse = '::')
-}

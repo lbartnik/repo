@@ -157,17 +157,17 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
   # annotate objects with information about: name, parent, commit, type, etc.
   objects <- lapply(ids, function (id) {
-    raw <- storage::os_read(repo$store, id)
+    raw_tags <- storage::os_read_tags(repo$store, id)
 
     tags_copy <- c("class", "parents", "time")
     stopifnot(has_name(raw$tags, c(tags_copy, 'parent_commit')))
 
-    obj <- raw$tags[tags_copy]
+    obj <- raw_tags[tags_copy]
     obj$id <- id
-    obj$commit <- raw$tags$parent_commit
-    obj$description <- description(raw$object)
+    obj$commit <- raw_tags$parent_commit
     obj$children <- character()
-    obj$names <- raw$tags$names
+    obj$names <- raw_tags$names # plots don't have names
+    obj$description <- description(raw_tags)
 
     # read parent commit and assign expression
     cmt <- storage::os_read_object(repo$store, obj$commit)
