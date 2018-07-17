@@ -1,17 +1,17 @@
-data.frame[52560, 3]
-└── data.frame[26280, 3]
-    └── data.frame[8760, 3]
-        ├── <plot>
-        ├── data.frame[168, 3]
-        │   ├── <plot>
-        │   ├── data.frame[168, 3]
-        │   └── <plot>
-        ├── data.frame[8760, 5]
-        │   ├── <plot>
-        │   └── lm adjR2:0.33 AIC:7164 df:168
-        └── data.frame[8760, 3]
-            ├── data.frame[8760, 5]
-            │   └── <plot>
-            └── data.frame[8760, 3]
-                └── data.frame[8760, 5]
-                    └── <plot>
+input (89c78e89) data.frame[52560, 3]
+└── input (2b67f493) data.frame[26280, 3]
+    └── input (af206c42) data.frame[8760, 3]
+        ├── <plot> (e85dba92)
+        ├── x (f59403b5) data.frame[168, 3]
+        │   ├── <plot> (ac9e485a)
+        │   ├── x (64228d01) data.frame[168, 3]
+        │   └── <plot> (2c6ca64f)
+        ├── x (b83ee352) data.frame[8760, 5]
+        │   ├── <plot> (fbcffea9)
+        │   └── m (57fbe755) lm adjR2:0.33 AIC:7164 df:168
+        └── input (f2d8e929) data.frame[8760, 3]
+            ├── x (866190fb) data.frame[8760, 5]
+            │   └── <plot> (d42340cd)
+            └── input (6ee2aaba) data.frame[8760, 3]
+                └── x (b418c062) data.frame[8760, 5]
+                    └── <plot> (091c4253)

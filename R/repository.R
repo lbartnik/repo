@@ -228,7 +228,7 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
       i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
       chld <- x$children[i]
 
-      cat0(indent)
+      ccat0(silver = indent)
       print(x, style = 'line')
 
       Map(y = chld, k = seq_along(chld), f = function (y, k) {
@@ -296,9 +296,10 @@ print.artifact.meta <- function (x, ..., style = 'full') {
   # a single line
   if (identical(style, 'line')) {
     if ('plot' %in% x$class)
-      cat('<plot>\n')
+      ccat0(grey = '<plot> ', silver = '(', yellow = shorten(x$id), silver = ')\n')
     else
-      cat0(description(x), '\n')
+      ccat0(green = first(x$names), silver = ' (', yellow = shorten(x$id), silver = ') ',
+            description(x), '\n')
   }
 
   invisible(x)
