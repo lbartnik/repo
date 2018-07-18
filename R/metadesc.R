@@ -46,6 +46,10 @@ describe.lm <- function (tags) {
          ' df:', tags$df)
 }
 
+describe.rawplot <- function (tags) {
+  ''
+}
+
 
 #' Provide a summary of an object.
 #'

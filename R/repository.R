@@ -167,6 +167,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     tags$description <- description(tags)
     if (is_empty(tags$names)) tags$names <- character() # plots don't have names
 
+    # remove
     tags$parent_commit <- NULL
 
     # read parent commit and assign expression
