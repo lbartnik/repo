@@ -82,6 +82,10 @@ utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'u
 #'
 simulate_london_meters <- function (repo)
 {
+  old_id <- options("repository.session_id")
+  on.exit(options(old_id), add = TRUE)
+  on.exit(internals$time_offset <- NULL)
+
   requireNamespace('dplyr', quietly = TRUE)
   requireNamespace('lubridate', quietly = TRUE)
   requireNamespace('magrittr', quietly = TRUE)
@@ -112,6 +116,7 @@ simulate_london_meters <- function (repo)
       dplyr::group_by(meter, timestamp) %>%
       dplyr::summarise(usage = sum(usage))
   )
+  internals$time_offset <- 60
 
   # dplyr adds attributes to objects when filter is called
   # it's probably some kind of smart pre-computed cache but
@@ -122,10 +127,12 @@ simulate_london_meters <- function (repo)
   workspace$run(
     input %<>% dplyr::filter(meter == "MAC004929")
   )
+  internals$time_offset <- 120
 
   workspace$run(
     with(input, plot(timestamp, usage, type = 'p', pch = '.'))
   )
+  internals$time_offset <- 180
 
   workspace$run(
     x <-
@@ -136,16 +143,19 @@ simulate_london_meters <- function (repo)
       dplyr::group_by(hour, dow) %>%
       dplyr::summarise(usage = mean(usage, na.rm = TRUE))
   )
+  internals$time_offset <- 240
 
   workspace$run(
     with(x, plot(hour, usage))
   )
+  internals$time_offset <- 300
 
   workspace$run(
     ggplot2::ggplot(x) +
       ggplot2::geom_point(ggplot2::aes(x = hour, y = usage)) +
       ggplot2::facet_wrap(~dow)
   )
+  internals$time_offset <- 360
 
   workspace$run(
     x <-
@@ -154,16 +164,23 @@ simulate_london_meters <- function (repo)
                     dow  = lubridate::wday(timestamp)) %>%
       dplyr::mutate_at(dplyr::vars(hour, dow), dplyr::funs(as.factor))
   )
+  internals$time_offset <- 420
 
   workspace$run(
     ggplot2::ggplot(x) +
       ggplot2::geom_boxplot(ggplot2::aes(x = hour, y = usage)) +
       ggplot2::facet_wrap(~dow)
   )
+  internals$time_offset <- 480
 
   workspace$run(
     m <- stats::lm(usage ~ hour:dow, x)
   )
+  internals$time_offset <- 540
+
+  # new R session
+  options(repository.session_id = crc32("new R session"))
+  internals$time_offset <- 7200 # 2 hours later
 
   res <- repo %>% select(object) %>% filter(id == go_back) %>% execute
   message('Restoring object ', go_back)
@@ -173,6 +190,7 @@ simulate_london_meters <- function (repo)
   workspace$run(
     input %<>% dplyr::filter(meter == "MAC000010")
   )
+  internals$time_offset <- 7260
 
   workspace$run(
     x <-
@@ -181,12 +199,14 @@ simulate_london_meters <- function (repo)
                     dow  = lubridate::wday(timestamp)) %>%
       dplyr::mutate_at(dplyr::vars(hour, dow), dplyr::funs(as.factor))
   )
+  internals$time_offset <- 7320
 
   workspace$run(
     ggplot2::ggplot(x) +
       ggplot2::geom_boxplot(ggplot2::aes(x = hour, y = usage)) +
       ggplot2::facet_wrap(~dow)
   )
+  internals$time_offset <- 7380
 
   # go back again, and try the third house
   message('Restoring object ', go_back)
@@ -195,6 +215,7 @@ simulate_london_meters <- function (repo)
   workspace$run(
     input %<>% dplyr::filter(meter == "MAC004391")
   )
+  internals$time_offset <- 7440
 
   workspace$run(
     x <-
@@ -203,6 +224,7 @@ simulate_london_meters <- function (repo)
                     dow  = lubridate::wday(timestamp)) %>%
       dplyr::mutate_at(dplyr::vars(hour, dow), dplyr::funs(as.factor))
   )
+  internals$time_offset <- 7500
 
   workspace$run(
     ggplot2::ggplot(x) +

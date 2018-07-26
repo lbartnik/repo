@@ -91,7 +91,7 @@ repository_updater <- function (repo, env, plot, expr) {
   u$write <- function (.) {
     # store list of object pointers + basic 'history' tags
     data <- list(expr = .$expr, objects = .$ids, plot = .$plot_id)
-    tags <- list(class = 'commit', parent = .$last_commit$id, time = Sys.time())
+    tags <- list(class = 'commit', parent = .$last_commit$id, time = current_time())
     cid  <- storage::compute_id(list(data, tags))
 
     # this should never happen because hash is computed from both objects

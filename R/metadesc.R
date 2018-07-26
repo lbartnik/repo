@@ -4,7 +4,7 @@ auto_tags.default <- function (x, ...) {
   preset <- list(...)
   stopifnot(is_all_named(preset))
 
-  combine(preset, list(class = class(x), time = Sys.time(), artifact = TRUE,
+  combine(preset, list(class = class(x), time = current_time(), artifact = TRUE,
                        session = r_session_id()))
 }
 
