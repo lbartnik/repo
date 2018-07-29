@@ -179,21 +179,8 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   })
   names(objects) <- ids
 
-  # add information about children
-  lapply(objects, function (obj) {
-    lapply(obj$parents, function (parent) {
-      if (parent %in% names(objects)) {
-        objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
-      }
-    })
-  })
-
-  structure(objects, class = c('origin', 'artifact.set', 'graph'))
-
-  # 3. wrap explanation in a 'origin' object that can be
-  # a) turned into a 'stratified' object
-  # b) turned into JSON
-  # c) iterated over
+  g <- graph_of_artifacts(objects, repo$store)
+  structure(g, class = c('origin', 'artifact.set', class(g)))
 }
 
 
@@ -287,10 +274,7 @@ print.artifact.meta <- function (x, ..., style = 'full') {
     ccat0(green = storage::shorten(x$id))
 
     if (length(x$parents)) {
-      ccat0(silver = '  parents:')
-      imap(x$parents, function(id, name) {
-        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
-      })
+      ccat0(silver = '  parents:', yellow = join(storage::shorten(x$parents), ' '))
     }
     else {
       ccat0(silver = '  no parents')

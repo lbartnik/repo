@@ -287,10 +287,10 @@ test_that("full explanation", {
   expect_length(x, 4)
   expect_named(x, letters[1:4])
 
-  expect_node(x, 'a', parents = list(), children = 'c')
-  expect_node(x, 'b', parents = list(), children = 'c')
-  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = 'd')
-  expect_node(x, 'd', parents = list(c = 'c'), children = character())
+  expect_node(x, 'a', parents = character(), children = 'c')
+  expect_node(x, 'b', parents = character(), children = 'c')
+  expect_node(x, 'c', parents = c('a', 'b'), children = 'd')
+  expect_node(x, 'd', parents = c('c'), children = character())
 })
 
 
@@ -302,13 +302,13 @@ test_that("explain object", {
 
   x <- repository_explain(r, 'c')
   expect_length(x, 3)
-  expect_node(x, 'a', parents = list(), children = 'c')
-  expect_node(x, 'b', parents = list(), children = 'c')
-  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = character())
+  expect_node(x, 'a', parents = character(), children = 'c')
+  expect_node(x, 'b', parents = character(), children = 'c')
+  expect_node(x, 'c', parents = c('a', 'b'), children = character())
 
   x <- repository_explain(r, 'b')
   expect_length(x, 1)
-  expect_node(x, 'b', parents = list(), children = character())
+  expect_node(x, 'b', parents = character(), children = character())
 })
 
 
