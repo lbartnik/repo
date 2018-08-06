@@ -20,7 +20,8 @@ test_that("reduce graph", {
 test_that("stratify", {
   h <- sample_graph()
 
-  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects'), ignore.order = TRUE)
+  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects', 'parents'),
+                                                      ignore.order = TRUE)
 
   x <- graph_stratify(h)
   expect_s3_class(x, 'stratified')
@@ -38,3 +39,57 @@ test_that("stratify", {
   lapply(b$children, expect_named)
   lapply(c$children, expect_named)
 })
+
+
+test_that("preserve class", {
+  g <- sample_graph()
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('stratified', 'list'))
+
+  g <- structure(list(a = structure(list(), class = c('a', 'b', 'c'))), class = 'graph')
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
+
+  g <- structure(list(a = structure(list(1), class = c('a', 'b', 'c')),
+                      b = structure(list(2), class = c('a', 'b', 'c'))),
+                 class = 'graph')
+  x <- graph_stratify(g)
+  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
+})
+
+
+test_that("graph of artifacts", {
+  r <- many_repository()
+
+  a <- list(a = list(), b = list(), c = list(), d = list())
+  g <- graph_of_artifacts(a, r$store)
+
+  expect_named(g, letters[1:4], ignore.order = TRUE)
+
+  expect_equal(g$a$parents, character())
+  expect_equal(g$b$parents, character())
+  expect_equal(g$c$parents, c('a', 'b'))
+  expect_equal(g$d$parents, 'c')
+
+  expect_equal(g$a$children, 'c')
+  expect_equal(g$b$children, 'c')
+  expect_equal(g$c$children, 'd')
+  expect_equal(g$d$children, character())
+})
+
+
+test_that("subgraph of artifacts", {
+  r <- many_repository()
+
+  a <- list(b = list(), c = list())
+  g <- graph_of_artifacts(a, r$store)
+
+  expect_named(g, c('b', 'c'), ignore.order = TRUE)
+
+  expect_equal(g$b$parents, character())
+  expect_equal(g$c$parents, 'b')
+
+  expect_equal(g$b$children, 'c')
+  expect_equal(g$c$children, character(0))
+})
+

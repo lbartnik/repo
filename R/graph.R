@@ -38,12 +38,14 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
 
 graph_roots <- function (x) {
   stopifnot(is_graph(x))
-  Filter(x, f = function (node) is.na(node$parent))
+  Filter(x, f = function (node) is_empty(node$parents))
 }
 
 
 graph_stratify <- function (x) {
   stopifnot(is_graph(x))
+  stopifnot(length(x) > 0)
+  stopif(is_stratified(x))
 
   # TODO if a parent has more than one child, displaying the tree might
   #      tricky: the branch that the parent is assigned to needs to be
@@ -55,7 +57,6 @@ graph_stratify <- function (x) {
     nodes$erase(id)
     node <- x[[id]]
     node$children <- lapply(node$children, process_node)
-    node$parent <- NULL
     node
   }
 
@@ -65,12 +66,12 @@ graph_stratify <- function (x) {
   # iterate over roots, descend over children
   roots <- lapply(names(graph_roots(x)), process_node)
   stopifnot(length(roots) != 0)
-
+  stopifnot(nodes$size() == 0)
 
   # if there is more than one top-level root, create an "abstract" root
   if (length(roots) > 1) {
     roots <- list(
-      class = 'abstract_root',
+      class = c('abstract_root', class(roots)),
       children = roots
     )
   }
@@ -78,5 +79,75 @@ graph_stratify <- function (x) {
     roots <- first(roots)
   }
 
-  structure(roots, class = c('stratified', class(x)))
+  structure(roots, class = c('stratified', class(first(x))))
 }
+
+is_stratified <- function (x) inherits(x, 'stratified')
+
+
+
+#' Turn a list of artifacts into a graph of artifacts.
+#'
+#' A list of artifacts, whose `names()` are artifact identifiers, is
+#' transformed into a graph by adding a `children` key each element of
+#' the list, removing `parents` that do exist in the list and finally
+#' re-assigning `parents` if a certain parent artifact is not in the
+#' input list.
+#'
+#'   two extra keys to each element
+#' of the input list: `parents` and `children`
+#'
+#' @importFrom rlang quos
+#' @import utilities
+#'
+#' @rdname graph
+#'
+graph_of_artifacts <- function (artifacts, store) {
+  ids <- storage::os_find(store, quos(isTRUE(artifact)))
+
+  parents <- map(ids, function (id) {
+    tags <- storage::os_read_tags(store, id)
+    if (!is.null(tags$parents)) return(as.character(tags$parents))
+    character()
+  })
+
+  children <- map(ids, function(...)character())
+  imap(parents, function (parents_for_id, id) {
+    for (parent in parents_for_id) {
+      children[[parent]] <<- c(children[[parent]], id)
+    }
+  })
+
+  # if a given artifact is not in the input list, reassign its id amongs
+  # its children's parents with that artifact's parents; "shrink" the graph
+  # but keep the lineage information
+  for (id in ids) {
+    # if among chosen artifacts, skip
+    if (id %in% names(artifacts)) next
+
+    # otherwise delete
+    for (child in children[[id]]) {
+      childs_parents <- parents[[child]]
+      childs_parents <- setdiff(childs_parents, id)
+      childs_parents <- c(childs_parents, parents[[id]])
+      parents[[child]] <- childs_parents
+    }
+
+    for (parent in parents[[id]]) {
+      children[[parent]] <- setdiff(children[[parent]], id)
+    }
+
+    parents[[id]] <- NULL
+    children[[id]] <- NULL
+  }
+
+  # assign newly computed paretns and children
+  for (id in names(parents)) {
+    artifacts[[id]]$parents <- parents[[id]]
+    artifacts[[id]]$children <- children[[id]]
+  }
+
+  structure(artifacts, class = 'graph')
+}
+
+

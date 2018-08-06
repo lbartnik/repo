@@ -6,7 +6,12 @@
 
 * describe objects in line, repo::describe
 
-* store full info on R session (esp. loaded packages and their versions)
+* store full info on R session (esp. loaded packages and their versions);
+  store session id in a private environment variable, not via options()
 
 * generate artif. description upon write; do not read the whole object
   (only metadata) in repository_explain
+
+* fix tree printout: even if objects are filtered out, tree should remain
+  consistent; it can only mark missing link with a different collor or
+  e.g. dashed line

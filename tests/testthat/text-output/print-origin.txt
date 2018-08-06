@@ -4,18 +4,18 @@
     dplyr::rename(meter = LCLid, timestamp = tstp, usage = energy_kWh) %>%
     dplyr::filter(meter %in% c("MAC004929", "MAC000010", "MAC004391"), lubridate::year(timestamp) == 2013)
 
-2b67f493  parents: input (89c78e89)
+2b67f493  parents:89c78e89
   input %<>% dplyr::mutate(timestamp = lubridate::floor_date(timestamp, "hours")) %>%
     dplyr::group_by(meter, timestamp) %>%
     dplyr::summarise(usage = sum(usage))
 
-af206c42  parents: input (2b67f493)
+af206c42  parents:2b67f493
   input %<>% dplyr::filter(meter == "MAC004929")
 
-b83ee352  parents: input (af206c42)
+b83ee352  parents:af206c42
   x <- input %>%
     dplyr::mutate(hour = lubridate::hour(timestamp), dow = lubridate::wday(timestamp)) %>%
     dplyr::mutate_at(dplyr::vars(hour, dow), dplyr::funs(as.factor))
 
-57fbe755  parents: x (b83ee352)
+57fbe755  parents:b83ee352
   m <- stats::lm(usage ~ hour:dow, x)

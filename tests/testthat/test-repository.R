@@ -287,10 +287,10 @@ test_that("full explanation", {
   expect_length(x, 4)
   expect_named(x, letters[1:4])
 
-  expect_node(x, 'a', parents = list(), children = 'c')
-  expect_node(x, 'b', parents = list(), children = 'c')
-  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = 'd')
-  expect_node(x, 'd', parents = list(c = 'c'), children = character())
+  expect_node(x, 'a', parents = character(), children = 'c')
+  expect_node(x, 'b', parents = character(), children = 'c')
+  expect_node(x, 'c', parents = c('a', 'b'), children = 'd')
+  expect_node(x, 'd', parents = c('c'), children = character())
 })
 
 
@@ -302,13 +302,13 @@ test_that("explain object", {
 
   x <- repository_explain(r, 'c')
   expect_length(x, 3)
-  expect_node(x, 'a', parents = list(), children = 'c')
-  expect_node(x, 'b', parents = list(), children = 'c')
-  expect_node(x, 'c', parents = list(a = 'a', b = 'b'), children = character())
+  expect_node(x, 'a', parents = character(), children = 'c')
+  expect_node(x, 'b', parents = character(), children = 'c')
+  expect_node(x, 'c', parents = c('a', 'b'), children = character())
 
   x <- repository_explain(r, 'b')
   expect_length(x, 1)
-  expect_node(x, 'b', parents = list(), children = character())
+  expect_node(x, 'b', parents = character(), children = character())
 })
 
 
@@ -316,9 +316,9 @@ test_that("order origin", {
   r <- sample_repository()
 
   x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  i <- order(unlist(lapply(x, expl_get, "time")), decreasing = FALSE)
+  i <- order(unlist(lapply(x, `[[`, "time")), decreasing = FALSE)
   x <- x[i]
-  i <- substr(unlist(lapply(x, expl_get, "id")), 1, 2)
+  i <- substr(unlist(lapply(x, `[[`, "id")), 1, 2)
   expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
 })
 
@@ -349,6 +349,13 @@ test_that("finding ancestors for multiple artifacts", {
 
   x <- object_origin(r, c('a', 'd'), 0)
   expect_equal(x, c('a', 'd'))
+})
+
+
+test_that("print tree", {
+  r <- sample_repository()
+  x <- repository_explain(r)
+  expect_output_file(print(x, style = 'tree'), "text-output/print-origin-tree.txt")
 })
 
 

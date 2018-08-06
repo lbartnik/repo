@@ -10,7 +10,6 @@
 \alias{repository_history}
 \alias{repository_explain}
 \alias{print.artifact.meta}
-\alias{expl_get}
 \alias{repository_rewind}
 \alias{as_deltas}
 \alias{as_origin}
@@ -31,8 +30,6 @@ repository_history(repo, mode = "all")
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
 \method{print}{artifact.meta}(x, ..., style = "full")
-
-expl_get(x, i)
 
 repository_rewind(repo, id)
 
@@ -85,9 +82,6 @@ all artifacts is returned.
 
 \code{print.explained} pretty-prints a description of an
 artifact.
-
-\code{expl_get} extracts a member \code{i} from the \code{"explained"}
-S3 object.
 
 \code{repository_rewind} changes the internal pointer to the
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to

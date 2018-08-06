@@ -88,6 +88,8 @@ repository_update <-function (repo, env, plot, expr) {
 #'
 #' @export
 #'
+# TODO is it needed at all anymore?
+# TODO if it stays, node keys need to be agreed with repository_explain
 repository_history <- function (repo, mode = 'all') {
   guard()
   stopifnot(is_repository(repo))
@@ -155,64 +157,85 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
   # annotate objects with information about: name, parent, commit, type, etc.
   objects <- lapply(ids, function (id) {
-    raw <- storage::os_read(repo$store, id)
+    tags <- storage::os_read_tags(repo$store, id)
 
-    tags_copy <- c("class", "parents", "time")
-    stopifnot(has_name(raw$tags, c(tags_copy, 'parent_commit')))
+    stopifnot(hasName(tags, c("class", "parents", "time", 'parent_commit')))
 
-    obj <- raw$tags[tags_copy]
-    obj$id <- id
-    obj$commit <- raw$tags$parent_commit
-    obj$description <- description(raw$object)
-    obj$children <- character()
-    obj$names <- raw$tags$names
+    tags$id <- id
+    tags$commit <- tags$parent_commit
+    tags$children <- character()
+    tags$description <- description(tags)
+    if (is_empty(tags$names)) tags$names <- character() # plots don't have names
+
+    # remove
+    tags$parent_commit <- NULL
 
     # read parent commit and assign expression
-    cmt <- storage::os_read_object(repo$store, obj$commit)
-    obj$expr <- cmt$expr
+    cmt <- storage::os_read_object(repo$store, tags$commit)
+    tags$expr <- cmt$expr
 
     # finally, add a S3 class for pretty-printing
-    structure(obj, class = 'artifact.meta')
+    structure(tags, class = 'artifact.meta')
   })
   names(objects) <- ids
 
-  # add information about children
-  lapply(objects, function (obj) {
-    lapply(obj$parents, function (parent) {
-      if (parent %in% names(objects)) {
-        objects[[parent]]$children <<- append(objects[[parent]]$children, obj$id)
-      }
-    })
-  })
-
-  structure(objects, class = c('origin', 'artifact.set', 'graph'))
-
-  # 3. wrap explanation in a 'origin' object that can be
-  # a) turned into a 'stratified' object
-  # b) turned into JSON
-  # c) iterated over
+  g <- graph_of_artifacts(objects, repo$store)
+  structure(g, class = c('origin', 'artifact.set', class(g)))
 }
 
 
 #' @importFrom rlang warn
+#' @import utilities
+#'
 #' @export
-print.artifact.set <- function (x, ..., sort_by = 'time') {
+print.artifact.set <- function (x, ..., style = 'by_time') {
+
+  # use the default style if attached
+  style <- get_default(x, 'style', style)
 
   # this is the only currently supported method
-  stopifnot(identical(sort_by, 'time'))
+  stopifnot(style %in% c('by_time', 'tree'))
 
   # if there is nothing to print
   if (!length(x)) {
     warn("origin object empty")
   }
 
-  # sort entries and then print them
-  i <- order(map_dbl(x, expl_get, sort_by), decreasing = FALSE)
-  x <- x[i]
+  if (identical(style, 'by_time')) {
+    # sort entries and then print them
+    i <- order(map_dbl(x, `[[`, 'time'), decreasing = FALSE)
+    x <- x[i]
 
-  # insert \n between two printouts
-  print(first(x), style = 'short')
-  lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
+    # insert \n between two printouts
+    print(first(x), style = 'short')
+    lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
+  }
+
+  if (identical(style, 'tree')) {
+    vert  <- '│   '
+    vert0 <- '    '
+    fork  <- '├── '
+    fork0 <- '└── '
+
+    print_level <- function (x, indent, exdent) {
+      i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
+      chld <- x$children[i]
+
+      ccat0(silver = indent)
+      print(x, style = 'line')
+
+      Map(y = chld, k = seq_along(chld), f = function (y, k) {
+        if (k == length(chld)) {
+          print_level(y, paste0(exdent, fork0), paste0(exdent, vert0))
+        } else {
+          print_level(y, paste0(exdent, fork), paste0(exdent, vert))
+        }
+      })
+      invisible(x)
+    }
+
+    print_level(graph_stratify(x), '', '')
+  }
 
   invisible(x)
 }
@@ -227,7 +250,7 @@ print.artifact.set <- function (x, ..., sort_by = 'time') {
 #' @export
 print.artifact.meta <- function (x, ..., style = 'full') {
 
-  stopifnot(style %in% c('full', 'short'))
+  stopifnot(style %in% c('full', 'short', 'line'))
   is_plot <- ('plot' %in% x$class)
 
   # full artifact description
@@ -251,10 +274,7 @@ print.artifact.meta <- function (x, ..., style = 'full') {
     ccat0(green = storage::shorten(x$id))
 
     if (length(x$parents)) {
-      ccat0(silver = '  parents:')
-      imap(x$parents, function(id, name) {
-        ccat0(' ', name, silver = ' (', yellow = storage::shorten(id), silver = ')')
-      })
+      ccat0(silver = '  parents:', yellow = join(storage::shorten(x$parents), ' '))
     }
     else {
       ccat0(silver = '  no parents')
@@ -263,17 +283,16 @@ print.artifact.meta <- function (x, ..., style = 'full') {
     ccat0('\n', format_expr(x$expr), '\n')
   }
 
+  # a single line
+  if (identical(style, 'line')) {
+    if ('plot' %in% x$class)
+      ccat0(grey = '<plot> ', silver = '(', yellow = shorten(x$id), silver = ')\n')
+    else
+      ccat0(green = first(x$names), silver = ' (', yellow = shorten(x$id), silver = ') ',
+            description(x), '\n')
+  }
+
   invisible(x)
-}
-
-
-#' @description `expl_get` extracts a member `i` from the `"explained"`
-#' S3 object.
-#'
-#' @rdname repository
-#' @export
-expl_get <- function (x, i) {
-  nth(x, i)
 }
 
 
