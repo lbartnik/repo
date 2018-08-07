@@ -37,8 +37,10 @@ text-only user interface with a graphical artifact browser.
 
 [^dsloop]: Hadley Wickham, "R for Data Science", http://r4ds.had.co.nz/explore-intro.html
 
-
 # Introduction
+
+![Exploratory data science, diagram from "R for Data Science" by Hadley Wickham.](graphics/data-science-explore.png)
+
 
 Describe goals
 and what is missing for each of them
