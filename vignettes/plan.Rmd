@@ -41,13 +41,39 @@ text-only user interface with a graphical artifact browser.
 
 ![Exploratory data science, diagram from "R for Data Science" by Hadley Wickham.](graphics/data-science-explore.png)
 
+In data exploration we search for new value: understanding which can be
+turned into actions. In the process, we create numerous artifacts: plots,
+models, derived data sets, tables, printouts. Our success to some extent
+depends on our ability to filter, organize and preserve those artifacts
+which will further the investigation and later serve as an explanation
+of our findings or help in building the narrative about new insights.
+An important aspect of said narrative is the lineage of an artifact,
+that is, explanation of its origin often as a sequence of transforms
+leading from the source data set to that artifact. The ability to track
+the origin of an artifact and prove its correctness is important enough
+to be a separate discipline, namely *reproducible research*.
 
-Describe goals
-and what is missing for each of them
+The task of cataloguing artifacts imposes certain overhead and if not
+done systematically, might omit parts of the lineage. In some cases this
+means that the final findings of research are not reproducible. In less
+severe cases, it only slows down the research or requires extra work to
+recreate missing steps.
 
-The extent to which this will be a useful tool depends on how well a person manages the artifacts and the narrative of the project. If they do a good job at documenting their research and making it reproducible, then this repository might be only occasionally useful to them. If, however, they leave big gaps in their documentation and often lose parts of the lineage, having an automated tracker will be helpful.
+The goal of the `repository` package, along with its additional tooling,
+is to automate the process of collecting artifacts together wth their
+lineage. The life of a repository of artifacts spans multiple R sessions
+as the repository is stored in the filesystem. All artifacts can be read
+and inspected, as can be their lineage which includes intermediate
+artifacts and R expressions that created them. The repository comes with
+a search interface.
 
- (e.g. JS app inside Shiny/RStudio) to effectively browse and work with the repository of artifacts.
+The extent to which this will be a useful tool depends on how well one
+manages the artifacts and the narrative of their exploratory data analysis.
+If they do a good job at documenting their research and making it
+reproducible, then automated collection might be only occasionally
+useful. If, however, they leave certain gaps in their documentation and
+often lose parts of the lineage, having an automated tracker might turn
+out helpful.
 
 
 # Future
@@ -56,6 +82,10 @@ The extent to which this will be a useful tool depends on how well a person mana
 
 Full inspection into history based on both expressions (commands) and
 objects (artifacts) created by those expressions.
+
+
+(e.g. JS app inside Shiny/RStudio) to effectively browse and work with the repository of artifacts.
+
 
 ## Propose narratives
 
