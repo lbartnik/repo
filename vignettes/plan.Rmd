@@ -1,0 +1,66 @@
+---
+title: "Upgrading the Research Toolkit"
+author: "Lukasz A. Bartnik"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Upgrading the Research Toolkit}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", prompt = FALSE, echo = TRUE)
+```
+
+# Abstract
+
+**Short-term design principle** is to simplify the occasional recall.
+By recall we understand the ability to understand the origin or meaning
+of a research artifact: data set, code, plot, model, etc[^recall]. In
+the schematic view of exploratory data analysis[^dsloop] (see plot XX)
+we aim to support the *Communicate* part.
+
+We track the lineage of all artifacts created in the *Explore* loop and
+we make the full explanation of their origin readily available upon user
+request. Such artifact repository will be valuable whenever there is a
+gap in the documentation of the analysis.
+
+**Long-term goals** are to provide infrastructure and tools to automate
+certain (semi-)manual tasks, like collecting, describing or organizing
+artifacts. An important aspect of that work will be extending the current
+text-only user interface with a graphical artifact browser.
+
+[^recall]: Jim Hester: "The ability of yourself or other to understand what your code is doing."
+
+[^dsloop]: Hadley Wickham, "R for Data Science", http://r4ds.had.co.nz/explore-intro.html
+
+
+# Introduction
+
+Describe goals
+and what is missing for each of them
+
+The extent to which this will be a useful tool depends on how well a person manages the artifacts and the narrative of the project. If they do a good job at documenting their research and making it reproducible, then this repository might be only occasionally useful to them. If, however, they leave big gaps in their documentation and often lose parts of the lineage, having an automated tracker will be helpful.
+
+ (e.g. JS app inside Shiny/RStudio) to effectively browse and work with the repository of artifacts.
+
+
+# Future
+
+## Graphical browser
+
+Full inspection into history based on both expressions (commands) and
+objects (artifacts) created by those expressions.
+
+## Propose narratives
+
+Identify the parts of the loop: ETL, exploration, models, model summary.
+Might be called a *result*.
+
+## Export to Rmd
+
+## Full information about R session
+
