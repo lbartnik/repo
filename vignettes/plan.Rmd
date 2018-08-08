@@ -15,7 +15,7 @@ library(knitr)
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", prompt = FALSE, echo = TRUE)
 ```
 
-# Abstract
+# Goals
 
 **Short-term design principle** is to simplify the occasional recall.
 By recall we understand the ability to understand the origin or meaning
@@ -23,21 +23,28 @@ of a research artifact: data set, code, plot, model, etc[^recall]. In
 the schematic view of exploratory data analysis[^dsloop] (see plot XX)
 we aim to support the *Communicate* part.
 
-We track the lineage of all artifacts created in the *Explore* loop and
-we make the full explanation of their origin readily available upon user
-request. Such artifact repository will be valuable whenever there is a
-gap in the documentation of the analysis.
+We track the lineage[^lineage] (also called provenance[^provenance]) of
+all artifacts created in the *Explore* loop and we make the full
+explanation of their origin readily available upon user request. Such
+artifact repository will be valuable whenever there is a gap in the
+documentation of the analysis.
 
 **Long-term goals** are to provide infrastructure and tools to automate
 certain (semi-)manual tasks, like collecting, describing or organizing
 artifacts. An important aspect of that work will be extending the current
 text-only user interface with a graphical artifact browser.
 
-[^recall]: Jim Hester: "The ability of yourself or other to understand what your code is doing."
+[^recall]: Jim Hester: "The ability of yourself or other to understand
+what your code is doing."
 
-[^dsloop]: Hadley Wickham, "R for Data Science", http://r4ds.had.co.nz/explore-intro.html
+[^dsloop]: Hadley Wickham, ["R for Data Science"](http://r4ds.had.co.nz/explore-intro.html)
 
-# Introduction
+[^lineage]: lineal descent from an ancestor; ancestry or pedigree.
+
+[^provenance]: origin, source; the history of ownership of a valued
+object or work of art or literature; [Merriam-Webster](https://www.merriam-webster.com/dictionary/provenance)
+
+# Current Day
 
 ![Exploratory data science, diagram from "R for Data Science" by Hadley Wickham.](graphics/data-science-explore.png)
 
@@ -78,21 +85,101 @@ out helpful.
 
 # Future
 
+Currently, `repository` and its collaborating packages implement only
+the simplest use case: tracking artifacts and retrieving their lineage.
+However, the kind of information collected by the tracker can be utilized
+in a number of other ways. Below are a few considered for future
+implementation.
+
+
 ## Graphical browser
 
 Full inspection into history based on both expressions (commands) and
-objects (artifacts) created by those expressions.
+objects (artifacts) created by those expressions. An example of such,
+[Shiny- and JavaScript-based browser](https://lbartnik.github.io/experiment)
+can be found in a [predecessor](http://github.com/lbartnik/experiment)
+of `repository`.
 
 
-(e.g. JS app inside Shiny/RStudio) to effectively browse and work with the repository of artifacts.
+## Presentation Aid
+
+A subset of artifacts can be chosen for presentation to stakeholders.
+Whenever a more specific question about an artifact, the narrative
+or rationale behind a given insight is raised, additional information
+can be presented. This can include: the full lineage, related plots
+and printouts, similar models, data transformations, etc.
+
+
+## Re-run code paths
+
+A lineage of an artifact effectively defines a program that starts
+with the source ("raw") data and produces the said artifact. It might
+depend on a number of additional artifacts or parameters, which from
+the perspective of R are the same. Those dependencies can be replaced
+and the full sequence can be then re-run to obtain a related result.
+
+In the example below, `n` and `h` are the parameters, `train` and `test`
+are the intermediate artifacts and `m` is the final artifact, a ARIMA
+model.
+
+```{r eval=FALSE}
+n <- 168
+h <- 10
+train <- head(data, n)
+test  <- head(tail(data, -n), h)
+m <- arima(train$x) # TODO turn into ARIMAX?
+summary(m)
+predict(m, test)
+```
+
+The `repository` would expose this whole sequece of commands as a
+function with a number of parameters, one for each intermediate
+artifact.
+
+```{r eval=FALSE}
+r <- repository_repeat(m)
+args(r)
+#> function(n, h, train, test, m)
+#> NULL
+```
+
+It is straightforward now to repeat the pipeline but with certain
+changes:
+
+```{r eval=FALSE}
+r(n = 336, h = 24)
+```
 
 
 ## Propose narratives
 
-Identify the parts of the loop: ETL, exploration, models, model summary.
-Might be called a *result*.
+The assumption here is that it is not a single artifact that constitutes
+an *unit of knowledge*, that is, the most basic but **meaningful**
+information about the analysis. Rather, it is a set of artifacts on a
+path from the source ("raw") data all the way to a model (or a summary
+of some kind) that confirms or disproves a hypothesis about the data.
+The first approximation for this feature would be an automated view
+presenting all models (understanding) together with data transformations
+(ETL) and artifacts derived from the model (communication).
+
+```{r eval=FALSE}
+repository_results()
+#> Artifact: m, ARIMAX model
+#>
+#> Communication:
+#>   .... information about plots etc. ....
+#>
+#> Transformations:
+#>    ... a list of expressions that transformed the source data ...
+```
+
 
 ## Export to Rmd
+
+Instead of manually crafting a Rmd document, choose artifacts and have
+them and their ancestors in the lineage tree exported automatically
+into one.
+
 
 ## Full information about R session
 
