@@ -17,7 +17,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", prompt = FALSE, echo = TR
 
 # Goals
 
-**Short-term design principle** is to simplify the occasional recall.
+**Short-term design goal** is to simplify the occasional recall.
 By recall we understand the ability to understand the origin or meaning
 of a research artifact: data set, code, plot, model, etc[^recall]. In
 the schematic view of exploratory data analysis[^dsloop] (see plot XX)
@@ -46,7 +46,7 @@ object or work of art or literature; [Merriam-Webster](https://www.merriam-webst
 
 # Current Day
 
-![Exploratory data science, diagram from "R for Data Science" by Hadley Wickham.](graphics/data-science-explore.png)
+![Exploratory data science, original diagram in "R for Data Science" by H. Wickham.](graphics/dsloop.png)
 
 In data exploration we search for new value: understanding which can be
 turned into actions. In the process, we create numerous artifacts: plots,
