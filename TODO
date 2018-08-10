@@ -15,3 +15,7 @@
 * fix tree printout: even if objects are filtered out, tree should remain
   consistent; it can only mark missing link with a different collor or
   e.g. dashed line
+
+* provide pretty query API: inherits("class") instead of "class" %in% class
+  storage::os_find will need to accept a new `env` parameter with those
+  extra search API calls
