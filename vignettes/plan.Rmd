@@ -17,17 +17,21 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", prompt = FALSE, echo = TR
 
 # Goals
 
-**Short-term design goal** is to simplify the occasional recall.
-By recall we understand the ability to understand the origin or meaning
-of a research artifact: data set, code, plot, model, etc[^recall]. In
-the schematic view of exploratory data analysis[^dsloop] (see plot XX)
-we aim to support the *Communicate* part.
+**Short-term design goal** is to improve the recall[^recall], that is,
+the ability to understand the significance of a research artifact. Each
+artifact produced in an R session is persisted in the filesystem along
+with pointers to all its immediate parent artifacts. The full tree of
+origin of each artifact can be produced upon request to support the
+recall.
 
-We track the lineage[^lineage] (also called provenance[^provenance]) of
-all artifacts created in the *Explore* loop and we make the full
-explanation of their origin readily available upon user request. Such
-artifact repository will be valuable whenever there is a gap in the
-documentation of the analysis.
+In *Plot 1*, artifacts are created in the *Exploration* loop and include
+data sets, code, plots, models, printouts, etc. Information about parents
+describes the lineage[^lineage] (also called provenance[^provenance]) of
+each artifact. The need for recall may arise in either step of the
+*Exploration* loop as well as in the *Communicate*. Whenever there is a
+gap in the documentation of the analysis, such artifact repository will
+be particularly handy.
+
 
 **Long-term goals** are to provide infrastructure and tools to automate
 certain (semi-)manual tasks, like collecting, describing or organizing
@@ -46,7 +50,8 @@ object or work of art or literature; [Merriam-Webster](https://www.merriam-webst
 
 # Current Day
 
-![Exploratory data science, original diagram in "R for Data Science" by H. Wickham.](graphics/dsloop.png)
+![**Plot 1**: Exploratory data science, original diagram in "R for Data
+Science" by H. Wickham.](graphics/dsloop.png)
 
 In data exploration we search for new value: understanding which can be
 turned into actions. In the process, we create numerous artifacts: plots,
