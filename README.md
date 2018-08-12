@@ -1,4 +1,14 @@
-# Artifact Repository for R
+Artifact Repository for R
+==========================
+
+| CRAN version    | Travis build status   | AppVeyor | Coverage |
+| :-------------: |:---------------------:|:--------:|:--------:|
+| [![CRAN version](http://www.r-pkg.org/badges/version/repository)](https://cran.r-project.org/package=repository) | [![Build Status](https://travis-ci.org/lbartnik/repository.svg?branch=master)](https://travis-ci.org/lbartnik/repository) | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/lbartnik/repository?branch=master&svg=true)](https://ci.appveyor.com/project/lbartnik/repository) | [![codecov](https://codecov.io/gh/lbartnik/repository/branch/master/graph/badge.svg)](https://codecov.io/gh/lbartnik/repository)|
+
+
+
+
+
 
 Implements the middle layer between user interface and storage. Provides
 calls to create a new repository, append artifacts to a repository,
