@@ -25,7 +25,7 @@ Revert depends on:
 
 # Documentation
 
-  * [user interface tutorial](https://lbartnik.github.io/ui/)
-  * [work plan](https://lbartnik.github.io/repository/)
-  * [graphical object browser](https://lbartnik.github.io/experiment/), an older attempt
+  * [user interface tutorial](https://lbartnik.github.io/ui/) - ways and APIs to interact with the repository
+  * [work plan](https://lbartnik.github.io/repository/) - current state of affairs and ideas for research
+  * [graphical artifact browser](https://lbartnik.github.io/experiment/) - an older attempt at browsing artifacts via Shiny and JS
 
