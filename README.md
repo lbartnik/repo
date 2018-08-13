@@ -19,6 +19,20 @@ Other packages implementing the *repository of artifacts*:
   * [defer](https://github.com/lbartnik/defer) - building and processing closures of R functions and data
 
 
+# Installation
+
+```r
+install_github("lbartnik/defer")
+install_github("lbartnik/storage")
+install_github("lbartnik/repository")
+install_github("lbartnik/ui")
+```
+
+```r
+library(ui)
+```
+
+
 # Documentation
 
   * [user interface tutorial](https://lbartnik.github.io/ui/) - ways and APIs to interact with the repository
