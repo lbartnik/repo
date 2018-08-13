@@ -6,21 +6,17 @@ Artifact Repository for R
 | [![CRAN version](http://www.r-pkg.org/badges/version/repository)](https://cran.r-project.org/package=repository) | [![Build Status](https://travis-ci.org/lbartnik/repository.svg?branch=master)](https://travis-ci.org/lbartnik/repository) | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/lbartnik/repository?branch=master&svg=true)](https://ci.appveyor.com/project/lbartnik/repository) | [![codecov](https://codecov.io/gh/lbartnik/repository/branch/master/graph/badge.svg)](https://codecov.io/gh/lbartnik/repository)|
 
 
-
-
-
+# Summary
 
 Implements the middle layer between user interface and storage. Provides
 calls to create a new repository, append artifacts to a repository,
 search for artifacts given their tag values.
 
 
-Depends on:
+Other packages implementing the *repository of artifacts*:
+  * [ui](https://github.com/lbartnik/ui) - text-based user interface
   * [storage](https://github.com/lbartnik/storage) - store of R objects
   * [defer](https://github.com/lbartnik/defer) - building and processing closures of R functions and data
-
-Revert depends on:
-  * [ui](https://github.com/lbartnik/ui) - text-based user interface
 
 
 # Documentation
