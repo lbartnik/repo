@@ -15,10 +15,31 @@ library(knitr)
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", prompt = FALSE, echo = TRUE)
 ```
 
-# Goals
 
-**Short-term design goal** is to improve the recall[^recall], that is,
-the ability to understand the significance of a research artifact. Each
+
+# Introduction & Goals
+
+In data exploration, the goal is understanding which can be later turned
+into decisions. In the process of exploring data, numerous artifacts are
+created: plots, models, derived data sets, tables, printouts. They serve
+two general purposes: as intermediate steps towards a certain end goal
+and as a means of communication to external parties. The success of the
+exploration depends to a certain extent on the ability to filter, organize,
+preserve and search through those artifacts. The key aspect of artifacts
+in their lineage[^lineage], that is, the sequence of preceding artifacts
+(ancestors) which often forms a sequence of transforms leading from the
+source ("raw") data set to the given artifact. The ability to track the
+complete path of origin of an artifact and thus prove its correctness is
+is at the center of *reproducible research*.
+
+Artifacts need to be catalogued which imposes certain overhead and, if
+not done systematically, might leave gaps in the lineage and in some
+cases prevent reproducibility. In other cases it might slows down the
+research or add extra work of recreating the missing steps.
+
+
+**Short-term goal** is to improve the recall[^recall], that is, the
+ability to understand the significance of a research artifact. Each
 artifact produced in an R session is persisted in the filesystem along
 with pointers to all its immediate parent artifacts. The full tree of
 origin of each artifact can be produced upon request to support the
@@ -26,17 +47,19 @@ recall.
 
 In *Plot 1*, artifacts are created in the *Exploration* loop and include
 data sets, code, plots, models, printouts, etc. Information about parents
-describes the lineage[^lineage] (also called provenance[^provenance]) of
-each artifact. The need for recall may arise in either step of the
+describes the lineage (also called provenance[^provenance]) of each
+artifact. The need for recall may arise in either step of the
 *Exploration* loop as well as in the *Communicate*. Whenever there is a
 gap in the documentation of the analysis, such artifact repository will
 be particularly handy.
 
+![*Plot 1*: Exploratory data science, original diagram in "R for Data
+Science" by H. Wickham.](graphics/dsloop.png)
 
 **Long-term goals** are to provide infrastructure and tools to automate
-certain (semi-)manual tasks, like collecting, describing or organizing
-artifacts. An important aspect of that work will be extending the current
-text-only user interface with a graphical artifact browser.
+collecting, describing and organizing artifacts. An important aspect of
+that work will be extending the current text-only user interface with a
+graphical artifact browser.
 
 [^recall]: Jim Hester: "The ability of yourself or other to understand
 what your code is doing."
@@ -48,44 +71,97 @@ what your code is doing."
 [^provenance]: origin, source; the history of ownership of a valued
 object or work of art or literature; [Merriam-Webster](https://www.merriam-webster.com/dictionary/provenance)
 
-# Current Day
 
-![**Plot 1**: Exploratory data science, original diagram in "R for Data
-Science" by H. Wickham.](graphics/dsloop.png)
 
-In data exploration we search for new value: understanding which can be
-turned into actions. In the process, we create numerous artifacts: plots,
-models, derived data sets, tables, printouts. Our success to some extent
-depends on our ability to filter, organize and preserve those artifacts
-which will further the investigation and later serve as an explanation
-of our findings or help in building the narrative about new insights.
-An important aspect of said narrative is the lineage of an artifact,
-that is, explanation of its origin often as a sequence of transforms
-leading from the source data set to that artifact. The ability to track
-the origin of an artifact and prove its correctness is important enough
-to be a separate discipline, namely *reproducible research*.
+# Current Implementation
 
-The task of cataloguing artifacts imposes certain overhead and if not
-done systematically, might omit parts of the lineage. In some cases this
-means that the final findings of research are not reproducible. In less
-severe cases, it only slows down the research or requires extra work to
-recreate missing steps.
+The current implementation spans four R packages:
 
-The goal of the `repository` package, along with its additional tooling,
+  * `repository` contains the bulk of "business logic"
+  * `ui` implements the user-facing facilities
+  * `storage` is a simple, filesystem storage layer for R objects
+  * `defer` provides API to identify objects referenced in R expressions 
+
+The goal of the current implementation of the *repository of artifacts*
 is to automate the process of collecting artifacts together wth their
 lineage. The life of a repository of artifacts spans multiple R sessions
-as the repository is stored in the filesystem. All artifacts can be read
-and inspected, as can be their lineage which includes intermediate
-artifacts and R expressions that created them. The repository comes with
-a search interface.
+and the repository itself is stored in the filesystem. All artifacts can
+be read and retrieved from the repository, inspected, their origin
+(lineage) can be explained. The `ui` package implements a search interface
+(the `artifacts` object) and a number of pretty-printing methods.
 
-The extent to which this will be a useful tool depends on how well one
-manages the artifacts and the narrative of their exploratory data analysis.
-If they do a good job at documenting their research and making it
-reproducible, then automated collection might be only occasionally
-useful. If, however, they leave certain gaps in their documentation and
-often lose parts of the lineage, having an automated tracker might turn
-out helpful.
+The usefulness of this toolset depends on how well one manages their
+artifacts and the narrative of their exploratory data analysis. If the
+documentation does not include substantial gaps and the research is
+reproducible then automated collection and tracking of artifacts might
+be useful only occasionally. However, if the gaps in artifacts' lineage
+are substantial and the documentation of the analysis is incomplete, an
+automated tracker might become handy.
+
+Sample sequence of calls and tree-like explanation of objects is
+presented below. See the `tutorial` vignette in the `ui` package for
+the full listing and further explanations.
+
+The sequence of R commands presented next loads, transforms and
+subsets a data set with time series meter readings. It creates
+a number of plots and finally a simple linear model to test the
+significance of the daily and weekly cycles in the data.
+
+```{r eval=FALSE}
+input <- system.file("extdata/block_62.csv", package = "repository") %>%
+  read_csv(na = "Null") %>%
+  rename(meter = LCLid, timestamp = tstp, usage = energy_kWh) %>%
+  filter(meter %in% c("MAC004929", "MAC000010", "MAC004391"), year(timestamp) == 2013)
+
+input %<>% mutate(timestamp = floor_date(timestamp, "hours")) %>%
+  group_by(meter, timestamp) %>%
+  summarise(usage = sum(usage))
+
+input %<>% filter(meter == "MAC004929")
+
+with(input, plot(timestamp, usage, type = "p", pch = "."))
+
+x <- input %>%
+  mutate(hour = hour(timestamp), dow = wday(timestamp, label = TRUE)) %>%
+  mutate_at(vars(hour, dow), funs(as.factor)) %>%
+  group_by(hour, dow) %>%
+  summarise(usage = mean(usage, na.rm = TRUE))
+
+with(x, plot(hour, usage))
+
+ggplot(x) + geom_point(aes(x = hour, y = usage)) + facet_wrap(~dow)
+
+ggplot(x) + geom_point(aes(x = hour, y = usage)) + facet_wrap(~dow)
+
+x <- input %>%
+  mutate(hour = hour(timestamp), dow = wday(timestamp)) %>%
+  mutate_at(vars(hour, dow), funs(as.factor))
+
+ggplot(x) + geom_boxplot(aes(x = hour, y = usage)) + facet_wrap(~dow)
+
+m <- lm(usage ~ hour:dow, x)
+```
+
+
+If that sequence of commands was tracked and stored in the repository of
+artifacts, a sample tree-like printout of artifacts from that R session
+could look as follows.
+
+```{r eval=FALSE}
+artifacts$session$`7a6f44b0`$tree
+#> input (89c78e89) data.frame[52560, 3]
+#> └── input (2b67f493) data.frame[26280, 3]
+#>     └── input (af206c42) data.frame[8760, 3]
+#>         ├── <plot> (a06e8fe4)
+#>         ├── x (f59403b5) data.frame[168, 3]
+#>         │   ├── <plot> (3539b7ba)
+#>         │   ├── x (64228d01) data.frame[168, 3]
+#>         │   └── <plot> (4cd2aeda)
+#>         └── x (b83ee352) data.frame[8760, 5]
+#>             ├── <plot> (9f51d793)
+#>             └── m (57fbe755) lm adjR2:0.33 AIC:7164 df:168
+```
+
 
 
 # Future
