@@ -88,7 +88,8 @@ lineage. The life of a repository of artifacts spans multiple R sessions
 and the repository itself is stored in the filesystem. All artifacts can
 be read and retrieved from the repository, inspected, their origin
 (lineage) can be explained. The `ui` package implements a search interface
-(the `artifacts` object) and a number of pretty-printing methods.
+(the `artifacts` object with Tab-completion-based query builder) and a
+number of pretty-printing methods.
 
 The usefulness of this toolset depends on how well one manages their
 artifacts and the narrative of their exploratory data analysis. If the
@@ -97,6 +98,14 @@ reproducible then automated collection and tracking of artifacts might
 be useful only occasionally. However, if the gaps in artifacts' lineage
 are substantial and the documentation of the analysis is incomplete, an
 automated tracker might become handy.
+
+The main areas of current research are:
+
+  * ways of presenting artifacts that maximize the recall
+  * effective search interface
+
+
+## Example
 
 Sample sequence of calls and tree-like explanation of objects is
 presented below. See the `tutorial` vignette in the `ui` package for
@@ -161,6 +170,7 @@ artifacts$session$`7a6f44b0`$tree
 #>             ├── <plot> (9f51d793)
 #>             └── m (57fbe755) lm adjR2:0.33 AIC:7164 df:168
 ```
+
 
 
 

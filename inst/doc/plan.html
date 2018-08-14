@@ -12,7 +12,7 @@
 
 <meta name="author" content="Lukasz A. Bartnik" />
 
-<meta name="date" content="2018-08-12" />
+<meta name="date" content="2018-08-14" />
 
 <title>Upgrading the Research Toolkit</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Upgrading the Research Toolkit</h1>
 <h4 class="author"><em>Lukasz A. Bartnik</em></h4>
-<h4 class="date"><em>2018-08-12</em></h4>
+<h4 class="date"><em>2018-08-14</em></h4>
 
 
 
@@ -95,8 +95,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><code>storage</code> is a simple, filesystem storage layer for R objects</li>
 <li><code>defer</code> provides API to identify objects referenced in R expressions</li>
 </ul>
-<p>The goal of the current implementation of the <em>repository of artifacts</em> is to automate the process of collecting artifacts together wth their lineage. The life of a repository of artifacts spans multiple R sessions and the repository itself is stored in the filesystem. All artifacts can be read and retrieved from the repository, inspected, their origin (lineage) can be explained. The <code>ui</code> package implements a search interface (the <code>artifacts</code> object) and a number of pretty-printing methods.</p>
+<p>The goal of the current implementation of the <em>repository of artifacts</em> is to automate the process of collecting artifacts together wth their lineage. The life of a repository of artifacts spans multiple R sessions and the repository itself is stored in the filesystem. All artifacts can be read and retrieved from the repository, inspected, their origin (lineage) can be explained. The <code>ui</code> package implements a search interface (the <code>artifacts</code> object with Tab-completion-based query builder) and a number of pretty-printing methods.</p>
 <p>The usefulness of this toolset depends on how well one manages their artifacts and the narrative of their exploratory data analysis. If the documentation does not include substantial gaps and the research is reproducible then automated collection and tracking of artifacts might be useful only occasionally. However, if the gaps in artifacts’ lineage are substantial and the documentation of the analysis is incomplete, an automated tracker might become handy.</p>
+<p>The main areas of current research are:</p>
+<ul>
+<li>ways of presenting artifacts that maximize the recall</li>
+<li>effective search interface</li>
+</ul>
+<div id="example" class="section level2">
+<h2>Example</h2>
 <p>Sample sequence of calls and tree-like explanation of objects is presented below. See the <code>tutorial</code> vignette in the <code>ui</code> package for the full listing and further explanations.</p>
 <p>The sequence of R commands presented next loads, transforms and subsets a data set with time series meter readings. It creates a number of plots and finally a simple linear model to test the significance of the daily and weekly cycles in the data.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">input &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata/block_62.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;repository&quot;</span>) <span class="op">%&gt;%</span>
@@ -144,6 +151,7 @@ m &lt;-<span class="st"> </span><span class="kw">lm</span>(usage <span class="op
 <span class="co">#&gt;         └── x (b83ee352) data.frame[8760, 5]</span>
 <span class="co">#&gt;             ├── &lt;plot&gt; (9f51d793)</span>
 <span class="co">#&gt;             └── m (57fbe755) lm adjR2:0.33 AIC:7164 df:168</span></code></pre></div>
+</div>
 </div>
 <div id="future" class="section level1">
 <h1>Future</h1>
