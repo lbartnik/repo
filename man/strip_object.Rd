@@ -2,12 +2,17 @@
 % Please edit documentation in R/repository-impl.R
 \name{strip_object}
 \alias{strip_object}
+\alias{strip_object_impl}
 \title{Removes references to environments.}
 \usage{
-strip_object(obj, attr = FALSE)
+strip_object(obj)
+
+strip_object_impl(obj, attr = FALSE)
 }
 \arguments{
 \item{obj}{Object to be processed.}
+
+\item{attr}{Is \code{obj} an attribute of some other object?}
 }
 \value{
 \code{obj} with environment references replaced by \code{emptyenv()}
