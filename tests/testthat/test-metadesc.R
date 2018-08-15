@@ -1,4 +1,4 @@
-context("meta")
+context("metadesc")
 
 
 test_that("tags for data.frame", {
@@ -18,3 +18,12 @@ test_that("default describe ignores custom operators", {
   p <- expect_silent(describe(o))
 })
 
+
+test_that("default describe excludes certain tags", {
+  tags <- list("artifact", "class", "commit", "id", "parent_commit", "time",
+               "names", "session", "x")
+  names(tags) <- as.character(tags)
+
+  x <- expect_silent(repository:::describe(tags))
+  expect_match(x, "names.*session.*x")
+})
