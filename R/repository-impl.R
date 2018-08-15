@@ -191,9 +191,9 @@ strip_object_impl <- function (obj, attr = FALSE)
   attrs <- if (!is.null(attributes(obj))) lapply(attributes(obj), strip_object_impl, attr = TRUE)
 
   if (is.list(obj)) {
-    obj_tmp <- lapply(obj, strip_object_impl, attr = FALSE)
+    obj_tmp <- lapply(unclass(obj), strip_object_impl, attr = FALSE)
     # use stripped object only if stripping actually changed something
-    obj_lst <- lapply(obj, function(x)x)
+    obj_lst <- lapply(unclass(obj), function(x)x)
     if (!identical(obj_tmp, obj_lst)) {
       obj <- obj_tmp
     }
