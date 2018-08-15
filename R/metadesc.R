@@ -29,7 +29,9 @@ describe <- function (tags) UseMethod("describe")
 
 #' @importFrom stringi stri_paste
 describe.default <- function (tags) {
-  values <- map_chr(tags, function(v) {
+  # class `unclass` to avoid calling a custom operator in `map_chr` as
+  # `tags` is not really an object of the class it declares
+  values <- map_chr(unclass(tags), function(v) {
     if (is_empty(v)) return('')
     stri_paste(unlist(v), collapse = ',')
   })
