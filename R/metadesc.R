@@ -29,6 +29,14 @@ describe <- function (tags) UseMethod("describe")
 
 #' @importFrom stringi stri_paste
 describe.default <- function (tags) {
+  # class `unclass` to avoid calling a custom operator in `map_chr` as
+  # `tags` is not really an object of the class it declares
+  tags <- unclass(tags)
+
+  # `exclude` could be an argument
+  exclude <- c("artifact", "class", "commit", "id", "parent_commit", "time")
+  tags <- tags[setdiff(names(tags), exclude)]
+
   values <- map_chr(tags, function(v) {
     if (is_empty(v)) return('')
     stri_paste(unlist(v), collapse = ',')

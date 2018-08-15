@@ -55,6 +55,15 @@ test_that("regular environment is not stripped", {
 })
 
 
+test_that("overloaded indexing is not used when stripping", {
+  assign("[[.xyz", function (x, i) stop('this should not be called'), envir = globalenv())
+  o <- structure(list(1), class = 'xyz')
+
+  p <- expect_silent(strip_object(o))
+  expect_equal(o, p)
+})
+
+
 # --- repository update ------------------------------------------------
 
 test_that("updater processes objects", {

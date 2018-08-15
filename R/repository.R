@@ -60,7 +60,7 @@ toString.repository <- function (x, ...) {
 #' @rdname repository
 #' @export
 #'
-repository_update <-function (repo, env, plot, expr) {
+repository_update <- function (repo, env, plot, expr) {
   guard()
   stopifnot(is_repository(repo))
 

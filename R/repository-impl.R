@@ -25,6 +25,8 @@ repository_updater <- function (repo, env, plot, expr) {
   u$plot_id <- character()
 
   u$process_objects <- function (.) {
+    guard("u$process_objects")
+
     .$objects <- lapply(as.list(env), strip_object)
     .$ids <- lapply(.$objects, storage::compute_id)
     .$new <- Filter(function (id) !storage::os_exists(.$store, id), .$ids)
@@ -49,6 +51,8 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$process_plot <- function (.) {
+    guard("u$process_plot")
+
     if (is.null(.$plot)) {
       return()
     }
@@ -78,6 +82,8 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$introduced_changes <- function (.) {
+    guard("u$introduced_changes")
+
     ia <- .$ids
     ib <- .$last_commit$objects
 
@@ -89,6 +95,8 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$write <- function (.) {
+    guard("u$write")
+
     # store list of object pointers + basic 'history' tags
     data <- list(expr = .$expr, objects = .$ids, plot = .$plot_id)
     tags <- list(class = 'commit', parent = .$last_commit$id, time = current_time())
@@ -121,6 +129,8 @@ repository_updater <- function (repo, env, plot, expr) {
   }
 
   u$sync_repo <- function (.) {
+    guard("u$sync_repo")
+
     .$.super$last_commit <- list(id = .$last_commit_id, objects = .$ids)
     .$.super$last_png    <- .$png
   }
@@ -155,22 +165,35 @@ extract_parents <- function (env, expr)
 #' which might be a costly operation.
 #'
 #' @param obj Object to be processed.
+#' @param attr Is `obj` an attribute of some other object?
+#'
 #' @return `obj` with environment references replaced by `emptyenv()`
 #'
-strip_object <- function (obj, attr = FALSE)
+#' @rdname strip_object
+#'
+strip_object <- function (obj)
 {
+  guard()
+
   if (is.symbol(obj)) return(obj)
   if (inherits(obj, 'recordedplot')) return(obj)
 
+  strip_object_impl(obj)
+}
+
+
+#' @rdname strip_object
+strip_object_impl <- function (obj, attr = FALSE)
+{
   # TODO should we disregard any environment?
   if (is.environment(obj) && isTRUE(attr)) return(emptyenv())
 
-  attrs <- if (!is.null(attributes(obj))) lapply(attributes(obj), strip_object, attr = TRUE)
+  attrs <- if (!is.null(attributes(obj))) lapply(attributes(obj), strip_object_impl, attr = TRUE)
 
   if (is.list(obj)) {
-    obj_tmp <- lapply(obj, strip_object, attr = FALSE)
+    obj_tmp <- lapply(unclass(obj), strip_object_impl, attr = FALSE)
     # use stripped object only if stripping actually changed something
-    obj_lst <- lapply(obj, function(x)x)
+    obj_lst <- lapply(unclass(obj), function(x)x)
     if (!identical(obj_tmp, obj_lst)) {
       obj <- obj_tmp
     }
