@@ -16,11 +16,13 @@ Imports:
   digest,
   dplyr,
   jsonlite,
+  magrittr,
   png,
   proto,
   rlang,
   rsvg,
   storage,
+  stringi,
   styler,
   tibble,
   tidyselect,
@@ -28,6 +30,7 @@ Imports:
 Suggests:
   data.table,
   devtools,
+  knitr,
   mockery,
   testthat
 Collate:
