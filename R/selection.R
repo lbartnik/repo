@@ -20,37 +20,37 @@ magrittr::`%>%`
 
 
 #' @export
-top_n <- function (x, n, wt) UseMethod("top_n")
+top_n <- function (.data, n, wt) UseMethod("top_n")
 
 #' @importFrom dplyr top_n
 #' @export
-top_n.default <- function (x, n, wt) dplyr::top_n(x, n, wt)
+top_n.default <- function (.data, n, wt) dplyr::top_n(x, n, wt)
 
 
 
 #' @export
-filter.repository <- function (repo, ...) {
-  filter(as_query(repo), ...)
+filter.repository <- function (.data, ...) {
+  filter(as_query(.data), ...)
 }
 
 #' @export
-arrange.repository <- function (repo, ...) {
-  arrange(as_query(repo), ...)
+arrange.repository <- function (.data, ...) {
+  arrange(as_query(.data), ...)
 }
 
 #' @export
-select.repository <- function (repo, ...) {
-  select(as_query(repo), ...)
+select.repository <- function (.data, ...) {
+  select(as_query(.data), ...)
 }
 
 #' @export
-summarise.repository <- function (repo, ...) {
-  summarise(as_query(repo), ...)
+summarise.repository <- function (.data, ...) {
+  summarise(as_query(.data), ...)
 }
 
 #' @export
-top_n.repository <- function (repo, n, wt) {
-  top_n(as_query(repo), n, wt)
+top_n.repository <- function (.data, n, wt) {
+  top_n(as_query(.data), n, wt)
 }
 
 
@@ -119,24 +119,24 @@ tag_values <- function (x) {
 
 #' @importFrom rlang quos
 #' @export
-filter.query <- function (qry, ...) {
+filter.query <- function (.data, ...) {
   dots <- quos(...)
-  qry$filter <- c(qry$filter, dots)
-  qry
+  .data$filter <- c(.data$filter, dots)
+  .data
 }
 
 #' @importFrom rlang abort quos
 #' @importFrom tidyselect vars_select
 #' @export
 #'
-select.query <- function (qry, ...) {
+select.query <- function (.data, ...) {
   sel <- quos(...)
 
-  if (!length(qry$select)) {
-    names <- all_select_names(qry)
+  if (!length(.data$select)) {
+    names <- all_select_names(.data)
   }
   else {
-    names <- qry$select
+    names <- .data$select
   }
 
   if (!length(names)) {
@@ -151,15 +151,15 @@ select.query <- function (qry, ...) {
     abort("select: selection reduced to an empty set")
   }
 
-  qry$select <- names
-  qry
+  .data$select <- names
+  .data
 }
 
 #' @export
-unselect <- function (qry) {
-  stopifnot(is_query(qry))
-  qry$select <- list()
-  qry
+unselect <- function (.data) {
+  stopifnot(is_query(.data))
+  .data$select <- list()
+  .data
 }
 
 
@@ -172,16 +172,16 @@ all_select_names <- function(qry) {
 
 #' @importFrom rlang quos quo
 #' @export
-arrange.query <- function (qry, ...) {
+arrange.query <- function (.data, ...) {
   dots <- quos(...)
-  qry$arrange <- c(qry$arrange, dots)
-  qry
+  .data$arrange <- c(.data$arrange, dots)
+  .data
 }
 
 
 #' @importFrom rlang quos quo abort
 #' @export
-top_n.query <- function (qry, n, wt) {
+top_n.query <- function (.data, n, wt) {
   if (!missing(wt)) {
     abort("wt not yet supported in top_n")
   }
@@ -189,19 +189,19 @@ top_n.query <- function (qry, n, wt) {
     abort("n has to be a non-negative number")
   }
 
-  qry$top_n <- n
-  qry
+  .data$top_n <- n
+  .data
 }
 
 
 #' @export
-summarise.query <- function (qry, ...) {
-  if (length(qry$summarise)) {
+summarise.query <- function (.data, ...) {
+  if (length(.data$summarise)) {
     warn("overwriting the query summary")
   }
 
-  qry$summarise <- quos(...)
-  qry
+  .data$summarise <- quos(...)
+  .data
 }
 
 
