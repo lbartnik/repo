@@ -13,6 +13,8 @@ sample_repository <- function () {
 
 
 #' @import proto
+#' @importFrom grDevices dev.off recordPlot
+#' @importFrom utils capture.output
 #'
 R_session_simulator <- function (repo) {
 

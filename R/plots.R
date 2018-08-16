@@ -36,6 +36,7 @@ plot.rawplot <- function (x, ...) {
 #'
 #' @return `character` string, base64-encoded SVG or PNG plot.
 #' @import jsonlite
+#' @importFrom grDevices dev.off png svg replayPlot
 #'
 #' @rdname rawplot
 #'

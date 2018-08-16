@@ -35,7 +35,7 @@ filter.history <- function (.data, ...)
         setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
       })
     },
-    no_parent = function () graph_roots(x)
+    no_parent = function () graph_roots(.data)
   )
 
   ans <- rlang::eval_tidy(first(quo), conditions)

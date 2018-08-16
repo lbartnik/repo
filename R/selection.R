@@ -24,7 +24,7 @@ top_n <- function (.data, n, wt) UseMethod("top_n")
 
 #' @importFrom dplyr top_n
 #' @export
-top_n.default <- function (.data, n, wt) dplyr::top_n(x, n, wt)
+top_n.default <- function (.data, n, wt) dplyr::top_n(.data, n, wt)
 
 
 
@@ -279,6 +279,7 @@ update <- function (x, ...) {
   stopif(length(x$select), length(x$summarise), length(x$arrange), length(x$top_n))
 
   quos <- quos(...)
+  e <- caller_env()
 
   ids <- select_ids(x)
   lapply(ids, function (id) {

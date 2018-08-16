@@ -43,6 +43,7 @@ Collate:
   'sample.R'
   'selection.R'
   'selection-impl.R'
+  'transient.R'
   'utils.R'
 Remotes:
   lbartnik/defer,

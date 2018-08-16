@@ -9,6 +9,8 @@ crc32 <- function (x) digest::digest(x, 'crc32')
 #' of the changes in values coming as input, namely changes in the output
 #' of `sessionInfo()`.
 #'
+#' @importFrom utils sessionInfo
+#'
 r_session_id <- function () {
   id <- getOption("repository.session_id", default = NULL)
   if (!is.null(id)) return(id)

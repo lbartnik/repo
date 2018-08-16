@@ -84,8 +84,6 @@ graph_stratify <- function (x) {
 
 is_stratified <- function (x) inherits(x, 'stratified')
 
-
-
 #' Turn a list of artifacts into a graph of artifacts.
 #'
 #' A list of artifacts, whose `names()` are artifact identifiers, is

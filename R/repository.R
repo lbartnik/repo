@@ -91,6 +91,7 @@ repository_update <- function (repo, env, plot, expr) {
 # TODO is it needed at all anymore?
 # TODO if it stays, node keys need to be agreed with repository_explain
 repository_history <- function (repo, mode = 'all') {
+  # actual implementation
   guard()
   stopifnot(is_repository(repo))
   stopifnot(mode %in% c("all", "current"))
@@ -159,7 +160,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   objects <- lapply(ids, function (id) {
     tags <- storage::os_read_tags(repo$store, id)
 
-    stopifnot(hasName(tags, c("class", "parents", "time", 'parent_commit')))
+    stopifnot(has_name(tags, c("class", "parents", "time", 'parent_commit')))
 
     tags$id <- id
     tags$commit <- tags$parent_commit
