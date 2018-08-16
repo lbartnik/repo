@@ -20,7 +20,6 @@ Imports:
   png,
   proto,
   rlang,
-  rsvg,
   storage,
   stringi,
   styler,
