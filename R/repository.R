@@ -212,10 +212,10 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
   }
 
   if (identical(style, 'tree')) {
-    vert  <- '│   '
+    vert  <- '\u2502   '
     vert0 <- '    '
-    fork  <- '├── '
-    fork0 <- '└── '
+    fork  <- '\u251c\u2500\u2500 '
+    fork0 <- '\u2514\u2500\u2500 '
 
     print_level <- function (x, indent, exdent) {
       i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
