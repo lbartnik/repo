@@ -75,7 +75,8 @@ utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'u
 #' history of data exploration.
 #'
 #' @description `simulate_london_meters` loads and examines a subset
-#' of __London meters__ data; see [energy] and the introductory vignette.
+#' of __London meters__ data; see the (https://www.kaggle.com/jeanmidev/smart-meters-in-london)[Kaggle website]
+#' for this data set and the introductory vignette.
 #'
 #' @param overwrite If current stash contains objects, setting `overwrite`
 #'        to `TRUE` will remove them prior to running simulation.

@@ -72,6 +72,11 @@ query <- function (x) {
             class = 'query')
 }
 
+#' Identify `query` objects.
+#'
+#' @param x Object to be tested.
+#' @return `TRUE` if `x` inherits from `"query"`.
+#'
 #' @export
 is_query <- function (x) inherits(x, 'query')
 

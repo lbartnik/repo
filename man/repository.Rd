@@ -50,12 +50,17 @@ as_origin(x)
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
-\item{id}{Commit identifier.}
+\item{mode}{\code{"current"} for the current branch only, \code{"all"} for the
+full tree.}
+
+\item{id}{List of artifact identifiers.}
 
 \item{ancestors}{Retrieve ancestors at most that far in the ancestry
 tree from specified \code{id}s.}
 
 \item{repo}{Repository object.}
+
+\item{id}{Commit identifier.}
 }
 \description{
 Tracks full history of multiple consecutive R sessions.

@@ -84,11 +84,13 @@ repository_update <- function (repo, env, plot, expr) {
 #' specified, the history is limited to the subtree of __commits__
 #' with `id` as the root.
 #'
-#' @rdname repository
+#' @param mode `"current"` for the current branch only, `"all"` for the
+#'        full tree.
 #'
+#' @rdname repository
 #' @export
 #'
-# TODO is it needed at all anymore?
+# TODO is this API needed at all anymore?
 # TODO if it stays, node keys need to be agreed with repository_explain
 repository_history <- function (repo, mode = 'all') {
   # actual implementation
@@ -129,6 +131,7 @@ repository_history <- function (repo, mode = 'all') {
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
+#' @param id List of artifact identifiers.
 #' @param ancestors Retrieve ancestors at most that far in the ancestry
 #'        tree from specified `id`s.
 #'
@@ -185,6 +188,11 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 }
 
 
+#' Pretty-print sets of artifacts.
+#'
+#' @param x Artifact set, e.g. returned by [repository_explain].
+#' @param style Either `"by_time"` or `"tree"`.
+#'
 #' @importFrom rlang warn
 #' @import utilities
 #'
