@@ -1,3 +1,8 @@
+#' Work with a sample artifact repository.
+#'
+#' Returns a handle to a read/write copy of an artifact repository
+#' installed with the package.
+#'
 #' @export
 sample_repository <- function () {
   source_path <- system.file('sample-repository/', package = 'repository')
@@ -75,7 +80,7 @@ utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'u
 #' history of data exploration.
 #'
 #' @description `simulate_london_meters` loads and examines a subset
-#' of __London meters__ data; see the (https://www.kaggle.com/jeanmidev/smart-meters-in-london)[Kaggle website]
+#' of __London meters__ data; see the [Kaggle website](https://www.kaggle.com/jeanmidev/smart-meters-in-london)
 #' for this data set and the introductory vignette.
 #'
 #' @param overwrite If current stash contains objects, setting `overwrite`

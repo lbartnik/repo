@@ -4,9 +4,6 @@
 \alias{rawplot}
 \alias{print.rawplot}
 \alias{plot.rawplot}
-\alias{replot_as}
-\alias{as_png}
-\alias{as_svg}
 \alias{png_equal}
 \alias{for_store}
 \title{Container for plots.}
@@ -17,28 +14,24 @@ rawplot(rp)
 
 \method{plot}{rawplot}(x, ...)
 
-replot_as(pl, type, ...)
-
-as_png(x, width = 1280, height = 720)
-
-as_svg(x)
-
 png_equal(a, b)
 
 for_store(x, store)
 }
 \arguments{
-\item{...}{Passed to \code{\link[=svg]{svg()}} or \code{\link[=png]{png()}}.}
+\item{rp}{value returned by \link[grDevices:recordPlot]{grDevices::recordPlot}.}
 
-\item{pl}{Plot recorded by \code{\link[=recordPlot]{recordPlot()}}.}
+\item{x}{\code{rawplot} object}
 
-\item{type}{Output format: \code{"png"} or \code{"svg"}.}
-}
-\value{
-\code{character} string, base64-encoded SVG or PNG plot.
+\item{...}{further arguments passed to or from other methods.}
+
+\item{a}{PNG plot.}
+
+\item{b}{PNG plot.}
 }
 \description{
 Container for plots.
 
-Returns a base64-encoded, SVG or PNG plot.
+\code{for_store} prepares a \code{rawplot} for writing to an
+object store (e.g. see \link[storage:filesystem]{storage::filesystem}).
 }

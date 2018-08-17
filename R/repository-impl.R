@@ -335,6 +335,8 @@ history_to_deltas <- function (hist)
 #' @description `is_deltas` verifies if the given object is a valid
 #' `deltas` structure.
 #'
+#' @param x Object to be tested.
+#'
 #' @rdname deltas
 #'
 is_deltas <- function (x) inherits(x, 'deltas')

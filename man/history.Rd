@@ -15,6 +15,11 @@ ancestor_of(x)
 
 no_parent()
 }
+\arguments{
+\item{x}{History object to be printed.}
+
+\item{...}{Extra arguments.}
+}
 \description{
 History of R session(s).
 }

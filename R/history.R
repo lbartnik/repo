@@ -1,5 +1,8 @@
 #' History of R session(s).
 #'
+#' @param x History object to be printed.
+#' @param ... Extra arguments.
+#'
 #' @rdname history
 #' @export
 #'

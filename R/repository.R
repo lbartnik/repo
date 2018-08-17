@@ -190,8 +190,9 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 
 #' Pretty-print sets of artifacts.
 #'
-#' @param x Artifact set, e.g. returned by [repository_explain].
-#' @param style Either `"by_time"` or `"tree"`.
+#' @param x artifact set, e.g. returned by [repository_explain].
+#' @param style either `"by_time"` or `"tree"`.
+#' @param ... further arguments passed to or from other methods.
 #'
 #' @importFrom rlang warn
 #' @import utilities

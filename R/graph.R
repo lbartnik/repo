@@ -92,8 +92,9 @@ is_stratified <- function (x) inherits(x, 'stratified')
 #' re-assigning `parents` if a certain parent artifact is not in the
 #' input list.
 #'
-#'   two extra keys to each element
-#' of the input list: `parents` and `children`
+#' @param artifacts `list` of artifacts, currently retrieved only in
+#'        `repository_explain`.
+#' @param store The store artifacts were read from.
 #'
 #' @importFrom rlang quos
 #' @import utilities

@@ -19,7 +19,18 @@ dplyr::summarise
 magrittr::`%>%`
 
 
+#' Retrieve top `n` elements.
+#'
+#' `dplyr`'s [dplyr::top_n] is a function, here we define an S3 method
+#' whose default implementation calls the function from `dplyr`.
+#'
+#' @param .data A `query`, `repository` or a class supported by `dplyr`.
+#' @param n The number of elements to retrieve.
+#' @param wt (Optional). The variable to use for ordering. Supported only
+#'        in `dplyr`.
+#'
 #' @export
+#'
 top_n <- function (.data, n, wt) UseMethod("top_n")
 
 #' @importFrom dplyr top_n
@@ -78,16 +89,21 @@ query <- function (x) {
 #' @return `TRUE` if `x` inherits from `"query"`.
 #'
 #' @export
+#' @rdname query
+#'
 is_query <- function (x) inherits(x, 'query')
 
 #' @importFrom rlang expr_deparse get_expr
-#'
 quos_text <- function (x) {
   map_chr(x, function (f) expr_deparse(get_expr(f)))
 }
 
 
+#' @param simplify simplify output formatting.
+#' @param ... further arguments passed to or from other methods.
+#'
 #' @export
+#' @rdname query
 print.query <- function (x, ..., simplify = FALSE) {
 
   # describe the source repo
@@ -105,14 +121,24 @@ print.query <- function (x, ..., simplify = FALSE) {
 }
 
 
+#' @description `tag_names` returns all tag names occuring among objects
+#' selected in the query `x`.
+#'
 #' @export
+#' @rdname query
+#'
 tag_names <- function (x) {
   ans <- all_tag_names(as_query(x))
   setdiff(ans, 'artifact')
 }
 
 
+#' @description `tag_values` returns a `list` of vectors of values for
+#' all tags occuring among objects selected in the query `x`.
+#'
 #' @export
+#' @rdname query
+#'
 tag_values <- function (x) {
   ans <- all_tag_values(as_query(x))
   nms <- setdiff(names(ans), 'artifact')
@@ -160,6 +186,12 @@ select.query <- function (.data, ...) {
   .data
 }
 
+
+#' @description `unselect` clears the list of selected tag names.
+#'
+#' @param .data `query` object.
+#'
+#' @rdname query
 #' @export
 unselect <- function (.data) {
   stopifnot(is_query(.data))
@@ -210,7 +242,14 @@ summarise.query <- function (.data, ...) {
 }
 
 
+#' @description `execute` runs the query and retrieves its results.
+#'
+#' @param x `query` object.
+#' @param .warn print warnings.
+#'
 #' @importFrom rlang UQS warn
+#'
+#' @rdname query
 #' @export
 #'
 execute <- function (x, .warn = TRUE) {

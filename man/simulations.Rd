@@ -15,7 +15,7 @@ to \code{TRUE} will remove them prior to running simulation.}
 }
 \description{
 \code{simulate_london_meters} loads and examines a subset
-of \strong{London meters} data; see the (https://www.kaggle.com/jeanmidev/smart-meters-in-london)\link{Kaggle website}
+of \strong{London meters} data; see the \href{https://www.kaggle.com/jeanmidev/smart-meters-in-london}{Kaggle website}
 for this data set and the introductory vignette.
 }
 \details{

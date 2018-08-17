@@ -7,7 +7,7 @@
 description(tags)
 }
 \arguments{
-\item{object}{Object to be described.}
+\item{tags}{Tags retrieved from an object store.}
 }
 \description{
 Provide a summary of an object.

@@ -11,6 +11,8 @@ is_deltas(x)
 }
 \arguments{
 \item{hist}{Object returned by \link{repository_history}.}
+
+\item{x}{Object to be tested.}
 }
 \value{
 Object of S3 class \code{deltas}.

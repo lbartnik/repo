@@ -7,9 +7,11 @@
 \method{print}{artifact.set}(x, ..., style = "by_time")
 }
 \arguments{
-\item{x}{Artifact set, e.g. returned by \link{repository_explain}.}
+\item{x}{artifact set, e.g. returned by \link{repository_explain}.}
 
-\item{style}{Either \code{"by_time"} or \code{"tree"}.}
+\item{...}{further arguments passed to or from other methods.}
+
+\item{style}{either \code{"by_time"} or \code{"tree"}.}
 }
 \description{
 Pretty-print sets of artifacts.
