@@ -1,3 +1,5 @@
+* `plot` tag cannot be exported bc it collides with graphics::plot
+
 * handle mutable objects: dplyr 0.7.6 injects a number of attributes (e.g.
   "indices" on a grouped df) when seemingly unrelated operations are
   carried out on that df (e.g. ggplot()); this will be very confusing as
