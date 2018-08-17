@@ -5,6 +5,8 @@
 \alias{filter.history}
 \alias{ancestor_of}
 \alias{no_parent}
+\alias{branch_tip}
+\alias{data_matches}
 \title{History of R session(s).}
 \usage{
 \method{print}{history}(x, ...)
@@ -14,14 +16,25 @@
 ancestor_of(x)
 
 no_parent()
+
+branch_tip()
+
+data_matches(..., data)
 }
 \arguments{
 \item{x}{History object to be printed.}
 
-\item{...}{Extra arguments.}
+\item{...}{named objects to look for.}
 
 \item{.data}{\code{history} object.`}
+
+\item{data}{(Optional). \code{...} as a single \code{list}.}
 }
 \description{
 History of R session(s).
+
+Selectors for history queries.
+
+\code{data_matches} searches for a commit whose artifacts
+match objects passed via \code{...} and \code{data}.
 }

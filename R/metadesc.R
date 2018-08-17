@@ -66,6 +66,7 @@ describe.rawplot <- function (tags) {
 #' @import broom
 #' @rdname internals
 #'
+#' @export
 description <- function (tags)
 {
   stopifnot(is_all_named(tags))
