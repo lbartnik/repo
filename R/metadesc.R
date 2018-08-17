@@ -61,7 +61,7 @@ describe.rawplot <- function (tags) {
 
 #' Provide a summary of an object.
 #'
-#' @param object Object to be described.
+#' @param tags Tags retrieved from an object store.
 #'
 #' @import broom
 #' @rdname internals

@@ -265,6 +265,14 @@ object_origin <- function (repo, ids, ancestors) {
 }
 
 
+#' Pretty-format an R expression.
+#'
+#' Internally calls [styler::style_text()] but adds line breaks after each
+#' occurence of the pipe operator.
+#'
+#' @param expr Expression.
+#' @param indent Indentation for all lines of the expression.
+#'
 #' @importFrom stringi stri_paste stri_replace_all_fixed stri_replace_all_regex
 #' @export
 format_expr <- function (expr, indent = '  ') {
@@ -326,6 +334,8 @@ history_to_deltas <- function (hist)
 
 #' @description `is_deltas` verifies if the given object is a valid
 #' `deltas` structure.
+#'
+#' @param x Object to be tested.
 #'
 #' @rdname deltas
 #'

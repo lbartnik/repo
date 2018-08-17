@@ -33,6 +33,8 @@ repository <- function (store)
 is_repository <- function (x) inherits(x, 'repository')
 
 
+#' @param ... further arguments passed to or from other methods.
+#'
 #' @rdname repository
 #' @export
 #'
@@ -84,13 +86,16 @@ repository_update <- function (repo, env, plot, expr) {
 #' specified, the history is limited to the subtree of __commits__
 #' with `id` as the root.
 #'
-#' @rdname repository
+#' @param mode `"current"` for the current branch only, `"all"` for the
+#'        full tree.
 #'
+#' @rdname repository
 #' @export
 #'
-# TODO is it needed at all anymore?
+# TODO is this API needed at all anymore?
 # TODO if it stays, node keys need to be agreed with repository_explain
 repository_history <- function (repo, mode = 'all') {
+  # actual implementation
   guard()
   stopifnot(is_repository(repo))
   stopifnot(mode %in% c("all", "current"))
@@ -128,6 +133,7 @@ repository_history <- function (repo, mode = 'all') {
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
 #' all artifacts is returned.
 #'
+#' @param id List of artifact identifiers.
 #' @param ancestors Retrieve ancestors at most that far in the ancestry
 #'        tree from specified `id`s.
 #'
@@ -159,7 +165,7 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
   objects <- lapply(ids, function (id) {
     tags <- storage::os_read_tags(repo$store, id)
 
-    stopifnot(hasName(tags, c("class", "parents", "time", 'parent_commit')))
+    stopifnot(has_name(tags, c("class", "parents", "time", 'parent_commit')))
 
     tags$id <- id
     tags$commit <- tags$parent_commit
@@ -184,6 +190,12 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
 }
 
 
+#' Pretty-print sets of artifacts.
+#'
+#' @param x artifact set, e.g. returned by [repository_explain].
+#' @param style either `"by_time"` or `"tree"`.
+#' @param ... further arguments passed to or from other methods.
+#'
 #' @importFrom rlang warn
 #' @import utilities
 #'
@@ -212,10 +224,10 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
   }
 
   if (identical(style, 'tree')) {
-    vert  <- '│   '
+    vert  <- '\u2502   '
     vert0 <- '    '
-    fork  <- '├── '
-    fork0 <- '└── '
+    fork  <- '\u251c\u2500\u2500 '
+    fork0 <- '\u2514\u2500\u2500 '
 
     print_level <- function (x, indent, exdent) {
       i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
@@ -243,6 +255,8 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
 
 #' @description `print.explained` pretty-prints a description of an
 #' artifact.
+#'
+#' @param style `"full"`, `"short"` or `"line"`.
 #'
 #' @importFrom storage shorten
 #'
@@ -301,9 +315,6 @@ print.artifact.meta <- function (x, ..., style = 'full') {
 #' that value. Subsequent commits will be recorded as descendants of
 #' commit `id`.
 #'
-#' @param repo Repository object.
-#' @param id Commit identifier.
-#'
 #' @rdname repository
 #'
 #' @export
@@ -353,6 +364,8 @@ as_origin <- function (x) {
 
 
 #' Tree-related operations.
+#'
+#' @param x `graph` object.
 #'
 #' @rdname trees
 #' @export

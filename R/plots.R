@@ -1,5 +1,7 @@
 #' Container for plots.
 #'
+#' @param rp value returned by [grDevices::recordPlot].
+#'
 #' @rdname rawplot
 rawplot <- function (rp) {
   stopifnot(is_recorded_plot(rp))
@@ -11,6 +13,9 @@ is_rawplot <- function (x) inherits(x, 'rawplot')
 
 
 
+#' @param x `rawplot` object
+#' @param ... further arguments passed to or from other methods.
+#'
 #' @export
 #' @rdname rawplot
 print.rawplot <- function (x, ...) {
@@ -30,14 +35,15 @@ plot.rawplot <- function (x, ...) {
 
 #' Returns a base64-encoded, SVG or PNG plot.
 #'
-#' @param pl Plot recorded by [recordPlot()].
+#' @param pl Plot recorded by [grDevices::recordPlot()].
 #' @param type Output format: `"png"` or `"svg"`.
 #' @param ... Passed to [svg()] or [png()].
 #'
 #' @return `character` string, base64-encoded SVG or PNG plot.
 #' @import jsonlite
+#' @importFrom grDevices dev.off png svg replayPlot
 #'
-#' @rdname rawplot
+#' @rdname replot
 #'
 replot_as <- function (pl, type, ...) {
   guard()
@@ -63,28 +69,38 @@ replot_as <- function (pl, type, ...) {
 }
 
 
-#' @rdname rawplot
+#' @param x `rawplot` object.
+#' @param width PNG width.
+#' @param height PNG height.
+#'
+#' @rdname replot
 as_png <- function (x, width = 1280, height = 720) {
   stopifnot(is_rawplot(x))
   replot_as(x$recordedplot, 'png', width = width, height = height)
 }
 
-#' @rdname rawplot
+#' @rdname replot
 as_svg <- function (x) {
   stopifnot(is_rawplot(x))
   replot_as(x$recordedplot, 'svg')
 }
 
 
-
+#' @param a PNG plot.
+#' @param b PNG plot.
+#'
 #' @rdname rawplot
 png_equal <- function (a, b) {
   isTRUE(all.equal(a, b))
 }
 
 
+#' @description `for_store` prepares a `rawplot` for writing to an
+#' object store (e.g. see [storage::filesystem]).
+#'
 #' @rdname rawplot
-for_store <- function (x, store) {
+#'
+for_store <- function (x) {
   stopifnot(is_rawplot(x))
 
   if (is.null(x$svg)) x$svg <- as_svg(x)
@@ -92,4 +108,3 @@ for_store <- function (x, store) {
 
   x
 }
-

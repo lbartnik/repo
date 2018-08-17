@@ -6,14 +6,16 @@
 \usage{
 graph_of_artifacts(artifacts, store)
 }
+\arguments{
+\item{artifacts}{\code{list} of artifacts, currently retrieved only in
+\code{repository_explain}.}
+
+\item{store}{The store artifacts were read from.}
+}
 \description{
 A list of artifacts, whose \code{names()} are artifact identifiers, is
 transformed into a graph by adding a \code{children} key each element of
 the list, removing \code{parents} that do exist in the list and finally
 re-assigning \code{parents} if a certain parent artifact is not in the
 input list.
-}
-\details{
-two extra keys to each element
-of the input list: \code{parents} and \code{children}
 }

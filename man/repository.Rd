@@ -42,6 +42,8 @@ as_origin(x)
 
 \item{x}{Object to be tested, converted or printed.}
 
+\item{...}{further arguments passed to or from other methods.}
+
 \item{repo}{A repository object.}
 
 \item{env}{Environment to create a commit from (e.g. \link{globalenv}).}
@@ -50,12 +52,15 @@ as_origin(x)
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
-\item{id}{Commit identifier.}
+\item{mode}{\code{"current"} for the current branch only, \code{"all"} for the
+full tree.}
+
+\item{id}{List of artifact identifiers.}
 
 \item{ancestors}{Retrieve ancestors at most that far in the ancestry
 tree from specified \code{id}s.}
 
-\item{repo}{Repository object.}
+\item{style}{\code{"full"}, \code{"short"} or \code{"line"}.}
 }
 \description{
 Tracks full history of multiple consecutive R sessions.

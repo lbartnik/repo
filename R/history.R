@@ -1,9 +1,12 @@
 #' History of R session(s).
 #'
+#' @param x History object to be printed.
+#' @param ... Extra arguments.
+#'
 #' @rdname history
 #' @export
 #'
-print.history <- function (x) {
+print.history <- function (x, ...) {
   cat('<history:commits>\n')
   cat(length(x), 'node(s)')
 }
@@ -11,35 +14,37 @@ print.history <- function (x) {
 is_history <- function (x) inherits(x, 'history') && storage::is_object_store(attr(x, 'store'))
 
 
+#' @param .data `history` object.`
+#'
 #' @rdname history
 #' @export
 #'
-filter.history <- function (x, ...)
+filter.history <- function (.data, ...)
 {
-  stopifnot(is_graph(x))
+  stopifnot(is_graph(.data))
 
   quo <- rlang::enquos(...)
   stopifnot(identical(length(quo), 1L))
 
   conditions <- list(
-    ancestor_of  = function (y) graph_reduce(x, to = y),
+    ancestor_of  = function (y) graph_reduce(.data, to = y),
     branch_tip   = function ()  {
-      Filter(x, f = function (commit) identical(length(commit$children), 0L))
+      Filter(.data, f = function (commit) identical(length(commit$children), 0L))
     },
     data_matches = function (..., data) {
       data <- if (missing(data)) list(...) else c(data, list(...))
       stopifnot(is_all_named(data))
 
       data <- lapply(data, storage::compute_id)
-      Filter(x, f = function (commit) {
+      Filter(.data, f = function (commit) {
         setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
       })
     },
-    no_parent = function () graph_roots(x)
+    no_parent = function () graph_roots(.data)
   )
 
   ans <- rlang::eval_tidy(first(quo), conditions)
-  preserve_attributes(ans, x)
+  preserve_attributes(ans, .data)
 }
 
 
