@@ -24,13 +24,11 @@ data_matches(..., data)
 \arguments{
 \item{x}{History object to be printed.}
 
-\item{...}{Extra arguments.}
+\item{...}{named objects to look for.}
 
 \item{.data}{\code{history} object.`}
 
 \item{data}{(Optional). \code{...} as a single \code{list}.}
-
-\item{...}{named objects to look for.}
 }
 \description{
 History of R session(s).

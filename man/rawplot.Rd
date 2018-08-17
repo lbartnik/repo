@@ -12,7 +12,7 @@ rawplot(rp)
 
 \method{print}{rawplot}(x, ...)
 
-plot.rawplot(x, ...)
+\method{plot}{rawplot}(x, ...)
 
 png_equal(a, b)
 

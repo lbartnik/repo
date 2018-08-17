@@ -50,7 +50,7 @@ object <- NULL
 
 #' @rdname tagnames
 #' @export
-plot <- NULL
+#plot <- NULL
 
 #' @rdname tagnames
 #' @export

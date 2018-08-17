@@ -4,7 +4,6 @@
 \name{time}
 \alias{time}
 \alias{object}
-\alias{plot}
 \alias{id}
 \alias{artifact}
 \alias{parent_commit}
@@ -16,8 +15,6 @@
 time
 
 object
-
-plot
 
 id
 
