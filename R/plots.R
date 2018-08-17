@@ -100,7 +100,7 @@ png_equal <- function (a, b) {
 #'
 #' @rdname rawplot
 #'
-for_store <- function (x, store) {
+for_store <- function (x) {
   stopifnot(is_rawplot(x))
 
   if (is.null(x$svg)) x$svg <- as_svg(x)

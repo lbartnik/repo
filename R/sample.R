@@ -57,6 +57,8 @@ R_session_simulator <- function (repo) {
 utils::globalVariables(c('iris'))
 
 
+#' @param repo Repository to write to.
+#'
 #' @rdname simulations
 generate_simple <- function (repo)
 {
@@ -82,9 +84,6 @@ utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'u
 #' @description `simulate_london_meters` loads and examines a subset
 #' of __London meters__ data; see the [Kaggle website](https://www.kaggle.com/jeanmidev/smart-meters-in-london)
 #' for this data set and the introductory vignette.
-#'
-#' @param overwrite If current stash contains objects, setting `overwrite`
-#'        to `TRUE` will remove them prior to running simulation.
 #'
 #' @rdname simulations
 #'

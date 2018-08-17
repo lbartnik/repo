@@ -14,6 +14,8 @@ print.history <- function (x, ...) {
 is_history <- function (x) inherits(x, 'history') && storage::is_object_store(attr(x, 'store'))
 
 
+#' @param .data `history` object.`
+#'
 #' @rdname history
 #' @export
 #'

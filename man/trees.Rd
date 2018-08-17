@@ -6,6 +6,9 @@
 \usage{
 stratify(x)
 }
+\arguments{
+\item{x}{\code{graph} object.}
+}
 \description{
 Tree-related operations.
 }

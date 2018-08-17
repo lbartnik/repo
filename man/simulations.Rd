@@ -10,8 +10,7 @@ generate_simple(repo)
 simulate_london_meters(repo)
 }
 \arguments{
-\item{overwrite}{If current stash contains objects, setting \code{overwrite}
-to \code{TRUE} will remove them prior to running simulation.}
+\item{repo}{Repository to write to.}
 }
 \description{
 \code{simulate_london_meters} loads and examines a subset

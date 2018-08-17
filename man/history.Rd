@@ -19,6 +19,8 @@ no_parent()
 \item{x}{History object to be printed.}
 
 \item{...}{Extra arguments.}
+
+\item{.data}{\code{history} object.`}
 }
 \description{
 History of R session(s).

@@ -16,7 +16,7 @@ rawplot(rp)
 
 png_equal(a, b)
 
-for_store(x, store)
+for_store(x)
 }
 \arguments{
 \item{rp}{value returned by \link[grDevices:recordPlot]{grDevices::recordPlot}.}

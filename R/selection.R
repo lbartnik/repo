@@ -89,7 +89,6 @@ query <- function (x) {
 #' @return `TRUE` if `x` inherits from `"query"`.
 #'
 #' @export
-#' @rdname query
 #'
 is_query <- function (x) inherits(x, 'query')
 
@@ -99,6 +98,8 @@ quos_text <- function (x) {
 }
 
 
+#' Querying an artifact repository.
+#'
 #' @param simplify simplify output formatting.
 #' @param ... further arguments passed to or from other methods.
 #'

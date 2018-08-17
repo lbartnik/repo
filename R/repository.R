@@ -33,6 +33,8 @@ repository <- function (store)
 is_repository <- function (x) inherits(x, 'repository')
 
 
+#' @param ... further arguments passed to or from other methods.
+#'
 #' @rdname repository
 #' @export
 #'
@@ -254,6 +256,8 @@ print.artifact.set <- function (x, ..., style = 'by_time') {
 #' @description `print.explained` pretty-prints a description of an
 #' artifact.
 #'
+#' @param style `"full"`, `"short"` or `"line"`.
+#'
 #' @importFrom storage shorten
 #'
 #' @rdname repository
@@ -311,9 +315,6 @@ print.artifact.meta <- function (x, ..., style = 'full') {
 #' that value. Subsequent commits will be recorded as descendants of
 #' commit `id`.
 #'
-#' @param repo Repository object.
-#' @param id Commit identifier.
-#'
 #' @rdname repository
 #'
 #' @export
@@ -363,6 +364,8 @@ as_origin <- function (x) {
 
 
 #' Tree-related operations.
+#'
+#' @param x `graph` object.
 #'
 #' @rdname trees
 #' @export

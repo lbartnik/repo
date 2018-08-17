@@ -119,7 +119,7 @@ test_that("select subsets", {
   q <- select(q, time)
   expect_equivalent(q$select, "time")
 
-  expect_error(select(q, id), "object 'id' not found")
+  expect_error(select(q, id), "select: selection reduced to an empty set")
 })
 
 test_that("various types of select", {
