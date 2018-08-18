@@ -100,16 +100,15 @@ quos_text <- function (x) {
 
 #' Querying an artifact repository.
 #'
-#' @param simplify simplify output formatting.
 #' @param ... further arguments passed to or from other methods.
 #'
 #' @export
 #' @rdname query
-print.query <- function (x, ..., simplify = FALSE) {
+print.query <- function (x, ...) {
 
   # describe the source repo
   lines <- new_vector()
-  lines$push_back(if (isTRUE(simplify)) '<repository>' else toString(x$repository))
+  lines$push_back(toString(x$repository))
 
   # print the full query
   for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {

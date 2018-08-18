@@ -8,7 +8,7 @@
 \alias{execute}
 \title{Querying an artifact repository.}
 \usage{
-\method{print}{query}(x, ..., simplify = FALSE)
+\method{print}{query}(x, ...)
 
 tag_names(x)
 
@@ -22,8 +22,6 @@ execute(x, .warn = TRUE)
 \item{x}{\code{query} object.}
 
 \item{...}{further arguments passed to or from other methods.}
-
-\item{simplify}{simplify output formatting.}
 
 \item{.data}{\code{query} object.}
 
