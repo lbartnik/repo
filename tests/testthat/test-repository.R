@@ -289,6 +289,12 @@ test_that("empty history", {
 })
 
 
+test_that("can find tips of branches", {
+  r <- sample_repository()
+  h <- repository_history(r)
+})
+
+
 test_that("full explanation", {
   r <- many_repository()
 

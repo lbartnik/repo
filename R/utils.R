@@ -12,22 +12,11 @@ crc32 <- function (x) digest::digest(x, 'crc32')
 #' @importFrom utils sessionInfo
 #'
 r_session_id <- function () {
-  id <- getOption("repository.session_id", default = NULL)
-  if (!is.null(id)) return(id)
-
-  id <- crc32(list(Sys.getpid(), sessionInfo()))
-  options(repository.session_id = id)
-
-  return(id)
+  if (!is.null(simulation$session_id)) return(simulation$session_id)
+  crc32(list(Sys.getpid(), sessionInfo()))
 }
-
 
 current_time <- function () {
-  if (!is.null(internals$time_offset)) return(Sys.time() + internals$time_offset)
+  if (!is.null(simulation$time)) return(simulation$time)
   Sys.time()
-}
-
-remove_class <- function (x, c) {
-  class(x) <- setdiff(class(x), c)
-  x
 }

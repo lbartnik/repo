@@ -1,27 +1,49 @@
-#' Work with a sample artifact repository.
-#'
-#' Returns a handle to a read/write copy of an artifact repository
-#' installed with the package.
-#'
-#' @export
-sample_repository <- function () {
-  source_path <- system.file('sample-repository/', package = 'repository')
-  target_path <- file.path(tempdir(TRUE), basename(source_path))
+simulation <- new.env()
 
-  if (!dir.exists(target_path)) {
-    dir.create(dirname(target_path), recursive = TRUE, showWarnings = FALSE)
-    file.copy(source_path, dirname(target_path), recursive = TRUE)
-  }
-
-  repository(storage::filesystem(target_path, create = FALSE))
+simulation_set <- function (name, value, ...) {
+  assign(name, value, envir = simulation)
 }
+
+simulation_get <- function (name, ...) {
+  get(name, envir = simulation)
+}
+
+simulation_unset <- function (names, ...) {
+  rm(list = names, envir = simulation)
+}
+
+simulation_commit_remember <- function (repo, ...) {
+  simulation$last_commit_id <- repo$last_commit$id
+}
+
+simulation_commit_restore <- function (repo, ...) {
+  repository_rewind(repo, simulation$last_commit_id)
+}
+
+simulation_offset_time <- function (value, ...) {
+  time <- simulation_get('time')
+  if (!is.null(time)) {
+    value <- value + time
+  }
+  simulation_set('time', value)
+}
+
+
+#' @importFrom stringi stri_startswith_fixed
+is_simulation_cmd <- function (expr) {
+  if (!is.call(expr)) return(FALSE)
+  name <- as.character(first(expr))
+  stri_startswith_fixed(name, 'simulation_')
+}
+
 
 
 #' @import proto
 #' @importFrom grDevices dev.off recordPlot
 #' @importFrom utils capture.output
+#' @importFrom rlang inform
 #'
-R_session_simulator <- function (repo) {
+R_session_simulator <- function (repo, .silent = TRUE) {
 
   try(dev.off(), silent = TRUE)
   parent_env <- parent.frame(1)
@@ -34,17 +56,36 @@ R_session_simulator <- function (repo) {
 
   g$run <- function (., expr) {
     expr <- substitute(expr)
-    cat("evaluating: ", deparse(expr)[[1]], "...\n")
+    .$run_quoted(expr)
+  }
 
-    # print is necessary for graphics, but we don't want to see the
-    # output on the console, thus - print and capture at the same time
-    eval_expr <- substitute(print(expr), list(expr = expr))
-    capture.output(eval(eval_expr, .$session, enclos = baseenv()))
+  g$run_quoted <- function (., expr) {
+    if (is_simulation_cmd(expr)) {
+      inform(sprintf("simulation command: %s", first(deparse(expr))))
+      .$run_simulation_cmd(expr)
+    } else {
+      inform(sprintf("evaluating: %s", first(deparse(expr))))
 
-    plot <- tryCatch(recordPlot(), error = function(e)'error')
-    if (identical(plot, 'error')) plot <- NULL
+      # print is necessary for graphics, but we don't want to see the
+      # output on the console, thus - print and capture at the same time
+      eval_expr <- substitute(print(expr), list(expr = expr))
 
-    repository::repository_update(repo, .$session, plot, expr)
+      if (isTRUE(.silent)) {
+        capture.output(eval(eval_expr, .$session, enclos = baseenv()))
+      } else {
+        eval(eval_expr, .$session, enclos = baseenv())
+      }
+
+      plot <- tryCatch(recordPlot(), error = function(e)'error')
+      if (identical(plot, 'error')) plot <- NULL
+
+      repository::repository_update(repo, .$session, plot, expr)
+    }
+  }
+
+  g$run_simulation_cmd <- function (., expr) {
+    expr$repo <- .$repo
+    eval(expr)
   }
 
   g
@@ -73,8 +114,6 @@ generate_simple <- function (repo)
 
 # --- London meters sequece --------------------------------------------
 
-# Suppress checks in `simulate_london_meters`.
-utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'usage', 'dow', 'hour'))
 
 #' Simulations and examples.
 #'
@@ -86,13 +125,38 @@ utils::globalVariables(c('LCLid', 'tstp', 'energy_kWh', 'meter', 'timestamp', 'u
 #' for this data set and the introductory vignette.
 #'
 #' @rdname simulations
+#' @importFrom rlang parse_exprs
+#' @import utilities
 #'
-simulate_london_meters <- function (repo)
+simulate_london_meters <- function (repo, .silent = TRUE)
 {
-  old_id <- options("repository.session_id")
-  on.exit(options(old_id), add = TRUE)
-  on.exit(internals$time_offset <- NULL)
+  workspace <- R_session_simulator(repo, .silent = .silent)
+  exprs <- parse_exprs(file(system.file('scripts/london-meters.R', package = 'repository')))
 
-  workspace <- R_session_simulator(repo)
+  lapply(exprs, function (expr) {
+    workspace$run_quoted(expr)
+    simulation_offset_time(60)
+  })
 
+  # TODO split between two sessions
+  # TODO make it possible to go back in history
+}
+
+
+#' Work with a sample artifact repository.
+#'
+#' Returns a handle to a read/write copy of an artifact repository
+#' installed with the package.
+#'
+#' @export
+sample_repository <- function () {
+  source_path <- system.file('sample-repository/', package = 'repository')
+  target_path <- file.path(tempdir(TRUE), basename(source_path))
+
+  if (!dir.exists(target_path)) {
+    dir.create(dirname(target_path), recursive = TRUE, showWarnings = FALSE)
+    file.copy(source_path, dirname(target_path), recursive = TRUE)
+  }
+
+  repository(storage::filesystem(target_path, create = FALSE))
 }
