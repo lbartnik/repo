@@ -17,13 +17,13 @@ input <-
   dplyr::filter(meter %in% c("MAC004929", "MAC000010", "MAC004391"),
                 lubridate::year(timestamp) == 2013)
 
-# remember the commit id so that later we can come back to this point in history
-simulation_commit_remember()
-
 input %<>%
   dplyr::mutate(timestamp = lubridate::floor_date(timestamp, 'hours')) %>%
   dplyr::group_by(meter, timestamp) %>%
   dplyr::summarise(usage = sum(usage))
+
+# remember the commit id so that later we can come back to this point in history
+simulation_commit_remember()
 
 
 # dplyr adds attributes to objects when filter is called

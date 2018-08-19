@@ -17,6 +17,6 @@ r_session_id <- function () {
 }
 
 current_time <- function () {
-  if (!is.null(simulation$time)) return(simulation$time)
-  Sys.time()
+  offset <- if (!is.null(simulation$time)) simulation$time else 0
+  Sys.time() + offset
 }

@@ -4,10 +4,15 @@ test_that("simulation command is recognized", {
   rep <- empty_repository()
   rss <- R_session_simulator(rep)
 
-  expect_message(rss$run(simulation_set('time', 1)),
-                'simulation command: simulation_set\\("time", 1\\)')
-  expect_equal(simulation$time, 1)
+  tm <- current_time()
+
+  expect_message(rss$run(simulation_set('time', 1000)),
+                'simulation command: simulation_set\\("time", 1000\\)')
+  expect_equal(simulation$time, 1000)
+
+  expect_true(difftime(current_time(), tm, units = 'secs') >= 1000)
 })
+
 
 test_that("commit can be restored", {
   rep <- empty_repository()

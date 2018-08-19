@@ -10,7 +10,7 @@ store <- storage::filesystem(path, create = TRUE)
 repo  <- repository::repository(store)
 
 generate_simple(repo)
-simulate_london_meters(repo, .silent = FALSE)
+simulate_london_meters(repo)
 
 repo %>% select(id, object) %>% filter('input' %in% names) %>% execute
 
