@@ -16,8 +16,9 @@ simulation_commit_remember <- function (repo, ...) {
   simulation$last_commit_id <- repo$last_commit$id
 }
 
-simulation_commit_restore <- function (repo, ...) {
+simulation_commit_restore <- function (repo, env, ...) {
   repository_rewind(repo, simulation$last_commit_id)
+  commit_checkout(commit(repo$store, simulation$last_commit_id), env)
 }
 
 simulation_offset_time <- function (value, ...) {
@@ -85,7 +86,12 @@ R_session_simulator <- function (repo, .silent = TRUE) {
 
   g$run_simulation_cmd <- function (., expr) {
     expr$repo <- .$repo
+    expr$env  <- .$session
     eval(expr)
+  }
+
+  g$contents <- function (.) {
+    return(as.list(.$session))
   }
 
   g
@@ -139,7 +145,8 @@ simulate_london_meters <- function (repo, .silent = TRUE)
   })
 
   # TODO split between two sessions
-  # TODO make it possible to go back in history
+
+  invisible()
 }
 
 

@@ -7,7 +7,7 @@
 \usage{
 generate_simple(repo)
 
-simulate_london_meters(repo)
+simulate_london_meters(repo, .silent = TRUE)
 }
 \arguments{
 \item{repo}{Repository to write to.}
