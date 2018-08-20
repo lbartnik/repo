@@ -104,6 +104,13 @@ R_session_simulator <- function (repo, .silent = TRUE) {
 utils::globalVariables(c('iris'))
 
 
+#' @title Simulations.
+#'
+#' @rdname simulations
+#' @name simulations
+NULL
+
+
 #' @param repo Repository to write to.
 #'
 #' @rdname simulations
@@ -129,6 +136,8 @@ generate_simple <- function (repo)
 #' @description `simulate_london_meters` loads and examines a subset
 #' of __London meters__ data; see the [Kaggle website](https://www.kaggle.com/jeanmidev/smart-meters-in-london)
 #' for this data set and the introductory vignette.
+#'
+#' @param .silent Do not print output.
 #'
 #' @rdname simulations
 #' @importFrom rlang parse_exprs
