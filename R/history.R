@@ -76,3 +76,17 @@ introduced <- function (commits, id) {
 
   new_objs
 }
+
+
+#' @rdname history
+#'
+#' @param commit as returned by [repository_history()].
+#' @param env Environment to check-out artifacts to.
+#'
+#' @export
+commit_checkout <- function (commit, env) {
+  mapply(names(commit$data), commit$data, FUN = function (name, value) {
+    assign(name, value, envir = env)
+  })
+  invisible()
+}

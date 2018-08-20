@@ -3,6 +3,7 @@
 \name{print.history}
 \alias{print.history}
 \alias{filter.history}
+\alias{commit_checkout}
 \alias{ancestor_of}
 \alias{no_parent}
 \alias{branch_tip}
@@ -12,6 +13,8 @@
 \method{print}{history}(x, ...)
 
 \method{filter}{history}(.data, ...)
+
+commit_checkout(commit, env)
 
 ancestor_of(x)
 
@@ -27,6 +30,10 @@ data_matches(..., data)
 \item{...}{named objects to look for.}
 
 \item{.data}{\code{history} object.`}
+
+\item{commit}{as returned by \code{\link[=repository_history]{repository_history()}}.}
+
+\item{env}{Environment to check-out artifacts to.}
 
 \item{data}{(Optional). \code{...} as a single \code{list}.}
 }

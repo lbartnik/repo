@@ -21,3 +21,8 @@
 * provide pretty query API: inherits("class") instead of "class" %in% class
   storage::os_find will need to accept a new `env` parameter with those
   extra search API calls
+
+* when storing compound artifacts (e.g. lm) extract its dependencies
+  (e.g. the input data) and store an object-store reference instead of
+  the full artifact (e.g. in the case of lm this will greatly reduce the
+  size of the artifact)
