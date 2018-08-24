@@ -65,61 +65,6 @@ top_n.repository <- function (.data, n, wt) {
 }
 
 
-as_query <- function (x) {
-  if (is_query(x)) {
-    return(x)
-  }
-  if (is_repository(x)) {
-    return(query(x))
-  }
-
-  stop("cannot coerce class ", first(class(x)), " to query")
-}
-
-query <- function (x) {
-  stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = NULL,
-                 top_n = NULL, summarise = list()),
-            class = 'query')
-}
-
-#' Identify `query` objects.
-#'
-#' @param x Object to be tested.
-#' @return `TRUE` if `x` inherits from `"query"`.
-#'
-#' @export
-#'
-is_query <- function (x) inherits(x, 'query')
-
-#' @importFrom rlang expr_deparse get_expr
-quos_text <- function (x) {
-  map_chr(x, function (f) expr_deparse(get_expr(f)))
-}
-
-
-#' Querying an artifact repository.
-#'
-#' @param ... further arguments passed to or from other methods.
-#'
-#' @export
-#' @rdname query
-print.query <- function (x, ...) {
-
-  # describe the source repo
-  lines <- new_vector()
-  lines$push_back(toString(x$repository))
-
-  # print the full query
-  for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {
-    if (length(x[[part]])) {
-      lines$push_back(paste0(part, '(', join(quos_text(x[[part]]), ', '), ')'))
-    }
-  }
-
-  cat0('  ', join(lines$data(), ' %>%\n    '), '\n')
-}
-
 
 #' @description `tag_names` returns all tag names occuring among objects
 #' selected in the query `x`.
@@ -148,215 +93,166 @@ tag_values <- function (x) {
 
 # --- impl -------------------------------------------------------------
 
-#' @importFrom rlang quos
-#' @export
-filter.query <- function (.data, ...) {
-  dots <- quos(...)
-  .data$filter <- c(.data$filter, dots)
-  .data
+#' @importFrom rlang quo
+all_tag_names <- function (query) {
+  stopifnot(is_query(query))
+  store <- query$repository$store
+
+  ids <- select_ids(query)
+  if (!length(ids)) return(NULL)
+
+  nms <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
+  unique(unlist(nms))
 }
 
-#' @importFrom rlang abort quos
-#' @importFrom tidyselect vars_select
-#' @export
-#'
-select.query <- function (.data, ...) {
-  sel <- quos(...)
+#' @importFrom rlang quo
+all_tag_values <- function (query) {
+  stopifnot(is_query(query))
+  store <- query$repository$store
 
-  if (!length(.data$select)) {
-    names <- all_select_names(.data)
-  }
-  else {
-    names <- .data$select
-  }
+  ids <- select_ids(query)
+  raw <- lapply(ids, function (id) storage::os_read_tags(store, id))
 
-  if (!length(names)) {
-    abort("select: no tag names to select from, filter matches no objects?")
-  }
+  nms <- unique(unlist(lapply(raw, names)))
 
-  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
-  if (is_error(names)) {
-    abort(sprintf("select: could not select names: %s", names$message))
-  }
-  if (!length(names)) {
-    abort("select: selection reduced to an empty set")
-  }
+  vls <- lapply(nms, function (name) {
+    val <- lapply(raw, `[[`, name)
+    unq <- unique(unlist(val))
+    if (is.atomic(first(val))) `class<-`(unq, class(first(val))) else unq
+  })
 
-  .data$select <- names
-  .data
+  with_names(vls, nms)
 }
 
+# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
+# If there is no summary at all, returns FALSE.
+# If there's an unsupported summary, throws an exception.
+#' @importFrom rlang abort quo_expr
+only_n_summary <- function (qry) {
+  if (!length(qry$summarise)) return(FALSE)
+  if (!is_all_named(qry$summarise)) abort("all summaries expressions need to be named")
 
-#' @description `unselect` clears the list of selected tag names.
-#'
-#' @param .data `query` object.
-#'
-#' @rdname query
-#' @export
-unselect <- function (.data) {
-  stopifnot(is_query(.data))
-  .data$select <- list()
-  .data
+  i <- map_lgl(qry$summarise, function (s) {
+    expr <- quo_expr(s)
+    is.call(expr) && identical(expr, quote(n()))
+  })
+
+  all(i)
 }
 
 
-all_select_names <- function(qry) {
-  regular_names <- all_tag_names(qry)
-  if (is.null(regular_names)) return(character())
+#' @importFrom rlang caller_env eval_tidy quo quo_get_env
+select_ids <- function (qry) {
+  stopifnot(is_query(qry))
 
-  c(regular_names, "id", "object")
-}
+  s <- qry$repository$store
 
-#' @importFrom rlang quos quo
-#' @export
-arrange.query <- function (.data, ...) {
-  dots <- quos(...)
-  .data$arrange <- c(.data$arrange, dots)
-  .data
-}
-
-
-#' @importFrom rlang quos quo abort
-#' @export
-top_n.query <- function (.data, n, wt) {
-  if (!missing(wt)) {
-    abort("wt not yet supported in top_n")
-  }
-  if (missing(n) || !is.numeric(n) || isFALSE(n > 0)) {
-    abort("n has to be a non-negative number")
+  if (!any(quos_match(qry$filter, id))) {
+    return(storage::os_find(s, c(quo(artifact), qry$filter)))
   }
 
-  .data$top_n <- n
-  .data
-}
-
-
-#' @export
-summarise.query <- function (.data, ...) {
-  if (length(.data$summarise)) {
-    warn("overwriting the query summary")
+  if (length(qry$filter) > 1) {
+    abort("if `id` is used in filter, it must be the only expression")
   }
 
-  .data$summarise <- quos(...)
-  .data
+  flt <- first(qry$filter)
+  expr <- quo_expr(flt)
+
+  if (is.call(expr) && identical(first(expr), quote(`==`))) {
+    i <- if (identical(second(expr), quote(id))) 3 else 2
+    return(eval_tidy(expr[[i]], env = quo_get_env(flt)))
+  }
+
+  if (is.call(expr) && identical(first(expr), quote(`%in%`))) {
+    if (!identical(second(expr), quote(id))) abort('cannot process ', deparse(expr))
+    return(eval_tidy(expr[[3]]))
+  }
+
+  ids <- storage::os_find(s, list(quo(artifact)))
+  i <- eval_tidy(flt, list(id = ids))
+  ids[i]
 }
 
 
-#' @description `execute` runs the query and retrieves its results.
-#'
-#' @param x `query` object.
-#' @param .warn print warnings.
-#'
-#' @importFrom rlang UQS warn
-#'
-#' @rdname query
-#' @export
-#'
-execute <- function (x, .warn = TRUE) {
-  stopifnot(is_query(x))
-  if (!length(x$select)) {
-    if (isTRUE(.warn)) warn("selection is empty, returning an empty set")
-    return(tibble::tibble())
-  }
 
-  # TODO summarise is mutually exclusive with top_n and arrange
+#' @importFrom rlang quos quo_expr
+quos_match <- function (quos, ...) {
+  symbols <- lapply(quos(...), function (q) {
+    e <- quo_expr(q)
+    if (is.symbol(e)) return(e)
+    if (is.character(e)) return(as.symbol(e))
+    stop('cannot process ', as.character(e))
+  })
 
-  store <- x$repository$store
-
-  # 1. find artifacts that match the filter
-  ids <- select_ids(x)
-
-  # 1a. if there's a simple counting summary, this is where we can actually
-  #     return the result
-  if (only_n_summary(x)) {
-    ans <- tibble::tibble(length(ids))
-    return(with_names(ans, names(x$summarise)))
-  }
-
-  if (!length(ids)) {
-    if (isTRUE(.warn)) warn("filter did not match any objects, returning an empty set")
-    return(tibble::tibble())
-  }
-
-  # 2. decide what to read from the object store
-  sel <- if (length(x$select)) x$select else all_select_names()
-
-  values <- read_tags(setdiff(sel, c("id", "object")), ids, store)
-
-  # object is the actual original data, be it an R object or a plot
-  if ("object" %in% sel) {
-    values <- c(values, list(object = lapply(ids, function (id) storage::os_read_object(store, id))))
-  }
-
-  # id is not present among tags
-  if ("id" %in% sel) {
-    values <- c(values, list(id = ids))
-  }
-
-  # simplify list-based tags into a tibble
-  values <- flatten_lists(values)
-
-  # 3. summarise goes before arrange and top_n and if defined is the last step
-  if (length(x$summarise)) {
-    return(dplyr::summarise(values, UQS(x$summarise)))
-  }
-
-  # 4. arrange
-  # TODO if arrange is malformed, maybe intercept the exception and provide
-  #      a custom error message to the user?
-  if (length(x$arrange)) {
-    values <- dplyr::arrange_(values, .dots = x$arrange)
-  }
-
-  # 5. top_n
-  if (!is.null(x$top)) {
-    values <- head(values, x$top)
-  }
-
-  values
-}
-
-
-#' @importFrom rlang abort caller_env expr_text eval_tidy quos quo_get_expr
-update <- function (x, ...) {
-  stopifnot(is_query(x))
-  stopif(length(x$select), length(x$summarise), length(x$arrange), length(x$top_n))
-
-  quos <- quos(...)
-  e <- caller_env()
-
-  ids <- select_ids(x)
-  lapply(ids, function (id) {
-    tags <- storage::os_read_tags(x$repository$store, id)
-
-    newt <- unlist(lapply(seq_along(quos), function (i) {
-      n <- nth(names(quos), i)
-      q <- nth(quos, i)
-
-      if (nchar(n)) {
-        return(with_names(list(eval_tidy(q, tags, e)), n))
-      }
-
-      update_tag_values(quo_get_expr(q), tags)
-    }), recursive = FALSE)
-
-    storage::os_update_tags(x$repository$store, id, combine(newt, tags))
+  map_lgl(quos, function (quo) {
+    any(map_lgl(symbols, function (sym) expr_match(quo_expr(quo), sym)))
   })
 }
 
 
-#' @importFrom rlang quo
-update_tag_values <- function (expr, tags) {
-  what <- nth(expr, 1)
-  stopifnot(identical(what, quote(append)) || identical(what, quote(remove)))
-
-  where <- as.character(nth(expr, 2))
-  if (!has_name(tags, where)) tags[[where]] <- character()
-
-  e <- new.env(parent = emptyenv())
-  e$append <- function (where, what) union(where, what)
-  e$remove <- function (where, what) setdiff(where, what)
-
-  with_names(list(eval_tidy(expr, tags, e)), where)
+expr_match <- function (expr, sym) {
+  recurse <- function (x) any(unlist(lapply(x, function (e) expr_match(e, sym))))
+  if (!is.recursive(expr)) return(identical(expr, sym))
+  if (is.call(expr)) return(recurse(expr[-1]))
+  stop('cannot process ', deparse(expr))
 }
 
+
+read_tags <- function (tag_names, ids, store) {
+  columns <- map(tag_names, function(x) base::vector("list", length(ids)))
+
+  # read all tags' values for given ids
+  Map(ids, seq_along(ids), f = function (id, i) {
+    tags <- storage::os_read_tags(store, id)
+    imap(tags[tag_names], function (value, name) {
+      columns[[name]][[i]] <<- value
+    })
+  })
+
+  columns
+}
+
+
+#' @importFrom rlang warn
+flatten_lists <- function (values) {
+
+  # simplify columns which hold single, atomic values
+  values <- imap(values, function (column, name) {
+    # check which values are NULL
+    inl <- map_lgl(column, is.null)
+
+    # if all, drop the column
+    if (all(inl)) {
+      warn(sprintf("tag %s rendered no values, removing from result", name))
+      return(NULL)
+    }
+
+    # otherwise, replace NULLs with NAs
+    if (any(inl)) {
+      cls <- first(typeof(unlist(column[!inl])))
+      nav <- switch(cls, double = NA_real_, integer = NA_integer_, character = NA_character_,
+                    complex = NA_complex_, NA)
+      column[inl] <- nav
+    }
+
+    # if there are multi-valued elements, return a list
+    len <- map_int(column, length)
+    if (any(len != 1)) return(column)
+
+    # if there is a class, as long as it's the same (esp. POSIXct), apply that here
+    cls <- unique(map(column, class))
+    if (length(cls) == 1 && !is_atomic_class(first(cls))) {
+      column <- unlist(column, recursive = FALSE)
+      return(structure(column, class = first(cls)))
+    }
+
+    # if all are atomic, return a vector and let R choose the type
+    if (all(map_lgl(column, is.atomic))) return(unlist(column))
+
+    # finally return a list
+    column
+  })
+
+  values <- Filter(function(x)!is.null(x), values)
+  tibble::as_tibble(values)
+}

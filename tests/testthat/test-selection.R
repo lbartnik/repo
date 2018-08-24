@@ -62,10 +62,11 @@ test_that("filter adds up", {
   r <- many_repository()
 
   q <- filter(r, x == 1)
-  expect_equal(quos_text(q$filter), "x == 1")
+  expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
 
   q <- filter(q, y == 2)
-  expect_equal(quos_text(q$filter), c("x == 1", "y == 2"))
+  expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
+  expect_equal(rlang::quo_expr(second(q$filter)), bquote(y == 2))
 })
 
 
@@ -101,10 +102,11 @@ test_that("arrange adds up", {
   r <- many_repository()
 
   q <- arrange(r, x)
-  expect_equal(quos_text(q$arrange), "x")
+  expect_equal(rlang::quo_expr(first(q$arrange)), bquote(x))
 
   q <- arrange(q, y)
-  expect_equal(quos_text(q$arrange), c("x", "y"))
+  expect_equal(rlang::quo_expr(first(q$arrange)), quote(x))
+  expect_equal(rlang::quo_expr(second(q$arrange)), quote(y))
 })
 
 
