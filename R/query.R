@@ -231,6 +231,15 @@ read_artifacts <- function (.data) {
 }
 
 
+#' @export
+#' @rdname query
+read_commits <- function (.data) {
+  stopifnot(is_commits(.data))
+  stopifnot(identical(length(.data$select), 0L))
+
+  structure(list(), class = 'container')
+}
+
 
 #' @description `execute` runs the query and retrieves its results.
 #'

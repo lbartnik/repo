@@ -14,6 +14,7 @@
 \alias{top_n.query}
 \alias{summarise.query}
 \alias{read_artifacts}
+\alias{read_commits}
 \alias{execute}
 \alias{update}
 \title{Query the repository of artifacts.}
@@ -39,6 +40,8 @@ unselect(.data)
 \method{summarise}{query}(.data, ...)
 
 read_artifacts(.data)
+
+read_commits(.data)
 
 execute(.data)
 
