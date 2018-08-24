@@ -3,5 +3,6 @@
 #' @description Tracks full history of multiple consecutive R sessions.
 #'
 #' @import utilities
+#' @importFrom glue glue
 NULL
 

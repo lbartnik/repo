@@ -10,7 +10,7 @@
 #' @return An `artifact` object.
 #'
 #' @importFrom utilities has_name
-#' @rdname artifact
+#' @rdname artifact-internal
 as_artifact <- function (tags) {
   stopifnot(has_name(tags, 'id'))
 
@@ -24,6 +24,11 @@ as_artifact <- function (tags) {
 }
 
 
+#' Manipulating and processing artifacts.
+#'
+#' @param x object to be tested; `artifact` to be processed.
+#'
+#' @export
 #' @rdname artifact
 is_artifact <- function (x) inherits(x, 'artifact')
 
@@ -34,4 +39,25 @@ is_valid_artifact <- function (x) {
   is_artifact(x) &&
     is_scalar_character(x$id) &&
     is_character(x)
+}
+
+
+#' @description `artifact_is` answers various questions about an
+#' artifact.
+#'
+#' @param what property of an `artifact` to be tested.
+#'
+#' @export
+#' @rdname artifact
+#'
+#' @examples
+#' \dontrun{
+#' artifact_is(a, 'plot')
+#' }
+artifact_is <- function (x, what) {
+  stopifnot(is_artifact(x))
+
+  if (identical(what, 'plot')) return('plot' %in% x$class)
+
+  abort(glue("unsupported value of what: {what}"))
 }

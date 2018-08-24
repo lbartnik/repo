@@ -15,6 +15,7 @@ Imports:
   defer,
   digest,
   dplyr,
+  glue,
   jsonlite,
   magrittr,
   png,
