@@ -59,7 +59,7 @@ test_that("all tag values", {
 # --- filter -----------------------------------------------------------
 
 test_that("filter adds up", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- filter(r, x == 1)
   expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
@@ -71,7 +71,7 @@ test_that("filter adds up", {
 
 
 test_that("filter by id", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   # no filter
   x <- r %>% select(id) %>% select_ids
@@ -99,7 +99,7 @@ test_that("filter by id", {
 # --- arrange ----------------------------------------------------------
 
 test_that("arrange adds up", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- arrange(r, x)
   expect_equal(rlang::quo_expr(first(q$arrange)), bquote(x))
@@ -113,7 +113,7 @@ test_that("arrange adds up", {
 # --- select -----------------------------------------------------------
 
 test_that("select subsets", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- select(r, time, id)
   expect_equivalent(q$select, c("time", "id"))
@@ -125,7 +125,7 @@ test_that("select subsets", {
 })
 
 test_that("various types of select", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   # a single column
   x <- select(r, id) %>% execute
@@ -149,7 +149,7 @@ test_that("various types of select", {
 
 
 test_that("no tag names for empty query", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- as_query(r)
   expect_length(all_select_names(q), 8)
@@ -165,7 +165,7 @@ test_that("no tag names for empty query", {
 # --- top_n ------------------------------------------------------------
 
 test_that("top_n chooses top n entries", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- top_n(r, 2)
   expect_equal(q$top, 2)
@@ -180,7 +180,7 @@ test_that("top_n chooses top n entries", {
 # --- summary ----------------------------------------------------------
 
 test_that("summary is recorded", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- summarise(r, n = n())
   expect_length(q$summarise, 1)
@@ -192,7 +192,7 @@ test_that("summary is recorded", {
 
 
 test_that("simple summary", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   q <- select(r, id) %>% summarise(id = min(id), n = n()) %>% execute
   expect_length(q, 2)
@@ -205,7 +205,7 @@ test_that("simple summary", {
 # --- execute ----------------------------------------------------------
 
 test_that("execute runs the query", {
-  r <- many_repository()
+  r <- as_query(many_repository())
 
   x <- select(r, id) %>% execute
   expect_named(x, "id")
@@ -248,7 +248,7 @@ test_that("simplify tags", {
 
 test_that("update", {
   r <- many_repository()
-  q <- filter(r, id == 'a')
+  q <- filter(as_query(r), id == 'a')
 
   expect_tag <- function (tag, value) {
     expect_equal(nth(storage::os_read_tags(r$store, 'a'), tag), value, label = tag)

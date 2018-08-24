@@ -3,14 +3,19 @@
 \name{new_query}
 \alias{new_query}
 \alias{as_query}
+\alias{set_type}
 \title{Internal API for query objects.}
 \usage{
 new_query(x)
 
 as_query(x)
+
+set_type(x, type)
 }
 \arguments{
 \item{x}{\code{repository} object or an object to be turned into a \code{query}.}
+
+\item{type}{make \code{x} be of type \code{type}.}
 }
 \description{
 Internal API for query objects.

@@ -4,8 +4,13 @@
 #' @rdname query-internal
 new_query <- function (x) {
   stopifnot(is_repository(x))
-  structure(list(repository = x, filter = list(), arrange = list(), select = NULL,
-                 top_n = NULL, summarise = list()),
+  structure(list(repository = x,
+                 filter = list(),
+                 arrange = list(),
+                 select = NULL,
+                 top_n = NULL,
+                 summarise = list(),
+                 type = 'raw'),
             class = 'query')
 }
 
@@ -23,10 +28,54 @@ as_query <- function (x) {
 }
 
 
+#' @param type make `x` be of type `type`.
+#' @rdname query-internal
+set_type <- function (x, type) {
+  x$type <- type
+  x
+}
+
+
+# TODO a general query man page mentioning all categories of functions + specific pages (query, read, etc.)
 
 #' Query the repository of artifacts.
 #'
-#' @param x Object to be tested or printed.
+#' @param x Object to be tested (`is_query()`, `is_artifacts()`, `is_commits()`),
+#'        printed, cast as `query` (`as_query()`, `as_artifacts()`,
+#'        `as_commits()`) or querried (verbs).
+#'
+#' @rdname query
+#' @name query
+NULL
+
+
+#' @description `as_commits` creates a `query` to search for commits.
+#' @export
+#' @rdname query
+as_commits <- function (x) {
+  stopifnot(is_repository(x))
+  filter(set_type(as_query(x), 'commits'),
+         'commit' %in% class)
+}
+
+
+#' @description `as_commits` creates a `query` to search for commits.
+#' @export
+#' @rdname query
+as_artifacts <- function (x) {
+  stopifnot(is_repository(x))
+  filter(set_type(as_query(x), 'artifacts'),
+         artifact)
+}
+
+
+is_raw <- function (x) is_query(x) && identical(x$type, 'raw')
+
+is_commits <- function (x) is_query(x) && identical(x$type, 'commits')
+
+is_artifacts <- function (x) is_query(x) && identical(x$type, 'artifacts')
+
+
 #' @return `TRUE` if `x` inherits from `"query"`.
 #'
 #' @export
@@ -84,6 +133,13 @@ filter.query <- function (.data, ...) {
 #' @rdname query
 select.query <- function (.data, ...) {
   sel <- quos(...)
+
+  # TODO store & print the expressions and perform tidyselect only when
+  #      ready to read the data; select() will be disallowed in read_objects
+  #      read_ids, read_artifacts and read_commits
+
+  # TODO only if query type is tags select() will narrow down; in every
+  #      other case it will replace the current select with a warning
 
   if (!length(.data$select)) {
     names <- all_select_names(.data)
@@ -156,6 +212,24 @@ summarise.query <- function (.data, ...) {
   .data$summarise <- quos(...)
   .data
 }
+
+
+#' @export
+#' @rdname query
+read_artifacts <- function (.data) {
+  stopifnot(is_artifacts(.data))
+  stopifnot(identical(length(.data$select), 0L))
+
+  store <- .data$repository$store
+  ans <- lapply(select_ids(.data), function (id) {
+    tags <- storage::os_read_tags(store, id)
+    tags$id <- id
+    as_artifact(tags)
+  })
+
+  structure(ans, class = 'container')
+}
+
 
 
 #' @description `execute` runs the query and retrieves its results.
@@ -259,6 +333,7 @@ update <- function (.data, ...) {
 
 
 # --- internal ---------------------------------------------------------
+
 
 #' @importFrom rlang quo
 update_tag_values <- function (expr, tags) {

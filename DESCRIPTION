@@ -33,6 +33,7 @@ Suggests:
   mockery,
   testthat
 Collate:
+  'artifact.R'
   'graph.R'
   'history.R'
   'metadesc.R'

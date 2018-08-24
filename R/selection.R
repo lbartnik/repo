@@ -39,39 +39,13 @@ top_n.default <- function (.data, n, wt) dplyr::top_n(.data, n, wt)
 
 
 
-#' @export
-filter.repository <- function (.data, ...) {
-  filter(as_query(.data), ...)
-}
-
-#' @export
-arrange.repository <- function (.data, ...) {
-  arrange(as_query(.data), ...)
-}
-
-#' @export
-select.repository <- function (.data, ...) {
-  select(as_query(.data), ...)
-}
-
-#' @export
-summarise.repository <- function (.data, ...) {
-  summarise(as_query(.data), ...)
-}
-
-#' @export
-top_n.repository <- function (.data, n, wt) {
-  top_n(as_query(.data), n, wt)
-}
-
-
-
+#' Extra query API.
+#'
 #' @description `tag_names` returns all tag names occuring among objects
 #' selected in the query `x`.
 #'
 #' @export
-#' @rdname query
-#'
+#' @rdname query-extra
 tag_names <- function (x) {
   ans <- all_tag_names(as_query(x))
   setdiff(ans, 'artifact')
@@ -82,8 +56,7 @@ tag_names <- function (x) {
 #' all tags occuring among objects selected in the query `x`.
 #'
 #' @export
-#' @rdname query
-#'
+#' @rdname query-extra
 tag_values <- function (x) {
   ans <- all_tag_values(as_query(x))
   nms <- setdiff(names(ans), 'artifact')
