@@ -55,6 +55,11 @@ printed, cast as \code{query} (\code{as_query()}, \code{as_artifacts()},
 \item{...}{further arguments passed to or from other methods.}
 
 \item{.data}{\code{query} object.}
+
+\item{n}{The number of elements to retrieve.}
+
+\item{wt}{(Optional). The variable to use for ordering. Supported only
+in \code{dplyr}.}
 }
 \value{
 \code{TRUE} if \code{x} inherits from \code{"query"}.

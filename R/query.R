@@ -186,6 +186,8 @@ arrange.query <- function (.data, ...) {
 }
 
 
+#' @inheritParams top_n
+#'
 #' @importFrom rlang quos quo abort
 #' @export
 #' @rdname query
@@ -245,6 +247,9 @@ read_commits <- function (.data) {
 #' @export
 #' @rdname query
 execute <- function (.data) {
+
+  .warn <- FALSE # TODO revisit warnings
+
   stopifnot(is_query(.data))
   if (!length(.data$select)) {
     warn("selection is empty, returning an empty set")

@@ -9,6 +9,9 @@ tag_names(x)
 
 tag_values(x)
 }
+\arguments{
+\item{x}{query object.}
+}
 \description{
 \code{tag_names} returns all tag names occuring among objects
 selected in the query \code{x}.

@@ -44,6 +44,8 @@ top_n.default <- function (.data, n, wt) dplyr::top_n(.data, n, wt)
 #' @description `tag_names` returns all tag names occuring among objects
 #' selected in the query `x`.
 #'
+#' @param x query object.
+#'
 #' @export
 #' @rdname query-extra
 tag_names <- function (x) {
