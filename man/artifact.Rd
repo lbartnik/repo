@@ -2,12 +2,15 @@
 % Please edit documentation in R/artifact.R
 \name{is_artifact}
 \alias{is_artifact}
+\alias{artifact_assert_valid}
 \alias{is_valid_artifact}
 \alias{artifact_is}
 \alias{artifact_data}
 \title{Manipulating and processing artifacts.}
 \usage{
 is_artifact(x)
+
+artifact_assert_valid(x)
 
 is_valid_artifact(x)
 

@@ -5,6 +5,12 @@
 #' from the repository. It is the central object for external (as opposed
 #' to internal to this package) processing, printing, etc.
 #'
+#' Each artifact (a `list`) has the following attributes (names):
+#'
+#'   * `id` identifier in the object store; see [storage::object_store]
+#'   * `class` one or more `character` values
+#'   * `parents` zero or more identifiers of direct parent artifacts
+#'
 #' @param id artifact identifier in `store`.
 #' @param store Object store; see [storage::object_store].
 #' @return An `artifact` object.
@@ -27,12 +33,13 @@ new_artifact <- function (id, store) {
 #'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
-  stopifnot(has_name(tags, 'id'))
+  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents')))
 
   structure(
     list(
-      id    = tags$id,
-      class = tags$class
+      id      = tags$id,
+      class   = tags$class,
+      parents = as.character(tags$parents)
     ),
     class = 'artifact'
   )
@@ -50,11 +57,17 @@ is_artifact <- function (x) inherits(x, 'artifact')
 
 #' @importFrom rlang is_character is_scalar_character
 #' @rdname artifact
-is_valid_artifact <- function (x) {
-  is_artifact(x) &&
-    is_scalar_character(x$id) &&
-    is_character(x)
+artifact_assert_valid <- function (x) {
+  stopifnot(is_artifact(x))
+  stopifnot(is_scalar_character(x$id))
+  stopifnot(is_character(x$class))
+  stopifnot(is_character(x$parents))
+  TRUE
 }
+
+
+#' @rdname artifact
+is_valid_artifact <- function (x) isTRUE(try(artifact_assert_valid(x), silent = TRUE))
 
 
 #' @description `artifact_is` answers various questions about an

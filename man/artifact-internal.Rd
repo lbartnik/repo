@@ -25,3 +25,13 @@ Creates a DTO (data transfer object) that fully describes an artifact
 from the repository. It is the central object for external (as opposed
 to internal to this package) processing, printing, etc.
 }
+\details{
+Each artifact (a \code{list}) has the following attributes (names):
+\itemize{
+\item \code{id} identifier in the object store; see \link[storage:object_store]{storage::object_store}
+\itemize{
+\item \code{class} one or more \code{character} values
+\item \code{parents} zero or more identifiers of direct parent artifacts
+}
+}
+}
