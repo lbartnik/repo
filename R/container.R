@@ -1,3 +1,9 @@
+#' Abstract container.
+#'
+#' Used to store artifacts or commits.
+#'
+#' @param x object to be tested.
+#'
 #' @export
 is_container <- function (x) inherits(x, 'container')
 
