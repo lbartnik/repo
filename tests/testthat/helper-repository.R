@@ -36,6 +36,8 @@ single_repository <- function (...) {
   r
 }
 
+
+# TODO rename to in-memory-repository
 many_repository <- function () {
   r <- empty_repository()
 

@@ -15,6 +15,7 @@ Imports:
   defer,
   digest,
   dplyr,
+  glue,
   jsonlite,
   magrittr,
   png,
@@ -33,16 +34,18 @@ Suggests:
   mockery,
   testthat
 Collate:
+  'artifact.R'
+  'container.R'
   'graph.R'
   'history.R'
   'metadesc.R'
   'plots.R'
+  'query.R'
   'repo-package.R'
   'repository.R'
   'repository-impl.R'
   'sample.R'
   'selection.R'
-  'selection-impl.R'
   'transient.R'
   'utils.R'
 Remotes:
