@@ -5,11 +5,26 @@
 #' from the repository. It is the central object for external (as opposed
 #' to internal to this package) processing, printing, etc.
 #'
-#' @param tags list of tag values that describe an artifact; typically
-#'        read with [storage::os_read_tags()].
+#' @param id artifact identifier in `store`.
+#' @param store Object store; see [storage::object_store].
 #' @return An `artifact` object.
 #'
-#' @importFrom utilities has_name
+#' @rdname artifact-internal
+new_artifact <- function (id, store) {
+  # cast tags as an artifact DTO
+  tags <- storage::os_read_tags(store, id)
+  tags$id <- id
+  dto <- as_artifact(tags)
+
+  # attach the store; artifact_data() depends on it
+  attr(dto, 'store') <- store
+  dto
+}
+
+
+#' @param tags list of tag values that describe an artifact; typically
+#'        read with [storage::os_read_tags()].
+#'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
   stopifnot(has_name(tags, 'id'))
@@ -60,4 +75,16 @@ artifact_is <- function (x, what) {
   if (identical(what, 'plot')) return('plot' %in% x$class)
 
   abort(glue("unsupported value of what: {what}"))
+}
+
+
+#' @description `artifact_data` loads the actual artifact object. The
+#' output might be large and thus it is not loaded until requested.
+#'
+#' @export
+#' @rdname artifact
+artifact_data <- function (x) {
+  stopifnot(is_artifact(x))
+  store <- attr(x, 'store')
+  storage::os_read_object(store, x$id)
 }

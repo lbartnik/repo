@@ -222,9 +222,7 @@ read_artifacts <- function (.data) {
 
   store <- .data$repository$store
   ans <- lapply(select_ids(.data), function (id) {
-    tags <- storage::os_read_tags(store, id)
-    tags$id <- id
-    as_artifact(tags)
+    new_artifact(id, store)
   })
 
   structure(ans, class = 'container')

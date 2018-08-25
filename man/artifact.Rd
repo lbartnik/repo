@@ -4,6 +4,7 @@
 \alias{is_artifact}
 \alias{is_valid_artifact}
 \alias{artifact_is}
+\alias{artifact_data}
 \title{Manipulating and processing artifacts.}
 \usage{
 is_artifact(x)
@@ -11,6 +12,8 @@ is_artifact(x)
 is_valid_artifact(x)
 
 artifact_is(x, what)
+
+artifact_data(x)
 }
 \arguments{
 \item{x}{object to be tested; \code{artifact} to be processed.}
@@ -22,6 +25,9 @@ Manipulating and processing artifacts.
 
 \code{artifact_is} answers various questions about an
 artifact.
+
+\code{artifact_data} loads the actual artifact object. The
+output might be large and thus it is not loaded until requested.
 }
 \examples{
 \dontrun{
