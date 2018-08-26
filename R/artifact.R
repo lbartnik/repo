@@ -17,6 +17,7 @@
 #' @param store Object store; see [storage::object_store].
 #' @return An `artifact` object.
 #'
+#' @importFrom rlang is_scalar_integer
 #' @rdname artifact-internal
 new_artifact <- function (id, store) {
   tags <- storage::os_read_tags(store, id)
@@ -26,6 +27,15 @@ new_artifact <- function (id, store) {
   stopifnot(storage::os_exists(store, tags$parent_commit))
   commit <- storage::os_read_object(store, tags$parent_commit)
   tags$expression <- commit$expr
+
+  # original name as recorded upon time of creation
+  if ('plot' %in% tags$class) {
+    tags$name <- tags$names <- '<plot>'
+  } else {
+    i <- match(id, unlist(commit$objects))
+    stopifnot(is_scalar_integer(i))
+    tags$name <- nth(names(commit$objects), i)
+  }
 
   # cast tags as an artifact DTO
   dto <- as_artifact(tags)
@@ -46,6 +56,8 @@ as_artifact <- function (tags) {
   structure(
     list(
       id          = tags$id,
+      name        = tags$name,
+      names       = tags$names,
       class       = tags$class,
       parents     = as.character(tags$parents),
       description = description(tags),
@@ -70,9 +82,11 @@ is_artifact <- function (x) inherits(x, 'artifact')
 artifact_assert_valid <- function (x) {
   stopifnot(is_artifact(x))
   stopifnot(is_scalar_character(x$id))
+  stopifnot(is_scalar_character(x$name))
+  stopifnot(is_character(x$names))
   stopifnot(is_character(x$class))
   stopifnot(is_character(x$parents))
-  stopifnot(is_character(x$descrition))
+  stopifnot(is_character(x$description))
   TRUE
 }
 
