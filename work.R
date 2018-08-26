@@ -1,3 +1,5 @@
+library(repository)
+
 options(repository.debug = TRUE)
 options(repository.debug = FALSE)
 
@@ -19,3 +21,7 @@ repo %>% select(object) %% filter(id == '2b67f4934da0aa3baecfdd3001008539217d571
 
 repo <- sample_repository()
 repo %>% select(-artifact) %>% filter(isTRUE(artifact)) %>% execute
+
+
+a <- read_artifacts(as_artifacts(sample_repository()))
+

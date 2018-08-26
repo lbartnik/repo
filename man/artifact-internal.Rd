@@ -3,11 +3,14 @@
 \name{new_artifact}
 \alias{new_artifact}
 \alias{as_artifact}
+\alias{artifact_store}
 \title{Create an artifact DTO.}
 \usage{
 new_artifact(id, store)
 
 as_artifact(tags)
+
+artifact_store(x)
 }
 \arguments{
 \item{id}{artifact identifier in \code{store}.}
@@ -16,6 +19,8 @@ as_artifact(tags)
 
 \item{tags}{list of tag values that describe an artifact; typically
 read with \code{\link[storage:os_read_tags]{storage::os_read_tags()}}.}
+
+\item{x}{artifact to extract \code{store} from.}
 }
 \value{
 An \code{artifact} object.

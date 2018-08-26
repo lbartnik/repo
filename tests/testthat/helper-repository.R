@@ -67,3 +67,14 @@ add_commit <- function (r, id, parent, expr, objects, plot = character()) {
                     list(parent = parent, time = Sys.time(), class = 'commit'), id)
 }
 
+
+# follows many_repository(); returns artifacts for that repository
+many_artifacts <- function (r) {
+  a <- lapply(letters[1:4], function (id) {
+    a <- list(id = id)
+    class(a) <- 'artifact'
+    attr(a, 'store') <- r$store
+    a
+  })
+  structure(a, class = 'container')
+}

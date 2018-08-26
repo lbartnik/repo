@@ -1,5 +1,50 @@
 context("graph")
 
+test_that("graph of artifacts", {
+  r <- many_repository()
+  a <- many_artifacts(r)
+  g <- connect_artifacts(a)
+
+  expect_length(g, 4)
+  names(g) <- utilities::map_chr(g, `[[`, 'id')
+
+  expect_equal(g$a$parents, character())
+  expect_equal(g$b$parents, character())
+  expect_equal(g$c$parents, c('a', 'b'))
+  expect_equal(g$d$parents, 'c')
+
+  expect_equal(g$a$children, 'c')
+  expect_equal(g$b$children, 'c')
+  expect_equal(g$c$children, 'd')
+  expect_equal(g$d$children, character())
+})
+
+
+test_that("subgraph of artifacts", {
+  r <- many_repository()
+  a <- many_artifacts(r)
+  g <- connect_artifacts(as_container(a[2:3]))
+
+  expect_length(g, 2)
+  names(g) <- utilities::map_chr(g, `[[`, 'id')
+
+  expect_named(g, c('b', 'c'), ignore.order = TRUE)
+
+  expect_equal(g$b$parents, character())
+  expect_equal(g$c$parents, 'b')
+
+  expect_equal(g$b$children, 'c')
+  expect_equal(g$c$children, character(0))
+})
+
+
+# --- old code ---------------------------------------------------------
+
+
+
+
+
+
 test_that("reduce graph", {
   h <- sample_graph()
 
@@ -56,40 +101,3 @@ test_that("preserve class", {
   x <- graph_stratify(g)
   expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
 })
-
-
-test_that("graph of artifacts", {
-  r <- many_repository()
-
-  a <- list(a = list(), b = list(), c = list(), d = list())
-  g <- graph_of_artifacts(a, r$store)
-
-  expect_named(g, letters[1:4], ignore.order = TRUE)
-
-  expect_equal(g$a$parents, character())
-  expect_equal(g$b$parents, character())
-  expect_equal(g$c$parents, c('a', 'b'))
-  expect_equal(g$d$parents, 'c')
-
-  expect_equal(g$a$children, 'c')
-  expect_equal(g$b$children, 'c')
-  expect_equal(g$c$children, 'd')
-  expect_equal(g$d$children, character())
-})
-
-
-test_that("subgraph of artifacts", {
-  r <- many_repository()
-
-  a <- list(b = list(), c = list())
-  g <- graph_of_artifacts(a, r$store)
-
-  expect_named(g, c('b', 'c'), ignore.order = TRUE)
-
-  expect_equal(g$b$parents, character())
-  expect_equal(g$c$parents, 'b')
-
-  expect_equal(g$b$children, 'c')
-  expect_equal(g$c$children, character(0))
-})
-

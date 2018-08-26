@@ -68,6 +68,14 @@ as_artifact <- function (tags) {
 }
 
 
+#' @param x artifact to extract `store` from.
+#' @rdname artifact-internal
+artifact_store <- function (x) {
+  stopifnot(is_artifact(x))
+  attr(x, 'store')
+}
+
+
 #' Manipulating and processing artifacts.
 #'
 #' @param x object to be tested; `artifact` to be processed.
@@ -121,8 +129,4 @@ artifact_is <- function (x, what) {
 #'
 #' @export
 #' @rdname artifact
-artifact_data <- function (x) {
-  stopifnot(is_artifact(x))
-  store <- attr(x, 'store')
-  storage::os_read_object(store, x$id)
-}
+artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
