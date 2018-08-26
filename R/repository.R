@@ -183,131 +183,11 @@ repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
     # finally, add a S3 class for pretty-printing
     structure(tags, class = 'artifact.meta')
   })
-  names(objects) <- ids
 
-  g <- graph_of_artifacts(objects, repo$store)
+  g <- connect_artifacts(as_container(objects))
   structure(g, class = c('origin', 'artifact.set', class(g)))
 }
 
-
-#' Pretty-print sets of artifacts.
-#'
-#' @param x artifact set, e.g. returned by [repository_explain].
-#' @param style either `"by_time"` or `"tree"`.
-#' @param ... further arguments passed to or from other methods.
-#'
-#' @importFrom rlang warn
-#' @import utilities
-#'
-#' @export
-print.artifact.set <- function (x, ..., style = 'by_time') {
-
-  # use the default style if attached
-  style <- get_default(x, 'style', style)
-
-  # this is the only currently supported method
-  stopifnot(style %in% c('by_time', 'tree'))
-
-  # if there is nothing to print
-  if (!length(x)) {
-    warn("origin object empty")
-  }
-
-  if (identical(style, 'by_time')) {
-    # sort entries and then print them
-    i <- order(map_dbl(x, `[[`, 'time'), decreasing = FALSE)
-    x <- x[i]
-
-    # insert \n between two printouts
-    print(first(x), style = 'short')
-    lapply(x[-1], function (y) { cat('\n'); print(y, style = 'short') })
-  }
-
-  if (identical(style, 'tree')) {
-    vert  <- '\u2502   '
-    vert0 <- '    '
-    fork  <- '\u251c\u2500\u2500 '
-    fork0 <- '\u2514\u2500\u2500 '
-
-    print_level <- function (x, indent, exdent) {
-      i <- order(map_dbl(x$children, `[[`, 'time'), decreasing = FALSE)
-      chld <- x$children[i]
-
-      ccat0(silver = indent)
-      print(x, style = 'line')
-
-      Map(y = chld, k = seq_along(chld), f = function (y, k) {
-        if (k == length(chld)) {
-          print_level(y, paste0(exdent, fork0), paste0(exdent, vert0))
-        } else {
-          print_level(y, paste0(exdent, fork), paste0(exdent, vert))
-        }
-      })
-      invisible(x)
-    }
-
-    print_level(graph_stratify(x), '', '')
-  }
-
-  invisible(x)
-}
-
-
-#' @description `print.explained` pretty-prints a description of an
-#' artifact.
-#'
-#' @param style `"full"`, `"short"` or `"line"`.
-#'
-#' @importFrom storage shorten
-#'
-#' @rdname repository
-#' @export
-print.artifact.meta <- function (x, ..., style = 'full') {
-
-  stopifnot(style %in% c('full', 'short', 'line'))
-  is_plot <- ('plot' %in% x$class)
-
-  # full artifact description
-  if (identical(style, 'full')) {
-    # preamble
-    ccat0(silver = "Artifact: ", green = shorten(x$id), silver = if (is_plot) ' (plot)', '\n')
-
-    # expression that produced this artifact
-    ccat0(silver = 'Expression:\n', format_expr(x$expr))
-
-    # more meta-data
-    if (!is_plot) ccat(silver = '\nName:   ', x$names)
-    ccat(silver = '\nClass:  ', x$class)
-    ccat(silver = '\nCreated:', x$time)
-    ccat(silver = '\nSummary:', x$description)
-    cat('\n')
-  }
-
-  # shortened artifact description
-  if (identical(style, 'short')) {
-    ccat0(green = storage::shorten(x$id))
-
-    if (length(x$parents)) {
-      ccat0(silver = '  parents:', yellow = join(storage::shorten(x$parents), ' '))
-    }
-    else {
-      ccat0(silver = '  no parents')
-    }
-
-    ccat0('\n', format_expr(x$expr), '\n')
-  }
-
-  # a single line
-  if (identical(style, 'line')) {
-    if ('plot' %in% x$class)
-      ccat0(grey = '<plot> ', silver = '(', yellow = shorten(x$id), silver = ')\n')
-    else
-      ccat0(green = first(x$names), silver = ' (', yellow = shorten(x$id), silver = ') ',
-            description(x), '\n')
-  }
-
-  invisible(x)
-}
 
 
 #' @description `repository_rewind` changes the internal pointer to the
@@ -361,17 +241,3 @@ as_deltas <- function (x) {
 as_origin <- function (x) {
   stopifnot(is_history(x))
 }
-
-
-#' Tree-related operations.
-#'
-#' @param x `graph` object.
-#'
-#' @rdname trees
-#' @export
-#'
-stratify <- function (x) {
-  stopifnot(is_graph(x))
-  graph_stratify(x)
-}
-

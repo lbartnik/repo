@@ -80,21 +80,61 @@ connect_artifacts <- function (artifacts) {
 }
 
 
+#' @param x container returned by `connect_artifacts`.
+#' @rdname graph
+stratify <- function (x) {
+  stopifnot(is_container(x), length(x) > 0)
+
+  # TODO if a parent has more than one child, displaying the tree might
+  #      tricky: the branch that the parent is assigned to needs to be
+  #      displayed first if the sequence of commands is to produce the
+  #      final object; but even then, if names collide, the actual parent
+  #      might be overwritten before the child is created based on it
+
+  process_node <- function (id) {
+    nodes$erase(id)
+    node <- x[[id]]
+    node$children <- lapply(node$children, process_node)
+    node
+  }
+
+  nodes <- new_vector(data = names(x))
+  stopifnot(nodes$size() != 0)
+
+  # iterate over roots, descend over children
+  roots <- lapply(names(find_roots(x)), process_node)
+  stopifnot(length(roots) != 0)
+  stopifnot(nodes$size() == 0)
+
+  # if there is more than one top-level root, create an "abstract" root
+  if (length(roots) > 1) {
+    roots <- list(
+      class = c('abstract_root', class(roots)),
+      children = roots
+    )
+  }
+  else {
+    roots <- first(roots)
+  }
+
+  roots
+}
+
+
+find_roots <- function (x) {
+  Filter(x, f = function (node) is_empty(node$parents))
+}
 
 
 
 
-
-
-
-
+# --- old code ---------------------------------------------------------
 
 is_graph <- function (x) inherits(x, 'graph')
 
 
 #' @import utilities
 graph_reduce <- function (x, from = NULL, to = NULL) {
-  stopifnot(is_graph(x))
   cls <- class(x)
 
   if (!is.null(from)) {
@@ -125,53 +165,3 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
   class(x) <- cls
   x
 }
-
-
-graph_roots <- function (x) {
-  stopifnot(is_graph(x))
-  Filter(x, f = function (node) is_empty(node$parents))
-}
-
-
-graph_stratify <- function (x) {
-  stopifnot(is_graph(x))
-  stopifnot(length(x) > 0)
-  stopif(is_stratified(x))
-
-  # TODO if a parent has more than one child, displaying the tree might
-  #      tricky: the branch that the parent is assigned to needs to be
-  #      displayed first if the sequence of commands is to produce the
-  #      final object; but even then, if names collide, the actual parent
-  #      might be overwritten before the child is created based on it
-
-  process_node <- function (id) {
-    nodes$erase(id)
-    node <- x[[id]]
-    node$children <- lapply(node$children, process_node)
-    node
-  }
-
-  nodes <- new_vector(data = names(x))
-  stopifnot(nodes$size() != 0)
-
-  # iterate over roots, descend over children
-  roots <- lapply(names(graph_roots(x)), process_node)
-  stopifnot(length(roots) != 0)
-  stopifnot(nodes$size() == 0)
-
-  # if there is more than one top-level root, create an "abstract" root
-  if (length(roots) > 1) {
-    roots <- list(
-      class = c('abstract_root', class(roots)),
-      children = roots
-    )
-  }
-  else {
-    roots <- first(roots)
-  }
-
-  structure(roots, class = c('stratified', class(first(x))))
-}
-
-is_stratified <- function (x) inherits(x, 'stratified')
-

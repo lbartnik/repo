@@ -299,6 +299,7 @@ test_that("can find tips of branches", {
 
 
 test_that("full explanation", {
+  skip("get rid of repository_explain")
   r <- many_repository()
 
   x <- repository_explain(r)
@@ -313,6 +314,7 @@ test_that("full explanation", {
 
 
 test_that("explain object", {
+  skip("get rid of repository_explain")
   r <- many_repository()
 
   x <- repository_explain(r, 'd')
@@ -331,6 +333,7 @@ test_that("explain object", {
 
 
 test_that("order origin", {
+  skip("get rid of repository_explain")
   r <- sample_repository()
 
   x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
@@ -342,6 +345,7 @@ test_that("order origin", {
 
 
 test_that("print origin", {
+  skip("get rid of repository_explain")
   r <- sample_repository()
   x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
   expect_output_file(print(x), "text-output/print-origin.txt")
@@ -367,13 +371,6 @@ test_that("finding ancestors for multiple artifacts", {
 
   x <- object_origin(r, c('a', 'd'), 0)
   expect_equal(x, c('a', 'd'))
-})
-
-
-test_that("print tree", {
-  r <- sample_repository()
-  x <- repository_explain(r)
-  expect_output_file(print(x, style = 'tree'), "text-output/print-origin-tree.txt")
 })
 
 

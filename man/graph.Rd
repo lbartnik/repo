@@ -2,12 +2,17 @@
 % Please edit documentation in R/graph.R
 \name{connect_artifacts}
 \alias{connect_artifacts}
+\alias{stratify}
 \title{Turn a container of artifacts into a graph of artifacts.}
 \usage{
 connect_artifacts(artifacts)
+
+stratify(x)
 }
 \arguments{
 \item{artifacts}{\code{container} of artifacts; see \link{read_artifacts}}
+
+\item{x}{container returned by \code{connect_artifacts}.}
 }
 \value{
 The input container, \code{artifacts}, whose elements are altered

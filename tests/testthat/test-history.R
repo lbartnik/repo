@@ -2,6 +2,8 @@ context("history")
 
 
 test_that("find ancestors", {
+  skip("move filtering history into filtering query")
+
   h <- sample_graph()
 
   x <- filter(h, ancestor_of("d"))
@@ -19,6 +21,7 @@ test_that("find ancestors", {
 
 
 test_that("find matching data", {
+  skip("move filtering history into filtering query")
   h <- sample_graph()
 
   x <- filter(h, data_matches(x = 1))

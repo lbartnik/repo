@@ -37,6 +37,29 @@ test_that("subgraph of artifacts", {
   expect_equal(g$c$children, character(0))
 })
 
+test_that("stratify", {
+  h <- sample_graph()
+
+  expect_names <- function (x)
+    expect_named(x, c('children', 'objects', 'parents'), ignore.order = TRUE)
+
+  x <- stratify(h)
+  expect_length(x$children, 2)
+  expect_names(x)
+
+  b <- first(x$children)
+  expect_length(b$children, 2)
+  expect_names(b)
+
+  c <- last(x$children)
+  expect_length(c$children, 2)
+  expect_names(c)
+
+  lapply(b$children, expect_names)
+  lapply(c$children, expect_names)
+})
+
+
 
 # --- old code ---------------------------------------------------------
 
@@ -62,42 +85,3 @@ test_that("reduce graph", {
 })
 
 
-test_that("stratify", {
-  h <- sample_graph()
-
-  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects', 'parents'),
-                                                      ignore.order = TRUE)
-
-  x <- graph_stratify(h)
-  expect_s3_class(x, 'stratified')
-  expect_length(x$children, 2)
-  expect_named(x)
-
-  b <- first(x$children)
-  expect_length(b$children, 2)
-  expect_named(b)
-
-  c <- last(x$children)
-  expect_length(c$children, 2)
-  expect_named(c)
-
-  lapply(b$children, expect_named)
-  lapply(c$children, expect_named)
-})
-
-
-test_that("preserve class", {
-  g <- sample_graph()
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('stratified', 'list'))
-
-  g <- structure(list(a = structure(list(), class = c('a', 'b', 'c'))), class = 'graph')
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
-
-  g <- structure(list(a = structure(list(1), class = c('a', 'b', 'c')),
-                      b = structure(list(2), class = c('a', 'b', 'c'))),
-                 class = 'graph')
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
-})
