@@ -2,13 +2,10 @@
 % Please edit documentation in R/query.R
 \name{new_query}
 \alias{new_query}
-\alias{as_query}
 \alias{set_type}
 \title{Internal API for query objects.}
 \usage{
 new_query(x)
-
-as_query(x)
 
 set_type(x, type)
 }

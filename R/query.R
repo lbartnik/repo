@@ -15,19 +15,6 @@ new_query <- function (x) {
 }
 
 
-#' @rdname query-internal
-as_query <- function (x) {
-  if (is_query(x)) {
-    return(x)
-  }
-  if (is_repository(x)) {
-    return(new_query(x))
-  }
-
-  stop("cannot coerce class ", first(class(x)), " to query")
-}
-
-
 #' @param type make `x` be of type `type`.
 #' @rdname query-internal
 set_type <- function (x, type) {
@@ -47,6 +34,21 @@ set_type <- function (x, type) {
 #' @rdname query
 #' @name query
 NULL
+
+
+#' @description `as_query` creates a general `query`.
+#' @export
+#' @rdname query
+as_query <- function (x) {
+  if (is_query(x)) {
+    return(x)
+  }
+  if (is_repository(x)) {
+    return(new_query(x))
+  }
+
+  stop("cannot coerce class ", first(class(x)), " to query")
+}
 
 
 #' @description `as_commits` creates a `query` to search for commits.

@@ -2,6 +2,7 @@
 % Please edit documentation in R/query.R
 \name{query}
 \alias{query}
+\alias{as_query}
 \alias{as_commits}
 \alias{as_artifacts}
 \alias{is_query}
@@ -19,6 +20,8 @@
 \alias{update}
 \title{Query the repository of artifacts.}
 \usage{
+as_query(x)
+
 as_commits(x)
 
 as_artifacts(x)
@@ -66,6 +69,8 @@ in \code{dplyr}.}
 }
 \description{
 Query the repository of artifacts.
+
+\code{as_query} creates a general \code{query}.
 
 \code{as_commits} creates a \code{query} to search for commits.
 
