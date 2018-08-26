@@ -32,6 +32,8 @@ Each artifact (a \code{list}) has the following attributes (names):
 \itemize{
 \item \code{class} one or more \code{character} values
 \item \code{parents} zero or more identifiers of direct parent artifacts
+\item \code{description} type-specific text describing the artifact
+\item \code{expression} pre-formatted expression that produced the artifact
 }
 }
 }

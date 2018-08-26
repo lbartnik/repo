@@ -10,6 +10,8 @@
 #'   * `id` identifier in the object store; see [storage::object_store]
 #'   * `class` one or more `character` values
 #'   * `parents` zero or more identifiers of direct parent artifacts
+#'   * `description` type-specific text describing the artifact
+#'   * `expression` pre-formatted expression that produced the artifact
 #'
 #' @param id artifact identifier in `store`.
 #' @param store Object store; see [storage::object_store].
@@ -17,9 +19,15 @@
 #'
 #' @rdname artifact-internal
 new_artifact <- function (id, store) {
-  # cast tags as an artifact DTO
   tags <- storage::os_read_tags(store, id)
   tags$id <- id
+
+  # expression is stored with the commit
+  stopifnot(storage::os_exists(store, tags$parent_commit))
+  commit <- storage::os_read_object(store, tags$parent_commit)
+  tags$expression <- commit$expr
+
+  # cast tags as an artifact DTO
   dto <- as_artifact(tags)
 
   # attach the store; artifact_data() depends on it
@@ -33,13 +41,15 @@ new_artifact <- function (id, store) {
 #'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
-  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents')))
+  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression')))
 
   structure(
     list(
-      id      = tags$id,
-      class   = tags$class,
-      parents = as.character(tags$parents)
+      id          = tags$id,
+      class       = tags$class,
+      parents     = as.character(tags$parents),
+      description = description(tags),
+      expression  = format_expr(tags$expression, indent = '')
     ),
     class = 'artifact'
   )
@@ -62,6 +72,7 @@ artifact_assert_valid <- function (x) {
   stopifnot(is_scalar_character(x$id))
   stopifnot(is_character(x$class))
   stopifnot(is_character(x$parents))
+  stopifnot(is_character(x$descrition))
   TRUE
 }
 

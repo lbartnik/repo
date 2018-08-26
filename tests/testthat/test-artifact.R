@@ -9,11 +9,16 @@ test_that("artifact is recognized as valid", {
 })
 
 test_that("parents are set correctly", {
-  r <- sample_repository()
-  a <- read_artifacts(as_artifacts(r))
+  a <- read_artifacts(as_artifacts(sample_repository()))
   n <- map_int(a, function (x) length(x$parents))
   expect_equal(sum(n == 0), 1)
   expect_equal(sum(n == 1), 16)
+})
+
+test_that("expression is present", {
+  a <- read_artifacts(as_artifacts(sample_repository()))
+  e <- map_lgl(a, function(x) is.character(x$expression) && identical(length(x$expression), 1L))
+  expect_true(all(e))
 })
 
 test_that("plot is recognized as such", {
