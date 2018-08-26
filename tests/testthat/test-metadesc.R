@@ -21,7 +21,7 @@ test_that("default describe ignores custom operators", {
 
 test_that("default describe excludes certain tags", {
   tags <- list("artifact", "class", "commit", "id", "parent_commit", "time",
-               "names", "session", "x")
+               "names", "session", "x", "expression")
   names(tags) <- as.character(tags)
 
   x <- expect_silent(repository:::describe(tags))
