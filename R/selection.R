@@ -116,21 +116,25 @@ only_n_summary <- function (qry) {
 }
 
 
-#' @importFrom rlang caller_env eval_tidy quo quo_get_env
+#' @importFrom rlang caller_env eval_tidy quo quo_get_env warn
 select_ids <- function (qry) {
   stopifnot(is_query(qry))
 
   s <- qry$repository$store
 
-  if (!any(quos_match(qry$filter, id))) {
+  with_id <- quos_match(qry$filter, id)
+  if (!any(with_id)) {
     return(storage::os_find(s, c(quo(artifact), qry$filter)))
+  }
+  if (sum(with_id) > 1) {
+    abort("mulitple ids specified")
   }
 
   if (length(qry$filter) > 1) {
-    abort("if `id` is used in filter, it must be the only expression")
+    warn("`id` is not the only expression used in a filter")
   }
 
-  flt <- first(qry$filter)
+  flt <- nth(qry$filter, which(with_id))
   expr <- quo_expr(flt)
 
   if (is.call(expr) && identical(first(expr), quote(`==`))) {
