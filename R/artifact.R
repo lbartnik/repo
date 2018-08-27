@@ -51,7 +51,7 @@ new_artifact <- function (id, store) {
 #'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
-  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression')))
+  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression', 'time')))
 
   structure(
     list(
@@ -59,6 +59,7 @@ as_artifact <- function (tags) {
       name        = tags$name,
       names       = tags$names,
       class       = tags$class,
+      time        = tags$time,
       parents     = as.character(tags$parents),
       description = description(tags),
       expression  = format_expr(tags$expression, indent = '')
@@ -86,6 +87,7 @@ is_artifact <- function (x) inherits(x, 'artifact')
 
 
 #' @importFrom rlang is_character is_scalar_character
+#' @importFrom lubridate is.POSIXt
 #' @rdname artifact
 artifact_assert_valid <- function (x) {
   stopifnot(is_artifact(x))
@@ -95,6 +97,7 @@ artifact_assert_valid <- function (x) {
   stopifnot(is_character(x$class))
   stopifnot(is_character(x$parents))
   stopifnot(is_character(x$description))
+  stopifnot(is.POSIXt(x$time))
   TRUE
 }
 
