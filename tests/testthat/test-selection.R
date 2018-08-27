@@ -1,32 +1,5 @@
 context("selection")
 
-# --- library ----------------------------------------------------------
-
-test_that("symbol is matched", {
-  s <- quote(id)
-
-  expect_true(expr_match(quote(id), s))
-  expect_true(expr_match(quote(id == 1), s))
-  expect_true(expr_match(quote(f(id)), s))
-  expect_true(expr_match(quote(f(id) == 1), s))
-  expect_true(expr_match(quote(f(a, b, id ** 2) == 1), s))
-
-  expect_false(expr_match(quote(f(id = 2)), s))
-  expect_false(expr_match(quote(id(1)), s))
-})
-
-
-test_that("symbol in quos", {
-  q <- list(rlang::quo(id == 1), rlang::quo(f(z)))
-
-  expect_equal(quos_match(q, id), c(T, F))
-  expect_equal(quos_match(q, "id"), c(T, F))
-  expect_equal(quos_match(q, z), c(F, T))
-
-  expect_equal(quos_match(q, a), c(F, F))
-})
-
-
 # --- tags -------------------------------------------------------------
 
 known_tags <- c("artifact", "class", "names", "parent_commit", "parents", "time")
@@ -68,33 +41,6 @@ test_that("filter adds up", {
   expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
   expect_equal(rlang::quo_expr(second(q$filter)), bquote(y == 2))
 })
-
-
-test_that("filter by id", {
-  r <- as_query(many_repository())
-
-  # no filter
-  x <- r %>% select(id) %>% select_ids
-  expect_equal(x, letters[1:4])
-
-  # first special case
-  x <- r %>% select(id) %>% filter(id == 'a') %>% select_ids
-  expect_equal(x, 'a')
-
-  # first special case: variable
-  i <- 'a'
-  x <- r %>% select(id) %>% filter(id == i) %>% select_ids
-  expect_equal(x, 'a')
-
-  # second special case
-  x <- r %>% select(id) %>% filter(id %in% c('a', 'b')) %>% select_ids
-  expect_equal(x, letters[1:2])
-
-  # general case
-  x <- r %>% select(id) %>% filter(id != 'a') %>% select_ids
-  expect_equal(x, letters[2:4])
-})
-
 
 # --- arrange ----------------------------------------------------------
 

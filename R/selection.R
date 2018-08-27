@@ -7,10 +7,6 @@ dplyr::filter
 dplyr::arrange
 
 #' @export
-#' @importFrom dplyr select
-dplyr::select
-
-#' @export
 #' @importFrom dplyr summarise
 dplyr::summarise
 
@@ -68,37 +64,6 @@ tag_values <- function (x) {
 
 # --- impl -------------------------------------------------------------
 
-#' @importFrom rlang quo
-all_tag_names <- function (query) {
-  stopifnot(is_query(query))
-  store <- query$repository$store
-
-  ids <- select_ids(query)
-  if (!length(ids)) return(NULL)
-
-  nms <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
-  unique(unlist(nms))
-}
-
-#' @importFrom rlang quo
-all_tag_values <- function (query) {
-  stopifnot(is_query(query))
-  store <- query$repository$store
-
-  ids <- select_ids(query)
-  raw <- lapply(ids, function (id) storage::os_read_tags(store, id))
-
-  nms <- unique(unlist(lapply(raw, names)))
-
-  vls <- lapply(nms, function (name) {
-    val <- lapply(raw, `[[`, name)
-    unq <- unique(unlist(val))
-    if (is.atomic(first(val))) `class<-`(unq, class(first(val))) else unq
-  })
-
-  with_names(vls, nms)
-}
-
 # A stop-gap function: check if the only summary is n() and if so, returns TRUE.
 # If there is no summary at all, returns FALSE.
 # If there's an unsupported summary, throws an exception.
@@ -113,82 +78,6 @@ only_n_summary <- function (qry) {
   })
 
   all(i)
-}
-
-
-#' @importFrom rlang caller_env eval_tidy quo quo_get_env warn
-select_ids <- function (qry) {
-  stopifnot(is_query(qry))
-
-  s <- qry$repository$store
-
-  with_id <- quos_match(qry$filter, id)
-  if (!any(with_id)) {
-    return(storage::os_find(s, c(quo(artifact), qry$filter)))
-  }
-  if (sum(with_id) > 1) {
-    abort("mulitple ids specified")
-  }
-
-  if (length(qry$filter) > 1) {
-    warn("`id` is not the only expression used in a filter")
-  }
-
-  flt <- nth(qry$filter, which(with_id))
-  expr <- quo_expr(flt)
-
-  if (is.call(expr) && identical(first(expr), quote(`==`))) {
-    i <- if (identical(second(expr), quote(id))) 3 else 2
-    return(eval_tidy(expr[[i]], env = quo_get_env(flt)))
-  }
-
-  if (is.call(expr) && identical(first(expr), quote(`%in%`))) {
-    if (!identical(second(expr), quote(id))) abort('cannot process ', deparse(expr))
-    return(eval_tidy(expr[[3]]))
-  }
-
-  ids <- storage::os_find(s, list(quo(artifact)))
-  i <- eval_tidy(flt, list(id = ids))
-  ids[i]
-}
-
-
-
-#' @importFrom rlang quos quo_expr
-quos_match <- function (quos, ...) {
-  symbols <- lapply(quos(...), function (q) {
-    e <- quo_expr(q)
-    if (is.symbol(e)) return(e)
-    if (is.character(e)) return(as.symbol(e))
-    stop('cannot process ', as.character(e))
-  })
-
-  map_lgl(quos, function (quo) {
-    any(map_lgl(symbols, function (sym) expr_match(quo_expr(quo), sym)))
-  })
-}
-
-
-expr_match <- function (expr, sym) {
-  recurse <- function (x) any(unlist(lapply(x, function (e) expr_match(e, sym))))
-  if (!is.recursive(expr)) return(identical(expr, sym))
-  if (is.call(expr)) return(recurse(expr[-1]))
-  stop('cannot process ', deparse(expr))
-}
-
-
-read_tags <- function (tag_names, ids, store) {
-  columns <- map(tag_names, function(x) base::vector("list", length(ids)))
-
-  # read all tags' values for given ids
-  Map(ids, seq_along(ids), f = function (id, i) {
-    tags <- storage::os_read_tags(store, id)
-    imap(tags[tag_names], function (value, name) {
-      columns[[name]][[i]] <<- value
-    })
-  })
-
-  columns
 }
 
 

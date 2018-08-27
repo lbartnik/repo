@@ -9,7 +9,7 @@
 \alias{print.query}
 \alias{query}
 \alias{filter.query}
-\alias{select.query}
+\alias{select_query}
 \alias{unselect}
 \alias{arrange.query}
 \alias{top_n.query}
@@ -32,7 +32,7 @@ is_query(x)
 
 \method{filter}{query}(.data, ...)
 
-\method{select}{query}(.data, ...)
+select_query(.data, ...)
 
 unselect(.data)
 

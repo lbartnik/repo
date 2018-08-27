@@ -129,54 +129,6 @@ filter.query <- function (.data, ...) {
 }
 
 
-#' @importFrom rlang abort quos
-#' @importFrom tidyselect vars_select
-#' @export
-#' @rdname query
-select.query <- function (.data, ...) {
-  sel <- quos(...)
-
-  # TODO store & print the expressions and perform tidyselect only when
-  #      ready to read the data; select() will be disallowed in read_objects
-  #      read_ids, read_artifacts and read_commits
-
-  # TODO only if query type is tags select() will narrow down; in every
-  #      other case it will replace the current select with a warning
-
-  if (!length(.data$select)) {
-    names <- all_select_names(.data)
-  }
-  else {
-    names <- .data$select
-  }
-
-  if (!length(names)) {
-    abort("select: no tag names to select from, filter matches no objects?")
-  }
-
-  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
-  if (is_error(names)) {
-    abort(sprintf("select: could not select names: %s", names$message))
-  }
-  if (!length(names)) {
-    abort("select: selection reduced to an empty set")
-  }
-
-  .data$select <- names
-  .data
-}
-
-
-#' @description `unselect` clears the list of selected tag names.
-#'
-#' @export
-#' @rdname query
-unselect <- function (.data) {
-  stopifnot(is_query(.data))
-  .data$select <- list()
-  .data
-}
-
 
 #' @importFrom rlang quos quo
 #' @export
@@ -239,8 +191,133 @@ read_commits <- function (.data) {
   stopifnot(is_commits(.data))
   stopifnot(identical(length(.data$select), 0L))
 
+  abort("read_commits not yet implemented")
+
   structure(list(), class = 'container')
 }
+
+
+#' @importFrom rlang quos
+read_tags <- function (.data, ...) {
+  selection <- quos(...)
+  abort("read_tags not yet implemented")
+
+  sel <- quos(...)
+
+  # TODO store & print the expressions and perform tidyselect only when
+  #      ready to read the data; select() will be disallowed in read_objects
+  #      read_ids, read_artifacts and read_commits
+
+  # TODO only if query type is tags select() will narrow down; in every
+  #      other case it will replace the current select with a warning
+
+  if (!length(.data$select)) {
+    names <- all_select_names(.data)
+  }
+  else {
+    names <- .data$select
+  }
+
+  if (!length(names)) {
+    abort("select: no tag names to select from, filter matches no objects?")
+  }
+
+  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
+  if (is_error(names)) {
+    abort(sprintf("select: could not select names: %s", names$message))
+  }
+  if (!length(names)) {
+    abort("select: selection reduced to an empty set")
+  }
+
+  .data$select <- names
+  .data
+
+}
+
+
+
+
+#' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
+select_ids <- function (query) {
+  stopifnot(is_query(query))
+  store <- query$repository$store
+
+  # identify which filter expressions include symbol `id`
+  with_id <- quos_match(query$filter, 'id')
+
+  # if expressions
+  if (!any(with_id)) {
+    return(os_find(store, query$filter))
+  }
+
+  # retrieve ids matching the query
+  matching_ids <- os_find(store, query$filter[!with_id])
+  matching_ids <- dplyr::filter_(dplyr::data_frame(id = matching_ids),
+                                 .dots = query$filter[with_id])
+
+  # TODO if arrange is malformed, maybe intercept the exception and provide
+  #      a custom error message to the user?
+  if (length(query$arrange)) {
+    names   <- read_tag_names(matching_ids, store)
+    matched <- map_lgl(tag_names, function (name) quos_match(query$arrange, name))
+    values  <- read_tag_values(matching_ids, matched, store)
+    values  <- flatten_lists(c(list(id = matching_ids), tag_values))
+    values  <- dplyr::arrange_(values, .dots = query$arrange)
+    matching_ids <- nth(values, 'id')
+  }
+
+  if (!is.null(query$top)) {
+    matching_ids <- head(matching_ids, query$top)
+  }
+
+  matching_ids
+}
+
+
+#' @importFrom rlang quos quo_expr
+quos_match <- function (quos, ...) {
+  symbols <- lapply(list(...), function (e) {
+    if (is.symbol(e)) return(e)
+    if (is.character(e)) return(as.symbol(e))
+    stop('cannot process ', as.character(e))
+  })
+
+  map_lgl(quos, function (quo) {
+    any(map_lgl(symbols, function (sym) expr_match(quo_expr(quo), sym)))
+  })
+}
+
+expr_match <- function (expr, sym) {
+  recurse <- function (x) any(unlist(lapply(x, function (e) expr_match(e, sym))))
+  if (!is.recursive(expr)) return(identical(expr, sym))
+  if (is.call(expr)) return(recurse(expr[-1]))
+  stop('cannot process ', deparse(expr))
+}
+
+#' @importFrom rlang quo
+read_tag_names <- function (ids, store) {
+  all_names <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
+  unique(unlist(all_names))
+}
+
+#' @importFrom rlang quo
+read_tag_values <- function (ids, selected, store) {
+  columns <- map(tag_names, function(x) base::vector("list", length(ids)))
+
+  # read id by id, set tag values in respective column vector
+  Map(ids, seq_along(ids), f = function (id, i) {
+    tags <- storage::os_read_tags(store, id)
+    imap(tags[tag_names], function (value, name) {
+      columns[[name]][[i]] <<- value
+    })
+  })
+
+  columns
+}
+
+
+# --- old code ---------------------------------------------------------
 
 
 #' @description `execute` runs the query and retrieves its results.
