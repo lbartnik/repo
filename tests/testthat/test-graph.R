@@ -37,11 +37,11 @@ test_that("subgraph of artifacts", {
   expect_equal(g$c$children, character(0))
 })
 
-test_that("stratify", {
+test_that("stratify sample graph", {
   h <- sample_graph()
 
   expect_names <- function (x)
-    expect_named(x, c('children', 'objects', 'parents'), ignore.order = TRUE)
+    expect_named(x, c('id', 'children', 'objects', 'parents'), ignore.order = TRUE)
 
   x <- stratify(h)
   expect_length(x$children, 2)
@@ -57,6 +57,18 @@ test_that("stratify", {
 
   lapply(b$children, expect_names)
   lapply(c$children, expect_names)
+})
+
+test_that("actual repo can be stratified", {
+  a <- read_artifacts(as_artifacts(sample_repository()))
+  s <- stratify(connect_artifacts(a))
+
+  # root
+  expect_s3_class(s, 'artifact')
+  expect_length(s$children, 1)
+
+  # branching
+  expect_length(s$children[[1]]$children, 3)
 })
 
 

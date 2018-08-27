@@ -3,7 +3,6 @@
 #' @param x History object to be printed.
 #'
 #' @rdname history
-#' @export
 #'
 print.history <- function (x, ...) {
   cat('<history:commits>\n')

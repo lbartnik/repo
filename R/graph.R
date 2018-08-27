@@ -20,8 +20,8 @@
 #' @importFrom rlang quos
 #' @import utilities
 #'
+#' @export
 #' @rdname graph
-#'
 connect_artifacts <- function (artifacts) {
   stopifnot(is_container(artifacts))
   # make sure all artifacts come from the same store
@@ -76,14 +76,15 @@ connect_artifacts <- function (artifacts) {
     a
   })
 
-  as_container(artifacts)
+  as_graph(as_container(artifacts))
 }
 
 
 #' @param x container returned by `connect_artifacts`.
+#' @export
 #' @rdname graph
 stratify <- function (x) {
-  stopifnot(is_container(x), length(x) > 0)
+  stopifnot(is_graph(x))
 
   # TODO if a parent has more than one child, displaying the tree might
   #      tricky: the branch that the parent is assigned to needs to be
@@ -98,6 +99,7 @@ stratify <- function (x) {
     node
   }
 
+  names(x) <- map_chr(x, `[[`, 'id')
   nodes <- new_vector(data = names(x))
   stopifnot(nodes$size() != 0)
 
@@ -125,8 +127,9 @@ find_roots <- function (x) {
   Filter(x, f = function (node) is_empty(node$parents))
 }
 
+as_graph <- function (x) structure(x, class = c('graph', class(x)))
 
-
+is_graph <- function (x) inherits(x, 'graph')
 
 # --- old code ---------------------------------------------------------
 
