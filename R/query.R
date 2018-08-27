@@ -236,8 +236,6 @@ read_tags <- function (.data, ...) {
 }
 
 
-
-
 #' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
 select_ids <- function (query) {
   stopifnot(is_query(query))
@@ -248,23 +246,23 @@ select_ids <- function (query) {
 
   # if expressions
   if (!any(with_id)) {
-    return(os_find(store, query$filter))
+    matching_ids <- os_find(store, query$filter)
+  } else {
+    # retrieve ids matching the query
+    matching_ids <- os_find(store, query$filter[!with_id])
+    matching_ids <- dplyr::filter_(dplyr::data_frame(id = matching_ids),
+                                   .dots = query$filter[with_id])
+    matching_ids <- nth(matching_ids, 'id')
   }
-
-  # retrieve ids matching the query
-  matching_ids <- os_find(store, query$filter[!with_id])
-  matching_ids <- dplyr::filter_(dplyr::data_frame(id = matching_ids),
-                                 .dots = query$filter[with_id])
-  matching_ids <- nth(matching_ids, 'id')
 
   # TODO if arrange is malformed, maybe intercept the exception and provide
   #      a custom error message to the user?
   if (length(query$arrange)) {
-    names   <- read_tag_names(matching_ids, store)
-    matched <- map_lgl(tag_names, function (name) quos_match(query$arrange, name))
-    values  <- read_tag_values(matching_ids, matched, store)
-    values  <- flatten_lists(c(list(id = matching_ids), tag_values))
-    values  <- dplyr::arrange_(values, .dots = query$arrange)
+    names  <- read_tag_names(matching_ids, store)
+    names  <- Filter(function (name) quos_match(query$arrange, name), names)
+    values <- read_tag_values(matching_ids, names, store)
+    values <- flatten_lists(c(list(id = matching_ids), values))
+    values <- dplyr::arrange_(values, .dots = query$arrange)
     matching_ids <- nth(values, 'id')
   }
 

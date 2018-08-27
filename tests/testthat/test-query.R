@@ -99,6 +99,22 @@ test_that("select by multiple references to id", {
   expect_equal(x, 'a')
 })
 
+test_that("select top tags", {
+  q <- as_query(many_repository())
+
+  p <- q %>% top_n(2)
+  x <- expect_silent(select_ids(p))
+  expect_equal(x, c('a', 'b'))
+})
+
+test_that("arrange and select top tags", {
+  q <- as_query(many_repository())
+
+  p <- q %>% arrange(desc(time)) %>% top_n(2)
+  x <- expect_silent(select_ids(p))
+  expect_equal(x, c('s', 'r'))
+})
+
 test_that("read tag names", {
   r <- many_repository()
   names <- read_tag_names('a', r$store)
