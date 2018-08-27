@@ -9,8 +9,6 @@
 \alias{print.query}
 \alias{query}
 \alias{filter.query}
-\alias{select_query}
-\alias{unselect}
 \alias{arrange.query}
 \alias{top_n.query}
 \alias{summarise.query}
@@ -31,10 +29,6 @@ is_query(x)
 \method{print}{query}(x, ...)
 
 \method{filter}{query}(.data, ...)
-
-select_query(.data, ...)
-
-unselect(.data)
 
 \method{arrange}{query}(.data, ...)
 
@@ -75,8 +69,6 @@ Query the repository of artifacts.
 \code{as_commits} creates a \code{query} to search for commits.
 
 \code{as_commits} creates a \code{query} to search for commits.
-
-\code{unselect} clears the list of selected tag names.
 
 \code{execute} runs the query and retrieves its results.
 }

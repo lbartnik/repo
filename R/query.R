@@ -255,6 +255,7 @@ select_ids <- function (query) {
   matching_ids <- os_find(store, query$filter[!with_id])
   matching_ids <- dplyr::filter_(dplyr::data_frame(id = matching_ids),
                                  .dots = query$filter[with_id])
+  matching_ids <- nth(matching_ids, 'id')
 
   # TODO if arrange is malformed, maybe intercept the exception and provide
   #      a custom error message to the user?
@@ -303,12 +304,12 @@ read_tag_names <- function (ids, store) {
 
 #' @importFrom rlang quo
 read_tag_values <- function (ids, selected, store) {
-  columns <- map(tag_names, function(x) base::vector("list", length(ids)))
+  columns <- map(selected, function(x) base::vector("list", length(ids)))
 
   # read id by id, set tag values in respective column vector
   Map(ids, seq_along(ids), f = function (id, i) {
     tags <- storage::os_read_tags(store, id)
-    imap(tags[tag_names], function (value, name) {
+    imap(tags[selected], function (value, name) {
       columns[[name]][[i]] <<- value
     })
   })

@@ -59,10 +59,11 @@ test_that("symbol in quos", {
 
 test_that("select by id", {
   r <- as_query(many_repository())
+  all <- c(letters[1:4], letters[16:19])
 
   # no filter
   x <- r %>% select_ids
-  expect_equal(x, letters[1:4])
+  expect_equal(x, all)
 
   # first special case
   x <- r %>% filter(id == 'a') %>% select_ids
@@ -79,7 +80,7 @@ test_that("select by id", {
 
   # general case
   x <- r %>% filter(id != 'a') %>% select_ids
-  expect_equal(x, letters[2:4])
+  expect_equal(x, all[-1])
 })
 
 test_that("select by id and tags", {
@@ -100,10 +101,33 @@ test_that("select by multiple references to id", {
 
 test_that("read tag names", {
   r <- many_repository()
-  names <- read_tags_names('a', r$store)
+  names <- read_tag_names('a', r$store)
   expect_true(setequal(names,
                        c("class", "parent_commit", "parents", "time", "artifact", "names")))
 })
 
+known_tags <- c("artifact", "class", "names", "parent_commit", "parents", "time")
+
+test_that("all tag names", {
+  r <- many_repository()
+
+  n <- read_tag_names(letters[1:4], r$store)
+  expect_equal(sort(n), known_tags)
+
+  n <- read_tag_names('a', r$store)
+  expect_equal(sort(n), known_tags)
+})
+
+test_that("all tag values", {
+  r <- many_repository()
+
+  n <- read_tag_values(letters[1:4], known_tags, r$store)
+  expect_named(n, known_tags, ignore.order = TRUE)
+  expect_equal(n$names, as.list(letters[1:4]))
+
+  n <- read_tag_values('a', known_tags, r$store)
+  expect_named(n, known_tags, ignore.order = TRUE)
+  expect_equal(n$names, list('a'))
+})
 
 
