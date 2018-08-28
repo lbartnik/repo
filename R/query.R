@@ -189,7 +189,7 @@ read_artifacts <- function (.data) {
   stopifnot(identical(length(.data$select), 0L))
 
   store <- .data$repository$store
-  ans <- lapply(select_ids(.data), function (id) {
+  ans <- lapply(match_ids(.data), function (id) {
     new_artifact(id, store)
   })
 
@@ -249,7 +249,7 @@ read_tags <- function (.data, ...) {
 
 
 #' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
-select_ids <- function (query) {
+match_ids <- function (query) {
   stopifnot(is_query(query))
   store <- query$repository$store
 
@@ -351,7 +351,7 @@ execute <- function (.data) {
   store <- .data$repository$store
 
   # 1. find artifacts that match the filter
-  ids <- select_ids(.data)
+  ids <- match_ids(.data)
 
   # 1a. if there's a simple counting summary, this is where we can actually
   #     return the result
@@ -413,7 +413,7 @@ update <- function (.data, ...) {
   quos <- quos(...)
   e <- caller_env()
 
-  ids <- select_ids(.data)
+  ids <- match_ids(.data)
   lapply(ids, function (id) {
     tags <- storage::os_read_tags(.data$repository$store, id)
 

@@ -76,24 +76,24 @@ test_that("select by id", {
   all <- c(letters[1:4], letters[16:19])
 
   # no filter
-  x <- r %>% select_ids
+  x <- r %>% match_ids
   expect_equal(x, all)
 
   # first special case
-  x <- r %>% filter(id == 'a') %>% select_ids
+  x <- r %>% filter(id == 'a') %>% match_ids
   expect_equal(x, 'a')
 
   # first special case: variable
   i <- 'a'
-  x <- r %>% filter(id == i) %>% select_ids
+  x <- r %>% filter(id == i) %>% match_ids
   expect_equal(x, 'a')
 
   # second special case
-  x <- r %>% filter(id %in% c('a', 'b')) %>% select_ids
+  x <- r %>% filter(id %in% c('a', 'b')) %>% match_ids
   expect_equal(x, letters[1:2])
 
   # general case
-  x <- r %>% filter(id != 'a') %>% select_ids
+  x <- r %>% filter(id != 'a') %>% match_ids
   expect_equal(x, all[-1])
 })
 
@@ -101,7 +101,7 @@ test_that("select by id and tags", {
   q <- as_query(many_repository())
 
   p <- q %>% filter(id == 'a', isTRUE(artifact))
-  x <- expect_silent(select_ids(p))
+  x <- expect_silent(match_ids(p))
   expect_equal(x, 'a')
 })
 
@@ -109,7 +109,7 @@ test_that("select by multiple references to id", {
   q <- as_query(many_repository())
 
   p <- q %>% filter(id == 'a', id != 'b')
-  x <- expect_silent(select_ids(p))
+  x <- expect_silent(match_ids(p))
   expect_equal(x, 'a')
 })
 
@@ -117,7 +117,7 @@ test_that("select top tags", {
   q <- as_query(many_repository())
 
   p <- q %>% top_n(2)
-  x <- expect_silent(select_ids(p))
+  x <- expect_silent(match_ids(p))
   expect_equal(x, c('a', 'b'))
 })
 
@@ -125,7 +125,7 @@ test_that("arrange and select top tags", {
   q <- as_query(many_repository())
 
   p <- q %>% arrange(desc(time)) %>% top_n(2)
-  x <- expect_silent(select_ids(p))
+  x <- expect_silent(match_ids(p))
   expect_equal(x, c('s', 'r'))
 })
 

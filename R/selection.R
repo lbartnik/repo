@@ -46,7 +46,7 @@ top_n.default <- function (.data, n, wt) dplyr::top_n(.data, n, wt)
 #' @rdname query-extra
 tag_names <- function (x) {
   q <- as_query(x)
-  ids <- select_ids(q)
+  ids <- match_ids(q)
   ans <- read_tag_names(ids, q$repository$store)
   # TODO return all tag names
   setdiff(ans, 'artifact')
@@ -60,7 +60,7 @@ tag_names <- function (x) {
 #' @rdname query-extra
 tag_values <- function (x) {
   q <- as_query(x)
-  ids <- select_ids(q)
+  ids <- match_ids(q)
   names <- read_tag_names(ids, q$repository$store)
   values <- read_tag_values(ids, names, q$repository$store)
   lapply(values, unique)
