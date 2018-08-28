@@ -5,6 +5,7 @@
 \alias{as_query}
 \alias{as_commits}
 \alias{as_artifacts}
+\alias{as_tags}
 \alias{is_query}
 \alias{print.query}
 \alias{query}
@@ -23,6 +24,8 @@ as_query(x)
 as_commits(x)
 
 as_artifacts(x)
+
+as_tags(x)
 
 is_query(x)
 
@@ -68,7 +71,9 @@ Query the repository of artifacts.
 
 \code{as_commits} creates a \code{query} to search for commits.
 
-\code{as_commits} creates a \code{query} to search for commits.
+\code{as_artifacts} creates a \code{query} to search for artifacts.
+
+\code{as_tags} creates a \code{query} to search for tag values.
 
 \code{execute} runs the query and retrieves its results.
 }

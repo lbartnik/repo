@@ -61,7 +61,7 @@ as_commits <- function (x) {
 }
 
 
-#' @description `as_commits` creates a `query` to search for commits.
+#' @description `as_artifacts` creates a `query` to search for artifacts.
 #' @export
 #' @rdname query
 as_artifacts <- function (x) {
@@ -71,11 +71,23 @@ as_artifacts <- function (x) {
 }
 
 
+#' @description `as_tags` creates a `query` to search for tag values.
+#' @export
+#' @rdname query
+as_tags <- function (x) {
+  stopifnot(is_repository(x))
+  filter(set_type(as_query(x), 'tags'),
+         artifact)
+}
+
+
 is_raw <- function (x) is_query(x) && identical(x$type, 'raw')
 
 is_commits <- function (x) is_query(x) && identical(x$type, 'commits')
 
 is_artifacts <- function (x) is_query(x) && identical(x$type, 'artifacts')
+
+is_tags <- function (x) is_query(x) && identical(x$type, 'tags')
 
 
 #' @return `TRUE` if `x` inherits from `"query"`.

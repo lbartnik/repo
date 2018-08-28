@@ -14,6 +14,10 @@ test_that("repository can be turned into a query", {
   q <- expect_silent(as_commits(r))
   expect_s3_class(q, 'query')
   expect_true(is_commits(q))
+
+  q <- expect_silent(as_tags(r))
+  expect_s3_class(q, 'query')
+  expect_true(is_tags(q))
 })
 
 test_that("query type matches read type", {
@@ -21,15 +25,25 @@ test_that("query type matches read type", {
 
   expect_error(read_artifacts(as_query(r)))
   expect_error(read_artifacts(as_commits(r)))
+  expect_error(read_artifacts(as_tags(r)))
 
   expect_error(read_commits(as_query(r)))
   expect_error(read_commits(as_artifacts(r)))
+  expect_error(read_commits(as_tags(r)))
+
+  expect_error(read_tags(as_query(r)))
+  expect_error(read_tags(as_artifacts(r)))
+  expect_error(read_tags(as_commits(r)))
 
   x <- expect_silent(read_artifacts(as_artifacts(r)))
   expect_true(is_container(x))
   expect_length(x, 17)
 
   #x <- expect_silent(read_commits(as_commits(r)))
+  #expect_true(is_container(x))
+  # TODO expect_length(x, 10)
+
+  #x <- expect_silent(read_tags(as_tags(r)))
   #expect_true(is_container(x))
   # TODO expect_length(x, 10)
 })
