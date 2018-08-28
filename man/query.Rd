@@ -15,7 +15,7 @@
 \alias{summarise.query}
 \alias{read_artifacts}
 \alias{read_commits}
-\alias{execute}
+\alias{deprecated_execute}
 \alias{update}
 \title{Query the repository of artifacts.}
 \usage{
@@ -43,7 +43,7 @@ read_artifacts(.data)
 
 read_commits(.data)
 
-execute(.data)
+deprecated_execute(.data)
 
 update(.data, ...)
 }

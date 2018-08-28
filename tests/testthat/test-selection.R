@@ -27,62 +27,6 @@ test_that("arrange adds up", {
   expect_equal(rlang::quo_expr(second(q$arrange)), quote(y))
 })
 
-
-# --- select -----------------------------------------------------------
-
-test_that("select subsets", {
-  skip("refactor to read_tags")
-  r <- as_query(many_repository())
-
-  q <- select(r, time, id)
-  expect_equivalent(q$select, c("time", "id"))
-
-  q <- select(q, time)
-  expect_equivalent(q$select, "time")
-
-  expect_error(select(q, id), "select: selection reduced to an empty set")
-})
-
-test_that("various types of select", {
-  skip("refactor to read_tags")
-  r <- as_query(many_repository())
-
-  # a single column
-  x <- select(r, id) %>% execute
-  expect_named(x, "id")
-  expect_setequal(x$id, letters[1:4])
-
-  # from character
-  y <- select(r, "id") %>% execute
-  expect_equal(x, y)
-
-  # basically everything
-  x <- select(r, -artifact) %>% execute
-  expect_named(x, c("object", "id", "class", "names", "parent_commit", "parents", "time"),
-               ignore.order = TRUE)
-  expect_equal(nrow(x), 4)
-
-  # only an actual tag
-  y <- select(r, names) %>% execute
-  expect_equal(y$names, letters[1:4])
-})
-
-
-test_that("no tag names for empty query", {
-  skip("refactor to read_tags")
-  r <- as_query(many_repository())
-
-  q <- as_query(r)
-  expect_length(all_select_names(q), 8)
-
-  q <- filter(r, TRUE)
-  expect_length(all_select_names(q), 8)
-
-  q <- filter(r, FALSE)
-  expect_length(all_select_names(q), 0)
-})
-
-
 # --- top_n ------------------------------------------------------------
 
 test_that("top_n chooses top n entries", {

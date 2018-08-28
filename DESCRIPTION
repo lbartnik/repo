@@ -42,6 +42,7 @@ Collate:
   'metadesc.R'
   'plots.R'
   'query.R'
+  'query-specialized.R'
   'repo-package.R'
   'repository.R'
   'repository-impl.R'
