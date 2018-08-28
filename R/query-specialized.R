@@ -61,42 +61,56 @@ read_commits <- function (.data) {
 }
 
 
-#' @importFrom rlang quos
+#' @importFrom rlang quos is_symbol is_character
+#' @importFrom tidyselect vars_select
+#' @importFrom dplyr bind_cols data_frame
 read_tags <- function (.data, ...) {
+  stopifnot(is_tags(.data))
   selection <- quos(...)
-  abort("read_tags not yet implemented")
 
-  sel <- quos(...)
+  ids <- match_ids(.data)
+  if (!length(ids)) {
+    abort("query does not match any objects")
+  }
 
-  # TODO store & print the expressions and perform tidyselect only when
-  #      ready to read the data; select() will be disallowed in read_objects
-  #      read_ids, read_artifacts and read_commits
-
-  # TODO only if query type is tags select() will narrow down; in every
-  #      other case it will replace the current select with a warning
-
-  if (!length(.data$select)) {
-    names <- all_select_names(.data)
+  # if nothing is specified, choose everything
+  if (!length(selection)) {
+    names <- c("id", read_tag_names(ids, .data$repository$store))
   }
   else {
-    names <- .data$select
+    # if only symbols or characters, that's it
+    exprs <- map(selection, quo_expr)
+    is_name <- map_lgl(exprs, function(x) is_symbol(x) || is_character(x))
+    if (all(is_name)) {
+      names <- as.character(exprs)
+    } else {
+      # is not only names, try tidyselect
+      names <- c("id", read_tag_names(ids, .data$repository$store))
+      names <- tryCatch(vars_select(names, UQS(selection)), error = function(e)e)
+
+      if (is_error(names)) {
+        abort(sprintf("could not select names: %s", names$message))
+      }
+      if (!length(names)) {
+        abort("selection reduced to an empty set")
+      }
+    }
   }
 
   if (!length(names)) {
-    abort("select: no tag names to select from, filter matches no objects?")
+    abort("no tag names to selected")
   }
 
-  names <- tryCatch(vars_select(names, UQS(sel), .exclude = "artifact"), error = function(e)e)
-  if (is_error(names)) {
-    abort(sprintf("select: could not select names: %s", names$message))
-  }
-  if (!length(names)) {
-    abort("select: selection reduced to an empty set")
+  # handle id
+  if (!match("id", names, nomatch = FALSE)) {
+    return(flatten_lists(read_tag_values(ids, names, .data$repository$store)))
   }
 
-  .data$select <- names
-  .data
+  names <- setdiff(names, "id")
+  if (!length(names)) return(data_frame(id = ids))
 
+  bind_cols(data_frame(id = ids),
+            flatten_lists(read_tag_values(ids, names, .data$repository$store)))
 }
 
 #' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
@@ -176,4 +190,48 @@ read_tag_values <- function (ids, selected, store) {
   })
 
   columns
+}
+
+#' @importFrom rlang warn
+flatten_lists <- function (values) {
+
+  # simplify columns which hold single, atomic values
+  values <- imap(values, function (column, name) {
+    # check which values are NULL
+    inl <- map_lgl(column, is.null)
+
+    # if all, drop the column
+    if (all(inl)) {
+      warn(sprintf("tag %s rendered no values, removing from result", name))
+      return(NULL)
+    }
+
+    # otherwise, replace NULLs with NAs
+    if (any(inl)) {
+      cls <- first(typeof(unlist(column[!inl])))
+      nav <- switch(cls, double = NA_real_, integer = NA_integer_, character = NA_character_,
+                    complex = NA_complex_, NA)
+      column[inl] <- nav
+    }
+
+    # if there are multi-valued elements, return a list
+    len <- map_int(column, length)
+    if (any(len != 1)) return(column)
+
+    # if there is a class, as long as it's the same (esp. POSIXct), apply that here
+    cls <- unique(map(column, class))
+    if (length(cls) == 1 && !is_atomic_class(first(cls))) {
+      column <- unlist(column, recursive = FALSE)
+      return(structure(column, class = first(cls)))
+    }
+
+    # if all are atomic, return a vector and let R choose the type
+    if (all(map_lgl(column, is.atomic))) return(unlist(column))
+
+    # finally return a list
+    column
+  })
+
+  values <- Filter(function(x)!is.null(x), values)
+  tibble::as_tibble(values)
 }

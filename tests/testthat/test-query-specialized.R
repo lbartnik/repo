@@ -157,7 +157,6 @@ test_that("all tag values", {
 })
 
 test_that("read_tags", {
-  skip("implement read_tags")
   q <- as_tags(many_repository())
 
   # id column
@@ -166,32 +165,64 @@ test_that("read_tags", {
   expect_setequal(x$id, letters[1:4])
 
   # id column from character
-  y <- read_tags(r, "id")
+  y <- read_tags(q, "id")
   expect_equal(x, y)
 
   # everything but one tag
-  x <- read_tags(r, -artifact)
-  expect_named(x, c("object", "id", "class", "names", "parent_commit", "parents", "time"),
+  x <- read_tags(q, -artifact)
+  expect_named(x, c("id", "class", "names", "parent_commit", "parents", "time"),
                ignore.order = TRUE)
   expect_equal(nrow(x), 4)
 
   # a single actual tag
-  y <- read_tags(r, names)
+  y <- read_tags(q, names)
   expect_equal(y$names, letters[1:4])
 })
 
+test_that("all tag names for empty query", {
+  q <- as_tags(many_repository())
 
-test_that("no tag names for empty query", {
-  skip("refactor to read_tags")
-  r <- as_query(many_repository())
+  expect_length(read_tags(q), 7)
 
-  q <- as_query(r)
-  expect_length(all_select_names(q), 8)
+  p <- filter(q, TRUE)
+  expect_length(read_tags(p), 7)
 
-  q <- filter(r, TRUE)
-  expect_length(all_select_names(q), 8)
-
-  q <- filter(r, FALSE)
-  expect_length(all_select_names(q), 0)
+  q <- filter(q, FALSE)
+  expect_error(read_tags(q), "query does not match any objects")
 })
 
+test_that("complex tag queries", {
+  q <- as_tags(many_repository())
+
+  x <- filter(q, class == "integer") %>% read_tags(id)
+  expect_equal(x$id, "b")
+
+  x <- filter(q, class == "numeric") %>% read_tags(id)
+  expect_equal(x$id, c("a", "c"))
+
+  x <- filter(q, class == "numeric") %>% arrange(desc(id)) %>% read_tags(id)
+  expect_equal(x$id, c("c", "a"))
+
+  x <- arrange(q, id) %>% top_n(1) %>% read_tags(id)
+  expect_equal(x$id, "a")
+
+  x <- arrange(q, desc(id)) %>% top_n(1) %>% read_tags(id)
+  expect_equal(x$id, "d")
+})
+
+test_that("simplify tags", {
+  r <- flatten_lists(list(x = list(1, 2, 3), y = list(1, NULL, 2)))
+  expect_named(r, c("x", "y"))
+  expect_equal(r$x, 1:3)
+  expect_equal(r$y, c(1, NA_real_, 2))
+
+  r <- flatten_lists(list(x = 1:4, y = list(c(1L, 2L), NULL, 3L, 4L)))
+  expect_named(r, c("x", "y"))
+  expect_equal(r$x, 1:4)
+  expect_equal(r$y, list(1:2, NA_integer_, 3L, 4L))
+
+  tm <- as.POSIXct(1:10, origin = '1970-01-01')
+  r <- flatten_lists(list(x = as.list(tm)))
+  expect_named(r, 'x')
+  expect_equal(r$x, tm)
+})

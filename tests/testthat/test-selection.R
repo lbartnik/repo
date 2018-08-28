@@ -68,50 +68,6 @@ test_that("simple summary", {
   expect_equal(q$n, 4L)
 })
 
-
-# --- execute ----------------------------------------------------------
-
-test_that("execute runs the query", {
-  skip("refactor select as read_tags")
-  r <- as_query(many_repository())
-
-  x <- select(r, id) %>% execute
-  expect_named(x, "id")
-  expect_length(x$id, 4)
-  expect_equal(x$id, letters[1:4])
-
-  x <- select(r, id) %>% filter(class == "integer") %>% execute
-  expect_equal(x$id, "b")
-  x <- select(r, id) %>% filter(class == "numeric") %>% execute
-  expect_equal(x$id, c("a", "c"))
-
-  x <- select(r, id) %>% filter(class == "numeric") %>% arrange(desc(id)) %>% execute
-  expect_equal(x$id, c("c", "a"))
-
-  x <- select(r, id) %>% arrange(id) %>% top_n(1) %>% execute
-  expect_equal(x$id, "a")
-  x <- select(r, id) %>% arrange(desc(id)) %>% top_n(1) %>% execute
-  expect_equal(x$id, "d")
-})
-
-
-test_that("simplify tags", {
-  r <- flatten_lists(list(x = list(1, 2, 3), y = list(1, NULL, 2)))
-  expect_named(r, c("x", "y"))
-  expect_equal(r$x, 1:3)
-  expect_equal(r$y, c(1, NA_real_, 2))
-
-  r <- flatten_lists(list(x = 1:4, y = list(c(1L, 2L), NULL, 3L, 4L)))
-  expect_named(r, c("x", "y"))
-  expect_equal(r$x, 1:4)
-  expect_equal(r$y, list(1:2, NA_integer_, 3L, 4L))
-
-  tm <- as.POSIXct(1:10, origin = '1970-01-01')
-  r <- flatten_lists(list(x = as.list(tm)))
-  expect_named(r, 'x')
-  expect_equal(r$x, tm)
-})
-
 # --- update -----------------------------------------------------------
 
 test_that("update", {
