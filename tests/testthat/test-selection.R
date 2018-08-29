@@ -41,33 +41,6 @@ test_that("top_n chooses top n entries", {
   expect_error(top_n(r, 10, some_column))
 })
 
-
-# --- summary ----------------------------------------------------------
-
-test_that("summary is recorded", {
-  skip("make summary execute right away")
-  r <- as_query(many_repository())
-
-  q <- summarise(r, n = n())
-  expect_length(q$summarise, 1)
-
-  x <- select(q, id) %>% execute
-  expect_named(x, 'n')
-  expect_equal(x$n, 4)
-})
-
-
-test_that("simple summary", {
-  skip("make summary execute right away")
-  r <- as_query(many_repository())
-
-  q <- select(r, id) %>% summarise(id = min(id), n = n()) %>% execute
-  expect_length(q, 2)
-  expect_named(q, c("id", "n"))
-  expect_equal(q$id, 'a')
-  expect_equal(q$n, 4L)
-})
-
 # --- update -----------------------------------------------------------
 
 test_that("update", {

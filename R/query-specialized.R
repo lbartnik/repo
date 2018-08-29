@@ -63,7 +63,8 @@ read_commits <- function (.data) {
 
 #' @importFrom rlang quos is_symbol is_character
 #' @importFrom tidyselect vars_select
-#' @importFrom dplyr bind_cols data_frame
+#' @importFrom dplyr bind_cols
+#' @importFrom tibble tibble
 read_tags <- function (.data, ...) {
   stopifnot(is_tags(.data))
   selection <- quos(...)
@@ -107,13 +108,14 @@ read_tags <- function (.data, ...) {
   }
 
   names <- setdiff(names, "id")
-  if (!length(names)) return(data_frame(id = ids))
+  if (!length(names)) return(tibble(id = ids))
 
-  bind_cols(data_frame(id = ids),
+  bind_cols(tibble(id = ids),
             flatten_lists(read_tag_values(ids, names, .data$repository$store)))
 }
 
 #' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
+#' @importFrom tibble tibble
 match_ids <- function (query) {
   stopifnot(is_query(query))
   store <- query$repository$store
@@ -127,7 +129,7 @@ match_ids <- function (query) {
   } else {
     # retrieve ids matching the query
     matching_ids <- os_find(store, query$filter[!with_id])
-    matching_ids <- dplyr::filter_(dplyr::data_frame(id = matching_ids),
+    matching_ids <- dplyr::filter_(tibble(id = matching_ids),
                                    .dots = query$filter[with_id])
     matching_ids <- nth(matching_ids, 'id')
   }

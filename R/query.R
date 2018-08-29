@@ -135,14 +135,42 @@ top_n.query <- function (.data, n, wt) {
 
 #' @export
 #' @rdname query
+#' @importFrom tibble tibble
 summarise.query <- function (.data, ...) {
-  if (length(.data$summarise)) {
-    warn("overwriting the query summary")
+  expr <- quos(...)
+
+  if (!length(expr)) {
+    abort("empty summary not supported")
   }
 
-  .data$summarise <- quos(...)
-  .data
+  if (!is_all_named(expr)) {
+    abort("all summary expressions need to be named")
+  }
+
+  if (!only_n_summary(expr)) {
+    abort("only the n() summary is supported")
+  }
+
+  n <- length(match_ids(.data))
+  with_names(tibble(n), names(expr))
 }
+
+# A stop-gap function: check if the only summary is n() and if so, returns TRUE.
+# If there is no summary at all, returns FALSE.
+# If there's an unsupported summary, throws an exception.
+#' @importFrom rlang abort quo_expr
+only_n_summary <- function (expr) {
+  if (!length(expr)) return(FALSE)
+
+  i <- map_lgl(expr, function (s) {
+    e <- quo_expr(s)
+    is.call(e) && identical(e, quote(n()))
+  })
+
+  all(i)
+}
+
+
 
 
 # --- old code ---------------------------------------------------------
