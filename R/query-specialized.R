@@ -53,9 +53,11 @@ read_artifacts <- function (.data) {
 #' @rdname query
 read_commits <- function (.data) {
   stopifnot(is_commits(.data))
-  stopifnot(identical(length(.data$select), 0L))
 
-  abort("read_commits not yet implemented")
+  # 1. check which expressions match ancestor_of, no_children, no_parents, data_matches
+  #    and split the filter list based on that match
+  # 2. apply the general filter and retrieve ids that match it
+  # 3. apply the special filters and take an intersection of all of those sets of ids
 
   structure(list(), class = 'container')
 }
@@ -236,4 +238,37 @@ flatten_lists <- function (values) {
 
   values <- Filter(function(x)!is.null(x), values)
   tibble::as_tibble(values)
+}
+
+ancestor_of_impl <- function (expr, query) {
+  # 1. extract descendant id by evaluating the filter expression
+  root <- tidy_eval(expr, data = list(ancestor_of = function(x)x))
+
+  # 2. read all ids; query should be something like as_commits(repository)
+  #    that is, it should return all ids of objects of the type in question
+  ids <- match_ids(query)
+
+  # 3. build parents-children graph (ancestry?) for these ids
+  graph <- ancestry_graph(ids, query$repository$store)
+
+  # 4. find the given starting node, find all its ancestors
+  graph <- traverse(graph, root, function(x) x$parents)
+
+  # 5. extract ids
+  names(graph)
+}
+
+
+no_children_impl <- function (query) {
+
+}
+
+
+no_parents_impl <- function (query) {
+
+}
+
+
+data_matches_impl <- function (query) {
+
 }

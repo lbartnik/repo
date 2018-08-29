@@ -227,3 +227,21 @@ test_that("simplify tags", {
   expect_named(r, 'x')
   expect_equal(r$x, tm)
 })
+
+test_that("read_commits", {
+  q <- as_commits(sample_repository())
+
+  # requires full access to all elements of the same type (commits, artifacts)
+  q %>% filter(ancestor_of(x)) %>% read_commits()
+
+  # double pass: (1) assign children, (2) filter
+  q %>% filter(no_children()) %>% read_commits()
+
+  # single pass, parents are stored in a tag
+  q %>% filter(no_parents()) %>% read_commits()
+
+  # single pass through commit objects
+  q %>% filter(data_matches(x)) %>% read_commits()
+
+  # what if there are other filters?
+})

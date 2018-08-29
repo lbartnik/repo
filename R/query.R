@@ -7,9 +7,7 @@ new_query <- function (x) {
   structure(list(repository = x,
                  filter = list(),
                  arrange = list(),
-                 select = NULL,
                  top_n = NULL,
-                 summarise = list(),
                  type = 'raw'),
             class = 'query')
 }

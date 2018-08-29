@@ -1,3 +1,5 @@
+# TODO move to selection.R
+
 #' Selectors for history queries.
 #'
 #' @importFrom rlang abort
