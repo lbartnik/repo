@@ -39,9 +39,10 @@ test_that("query type matches read type", {
   #expect_true(is_container(x))
   # TODO expect_length(x, 10)
 
-  #x <- expect_silent(read_tags(as_tags(r)))
-  #expect_true(is_container(x))
-  # TODO expect_length(x, 10)
+  x <- expect_silent(read_tags(as_tags(r)))
+  expect_true(is_tibble(x))
+  expect_equal(nrow(x), 17)
+  expect_equal(ncol(x), 14)
 })
 
 test_that("symbol is matched", {
