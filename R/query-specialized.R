@@ -49,20 +49,6 @@ read_artifacts <- function (.data) {
 }
 
 
-#' @export
-#' @rdname query
-read_commits <- function (.data) {
-  stopifnot(is_commits(.data))
-
-  # 1. check which expressions match ancestor_of, no_children, no_parents, data_matches
-  #    and split the filter list based on that match
-  # 2. apply the general filter and retrieve ids that match it
-  # 3. apply the special filters and take an intersection of all of those sets of ids
-
-  structure(list(), class = 'container')
-}
-
-
 #' @importFrom rlang quos is_symbol is_character
 #' @importFrom tidyselect vars_select
 #' @importFrom dplyr bind_cols
@@ -240,16 +226,58 @@ flatten_lists <- function (values) {
   tibble::as_tibble(values)
 }
 
-ancestor_of_impl <- function (expr, query) {
+
+#' @export
+#' @rdname query
+read_commits <- function (.data) {
+  stopifnot(is_commits(.data))
+
+  # TODO move this to match_ids
+  ans <- lapply(.data$filter, function (quo) {
+    expr <- quo_expr(quo)
+    if (expr_match(expr, quote(ancestor_of))) {
+      return(ancestor_of_impl(expr, .data$repository))
+    }
+    if (expr_match(expr, quote(no_children))) {
+      return()
+    }
+    if (expr_match(expr, quote(no_parents))) {
+      return()
+    }
+    if (expr_match(expr, quote(data_matches))) {
+      return()
+    }
+    return(NA)
+  })
+
+  # remove complex filters
+  .data$filter[!map_lgl(ans, is.na)] <- NULL
+  ans <- c(ans, list(match_ids(.data)))
+
+  ids <- Reduce(ans, NA, f = function(a, b) {
+    if (is.na(a)) return(b)
+    if (is.na(b)) return(b)
+    intersect(a, b)
+  })
+
+  commits <- lapply(ids, function (id) {
+    new_commit(id, .data$repository$store)
+  })
+
+  structure(commits, class = 'container')
+}
+
+
+ancestor_of_impl <- function (expr, repository) {
   # 1. extract descendant id by evaluating the filter expression
   root <- tidy_eval(expr, data = list(ancestor_of = function(x)x))
 
   # 2. read all ids; query should be something like as_commits(repository)
   #    that is, it should return all ids of objects of the type in question
-  ids <- match_ids(query)
+  ids <- match_ids(as_commits(repository))
 
   # 3. build parents-children graph (ancestry?) for these ids
-  graph <- ancestry_graph(ids, query$repository$store)
+  graph <- ancestry_graph(ids, repository$store)
 
   # 4. find the given starting node, find all its ancestors
   graph <- traverse(graph, root, function(x) x$parents)

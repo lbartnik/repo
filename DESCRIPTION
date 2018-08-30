@@ -36,6 +36,7 @@ Suggests:
   testthat
 Collate:
   'artifact.R'
+  'commit.R'
   'container.R'
   'graph.R'
   'history.R'

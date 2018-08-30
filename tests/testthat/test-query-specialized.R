@@ -228,11 +228,20 @@ test_that("simplify tags", {
   expect_equal(r$x, tm)
 })
 
-test_that("read_commits", {
+test_that("simple read_commits", {
+  q <- as_commits(sample_repository())
+
+  x <- read_commits(q)
+  expect_s3_class(x, 'container')
+  expect_length(x, 16)
+  expect_true(all(map_chr(x, class) == 'commit'))
+})
+
+test_that("complex read_commits", {
   q <- as_commits(sample_repository())
 
   # requires full access to all elements of the same type (commits, artifacts)
-  q %>% filter(ancestor_of(x)) %>% read_commits()
+  x <- q %>% filter(ancestor_of(x)) %>% read_commits()
 
   # double pass: (1) assign children, (2) filter
   q %>% filter(no_children()) %>% read_commits()
