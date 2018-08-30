@@ -150,16 +150,31 @@ quos_match <- function (quos, ...) {
   })
 
   map_lgl(quos, function (quo) {
-    any(map_lgl(symbols, function (sym) expr_match(quo_expr(quo), sym)))
+    any(map_lgl(symbols, function (sym) expr_match_sym(quo_expr(quo), sym)))
   })
 }
 
-expr_match <- function (expr, sym) {
-  recurse <- function (x) any(unlist(lapply(x, function (e) expr_match(e, sym))))
-  if (!is.recursive(expr)) return(identical(expr, sym))
-  if (is.call(expr)) return(recurse(expr[-1]))
-  stop('cannot process ', deparse(expr))
+expr_match <- function (expr, sym, mode) {
+  stopifnot(mode %in% c('no-call', 'call', 'fun-only'))
+
+  if (!is.recursive(expr)) {
+    if (identical(mode, 'fun-only')) return(FALSE)
+    return(identical(expr, sym))
+  }
+
+  recurse <- function (x) any(unlist(lapply(x, function (e) expr_match(e, sym, mode))))
+  if (is.call(expr)) {
+    if (identical(mode, 'fun-only') && identical(expr[[1]], sym)) return(TRUE)
+    return(recurse(expr[-1]))
+  }
+
+  abort('cannot process: ', deparse(expr))
 }
+
+expr_match_sym <- function (expr, sym) expr_match(expr, sym, 'no-call')
+
+expr_match_fun <- function (expr, sym) expr_match(expr, sym, 'fun-only')
+
 
 #' @importFrom rlang quo
 read_tag_names <- function (ids, store) {
@@ -235,16 +250,16 @@ read_commits <- function (.data) {
   # TODO move this to match_ids
   ans <- lapply(.data$filter, function (quo) {
     expr <- quo_expr(quo)
-    if (expr_match(expr, quote(ancestor_of))) {
+    if (expr_match_fun(expr, quote(ancestor_of))) {
       return(ancestor_of_impl(expr, .data$repository))
     }
-    if (expr_match(expr, quote(no_children))) {
+    if (expr_match_fun(expr, quote(no_children))) {
       return()
     }
-    if (expr_match(expr, quote(no_parents))) {
+    if (expr_match_fun(expr, quote(no_parents))) {
       return()
     }
-    if (expr_match(expr, quote(data_matches))) {
+    if (expr_match_fun(expr, quote(data_matches))) {
       return()
     }
     return(NA)
@@ -268,9 +283,10 @@ read_commits <- function (.data) {
 }
 
 
+#' @importFrom rlang eval_tidy
 ancestor_of_impl <- function (expr, repository) {
   # 1. extract descendant id by evaluating the filter expression
-  root <- tidy_eval(expr, data = list(ancestor_of = function(x)x))
+  root <- eval_tidy(expr, data = list(ancestor_of = function(x)x))
 
   # 2. read all ids; query should be something like as_commits(repository)
   #    that is, it should return all ids of objects of the type in question
@@ -299,4 +315,33 @@ no_parents_impl <- function (query) {
 
 data_matches_impl <- function (query) {
 
+}
+
+# TODO move to graph; merge with graph_reduce and connect_artifacts
+
+#' Build a connected ancestry graph.
+#'
+#' For each identifier in `ids`, `ancestry_graph` creates and returns a
+#' `list` with the two following keys:
+#'
+#'   * `parents` which is read directly from `store`
+#'   * `children` which is inferred from `parents`
+#'
+#' Those lists are wrapped in a single list and named with values from `ids`.
+#' Furthermore, `ancestry_graph` verifies that all values present in `parents`
+#' and `children` are also present in `ids` and that the resulting graph is
+#' connected, that is, whether there is a path between any pair of nodes.
+#'
+#' @param ids identifiers of objects in `store`
+#' @param store object store; see [storage::object_store]
+#'
+#' @return A `list` named according to `ids`; each element is a list with
+#' two keys: `parents` and `children`.
+#'
+ancestry_graph <- function (ids, store) {
+
+}
+
+traverse <- function (graph, start, neighbours) {
+  stopifnot(is.function(neighbours))
 }

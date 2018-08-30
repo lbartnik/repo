@@ -5,11 +5,6 @@ all_commits <- function (store) {
   map(ids, function(id) commit(store, id))
 }
 
-
-print.commit <- function (x, ...) {
-  cat("<commit: ", join(names(x$objects), ' '), '>\n')
-}
-
 # --- private API: update ------------------------------------------------------
 
 

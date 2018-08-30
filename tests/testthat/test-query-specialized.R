@@ -40,7 +40,7 @@ test_that("query type matches read type", {
   # TODO expect_length(x, 10)
 
   x <- expect_silent(read_tags(as_tags(r)))
-  expect_true(is_tibble(x))
+  expect_true(tibble::is_tibble(x))
   expect_equal(nrow(x), 17)
   expect_equal(ncol(x), 14)
 })
@@ -48,14 +48,25 @@ test_that("query type matches read type", {
 test_that("symbol is matched", {
   s <- quote(id)
 
-  expect_true(expr_match(quote(id), s))
-  expect_true(expr_match(quote(id == 1), s))
-  expect_true(expr_match(quote(f(id)), s))
-  expect_true(expr_match(quote(f(id) == 1), s))
-  expect_true(expr_match(quote(f(a, b, id ** 2) == 1), s))
+  expect_true(expr_match_sym(quote(id), s))
+  expect_true(expr_match_sym(quote(id == 1), s))
+  expect_true(expr_match_sym(quote(f(id)), s))
+  expect_true(expr_match_sym(quote(f(id) == 1), s))
+  expect_true(expr_match_sym(quote(f(a, b, id ** 2) == 1), s))
 
-  expect_false(expr_match(quote(f(id = 2)), s))
-  expect_false(expr_match(quote(id(1)), s))
+  expect_false(expr_match_sym(quote(f(id = 2)), s))
+  expect_false(expr_match_sym(quote(id(1)), s))
+})
+
+test_that("function is matched", {
+  f <- quote(fun)
+
+  expect_true(expr_match_fun(quote(fun()), f))
+  expect_true(expr_match_fun(quote(fun(a)), f))
+  expect_true(expr_match_fun(quote(fun(a = 1)), f))
+  expect_true(expr_match_fun(quote(x(fun(a))), f))
+
+  expect_false(expr_match_fun(quote(x(fun)), f))
 })
 
 test_that("symbol in quos", {
@@ -241,7 +252,7 @@ test_that("complex read_commits", {
   q <- as_commits(sample_repository())
 
   # requires full access to all elements of the same type (commits, artifacts)
-  x <- q %>% filter(ancestor_of(x)) %>% read_commits()
+  x <- q %>% filter(ancestor_of('13b2c216')) %>% read_commits()
 
   # double pass: (1) assign children, (2) filter
   q %>% filter(no_children()) %>% read_commits()
