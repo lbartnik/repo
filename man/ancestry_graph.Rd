@@ -4,12 +4,12 @@
 \alias{ancestry_graph}
 \title{Build a connected ancestry graph.}
 \usage{
-ancestry_graph(ids, store)
+ancestry_graph(chosen_ids, all_ids, store)
 }
 \arguments{
-\item{ids}{identifiers of objects in \code{store}}
-
 \item{store}{object store; see \link[storage:object_store]{storage::object_store}}
+
+\item{ids}{identifiers of objects in \code{store}}
 }
 \value{
 A \code{list} named according to \code{ids}; each element is a list with

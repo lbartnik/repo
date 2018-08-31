@@ -293,7 +293,7 @@ ancestor_of_impl <- function (expr, repository) {
   ids <- match_ids(as_commits(repository))
 
   # 3. build parents-children graph (ancestry?) for these ids
-  graph <- ancestry_graph(ids, repository$store)
+  graph <- ancestry_graph(ids, ids, repository$store)
 
   # 4. find the given starting node, find all its ancestors
   graph <- traverse(graph, root, function(x) x$parents)
@@ -338,8 +338,53 @@ data_matches_impl <- function (query) {
 #' @return A `list` named according to `ids`; each element is a list with
 #' two keys: `parents` and `children`.
 #'
-ancestry_graph <- function (ids, store) {
+ancestry_graph <- function (chosen_ids, all_ids, store) {
 
+  parents <- map(all_ids, function (id) {
+    tags <- storage::os_read_tags(store, id)
+    if (!is.null(tags$parents)) return(as.character(tags$parents))
+    character()
+  })
+
+  children <- map(all_ids, function(...)character())
+  imap(parents, function (parents_for_id, id) {
+    for (parent in parents_for_id) {
+      children[[parent]] <<- c(children[[parent]], id)
+    }
+  })
+
+  # if a given artifact is not in the input list, reassign its id among
+  # its children's parents with that artifact's parents; in doing so, it
+  # "shrinks" the graph but keeps the lineage information
+  for (id in all_ids) {
+    # if among chosen artifacts, skip
+    if (id %in% chosen_ids) next
+
+    # otherwise delete
+    for (child in children[[id]]) {
+      childs_parents <- parents[[child]]
+      childs_parents <- setdiff(childs_parents, id)
+      childs_parents <- c(childs_parents, parents[[id]])
+      parents[[child]] <- childs_parents
+    }
+
+    for (parent in parents[[id]]) {
+      children[[parent]] <- setdiff(children[[parent]], id)
+    }
+
+    parents[[id]] <- NULL
+    children[[id]] <- NULL
+  }
+
+  graph <- lapply(chosen_ids, function (id) {
+    list(
+      parents  = parents[[id]],
+      children = children[[id]]
+    )
+  })
+  names(graph) <- chosen_ids
+
+  graph
 }
 
 traverse <- function (graph, start, neighbours) {

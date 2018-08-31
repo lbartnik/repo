@@ -27,52 +27,18 @@ connect_artifacts <- function (artifacts) {
   # make sure all artifacts come from the same store
   stopifnot(length(unique(lapply(artifacts, artifact_store))) == 1)
 
-  chosen_ids <- map_chr(artifacts, `[[`, 'id')
-
   # find identifiers of all artifacts
   store <- artifact_store(first(artifacts))
   all_ids <- storage::os_find(store, quos(isTRUE(artifact)))
 
-  parents <- map(all_ids, function (id) {
-    tags <- storage::os_read_tags(store, id)
-    if (!is.null(tags$parents)) return(as.character(tags$parents))
-    character()
-  })
-
-  children <- map(all_ids, function(...)character())
-  imap(parents, function (parents_for_id, id) {
-    for (parent in parents_for_id) {
-      children[[parent]] <<- c(children[[parent]], id)
-    }
-  })
-
-  # if a given artifact is not in the input list, reassign its id among
-  # its children's parents with that artifact's parents; in doing so, it
-  # "shrinks" the graph but keeps the lineage information
-  for (id in all_ids) {
-    # if among chosen artifacts, skip
-    if (id %in% chosen_ids) next
-
-    # otherwise delete
-    for (child in children[[id]]) {
-      childs_parents <- parents[[child]]
-      childs_parents <- setdiff(childs_parents, id)
-      childs_parents <- c(childs_parents, parents[[id]])
-      parents[[child]] <- childs_parents
-    }
-
-    for (parent in parents[[id]]) {
-      children[[parent]] <- setdiff(children[[parent]], id)
-    }
-
-    parents[[id]] <- NULL
-    children[[id]] <- NULL
-  }
+  chosen_ids <- map_chr(artifacts, `[[`, 'id')
+  graph <- ancestry_graph(chosen_ids, all_ids, store)
 
   # assign newly computed paretns and children
   artifacts <- lapply(artifacts, function (a) {
-    a$parents <- parents[[a$id]]
-    a$children <- children[[a$id]]
+    node <- graph[[a$id]]
+    a$parents <- node$parents
+    a$children <- node$children
     a
   })
 
