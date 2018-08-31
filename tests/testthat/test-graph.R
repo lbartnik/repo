@@ -71,6 +71,18 @@ test_that("actual repo can be stratified", {
   expect_length(s$children[[1]]$children, 3)
 })
 
+test_that("traverse", {
+  g <- sample_graph()
+  x <- traverse(g, 'g', function(id, graph) graph[[id]]$parents)
+  expect_equal(x, c('g', 'c', 'a'))
+})
+
+test_that("traverse", {
+  g <- sample_graph()
+  x <- traverse(g, 'a', function(id, graph) graph[[id]]$children)
+  expect_equal(x, letters[1:7])
+})
+
 
 
 # --- old code ---------------------------------------------------------

@@ -1,3 +1,9 @@
+as_graph <- function (x) structure(x, class = c('graph', class(x)))
+
+is_graph <- function (x) inherits(x, 'graph')
+
+
+
 #' Turn a container of artifacts into a graph of artifacts.
 #'
 #' `connect_artifacts` can be called on the output of [read_artifacts]
@@ -93,13 +99,109 @@ find_roots <- function (x) {
   Filter(x, f = function (node) is_empty(node$parents))
 }
 
-as_graph <- function (x) structure(x, class = c('graph', class(x)))
 
-is_graph <- function (x) inherits(x, 'graph')
+
+# TODO merge with graph_reduce and connect_artifacts
+
+#' Build a connected ancestry graph.
+#'
+#' For each identifier in `ids`, `ancestry_graph` creates and returns a
+#' `list` with the two following keys:
+#'
+#'   * `parents` which is read directly from `store`
+#'   * `children` which is inferred from `parents`
+#'
+#' Those lists are wrapped in a single list and named with values from `ids`.
+#' Furthermore, `ancestry_graph` verifies that all values present in `parents`
+#' and `children` are also present in `ids` and that the resulting graph is
+#' connected, that is, whether there is a path between any pair of nodes.
+#'
+#' @param ids identifiers of objects in `store`
+#' @param store object store; see [storage::object_store]
+#'
+#' @return A `list` named according to `ids`; each element is a list with
+#' two keys: `parents` and `children`.
+#'
+ancestry_graph <- function (chosen_ids, all_ids, store) {
+
+  parents <- map(all_ids, function (id) {
+    tags <- storage::os_read_tags(store, id)
+    if (!is.null(tags$parents)) return(as.character(tags$parents))
+    character()
+  })
+
+  children <- map(all_ids, function(...)character())
+  imap(parents, function (parents_for_id, id) {
+    for (parent in parents_for_id) {
+      children[[parent]] <<- c(children[[parent]], id)
+    }
+  })
+
+  # if a given artifact is not in the input list, reassign its id among
+  # its children's parents with that artifact's parents; in doing so, it
+  # "shrinks" the graph but keeps the lineage information
+  for (id in all_ids) {
+    # if among chosen artifacts, skip
+    if (id %in% chosen_ids) next
+
+    # otherwise delete
+    for (child in children[[id]]) {
+      childs_parents <- parents[[child]]
+      childs_parents <- setdiff(childs_parents, id)
+      childs_parents <- c(childs_parents, parents[[id]])
+      parents[[child]] <- childs_parents
+    }
+
+    for (parent in parents[[id]]) {
+      children[[parent]] <- setdiff(children[[parent]], id)
+    }
+
+    parents[[id]] <- NULL
+    children[[id]] <- NULL
+  }
+
+  graph <- lapply(chosen_ids, function (id) {
+    list(
+      parents  = parents[[id]],
+      children = children[[id]]
+    )
+  })
+  names(graph) <- chosen_ids
+
+  graph
+}
+
+
+traverse <- function (graph, start, neighbours) {
+  stopifnot(is.function(neighbours))
+  stopifnot(all(start %in% names(graph)))
+
+  # BFS
+  black <- new_set()
+  grey  <- new_set(data = start)
+
+  while (grey$size() > 0) {
+    id <- grey$pop_front()
+    black$insert(id)
+
+    new_ids <- neighbours(id, graph)
+    if (length(new_ids) > 0) {
+      stopifnot(all(new_ids %in% names(graph)))
+    }
+
+    lapply(new_ids, function (new_id) {
+      if (!black$contains(new_id)) {
+        grey$insert(new_id)
+        grey$remove(id)
+      }
+    })
+  }
+
+  unlist(black$data())
+}
+
 
 # --- old code ---------------------------------------------------------
-
-is_graph <- function (x) inherits(x, 'graph')
 
 
 #' @import utilities

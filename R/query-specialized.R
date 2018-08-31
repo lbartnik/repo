@@ -296,7 +296,7 @@ ancestor_of_impl <- function (expr, repository) {
   graph <- ancestry_graph(ids, ids, repository$store)
 
   # 4. find the given starting node, find all its ancestors
-  graph <- traverse(graph, root, function(x) x$parents)
+  graph <- traverse(graph, root, function(node, graph) node$parents)
 
   # 5. extract ids
   names(graph)
@@ -315,78 +315,4 @@ no_parents_impl <- function (query) {
 
 data_matches_impl <- function (query) {
 
-}
-
-# TODO move to graph; merge with graph_reduce and connect_artifacts
-
-#' Build a connected ancestry graph.
-#'
-#' For each identifier in `ids`, `ancestry_graph` creates and returns a
-#' `list` with the two following keys:
-#'
-#'   * `parents` which is read directly from `store`
-#'   * `children` which is inferred from `parents`
-#'
-#' Those lists are wrapped in a single list and named with values from `ids`.
-#' Furthermore, `ancestry_graph` verifies that all values present in `parents`
-#' and `children` are also present in `ids` and that the resulting graph is
-#' connected, that is, whether there is a path between any pair of nodes.
-#'
-#' @param ids identifiers of objects in `store`
-#' @param store object store; see [storage::object_store]
-#'
-#' @return A `list` named according to `ids`; each element is a list with
-#' two keys: `parents` and `children`.
-#'
-ancestry_graph <- function (chosen_ids, all_ids, store) {
-
-  parents <- map(all_ids, function (id) {
-    tags <- storage::os_read_tags(store, id)
-    if (!is.null(tags$parents)) return(as.character(tags$parents))
-    character()
-  })
-
-  children <- map(all_ids, function(...)character())
-  imap(parents, function (parents_for_id, id) {
-    for (parent in parents_for_id) {
-      children[[parent]] <<- c(children[[parent]], id)
-    }
-  })
-
-  # if a given artifact is not in the input list, reassign its id among
-  # its children's parents with that artifact's parents; in doing so, it
-  # "shrinks" the graph but keeps the lineage information
-  for (id in all_ids) {
-    # if among chosen artifacts, skip
-    if (id %in% chosen_ids) next
-
-    # otherwise delete
-    for (child in children[[id]]) {
-      childs_parents <- parents[[child]]
-      childs_parents <- setdiff(childs_parents, id)
-      childs_parents <- c(childs_parents, parents[[id]])
-      parents[[child]] <- childs_parents
-    }
-
-    for (parent in parents[[id]]) {
-      children[[parent]] <- setdiff(children[[parent]], id)
-    }
-
-    parents[[id]] <- NULL
-    children[[id]] <- NULL
-  }
-
-  graph <- lapply(chosen_ids, function (id) {
-    list(
-      parents  = parents[[id]],
-      children = children[[id]]
-    )
-  })
-  names(graph) <- chosen_ids
-
-  graph
-}
-
-traverse <- function (graph, start, neighbours) {
-  stopifnot(is.function(neighbours))
 }

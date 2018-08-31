@@ -1,7 +1,7 @@
 sample_graph <- function () {
   structure(
     list(
-      a = list(id = 'a', parents = NA_character_, children = c("b", "c"), objects = list(x = 'a')),
+      a = list(id = 'a', parents = c(), children = c("b", "c"), objects = list(x = 'a')),
       b = list(id = 'b', parents = "a", children = c("d", "e"), objects = list(x = 'a')),
       c = list(id = 'c', parents = "a", children = c("f", "g"), objects = list(x = 'a')),
       d = list(id = 'd', parents = "b", children = c(), objects = list(x = 'a', y = 'b')),
