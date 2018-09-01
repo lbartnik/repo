@@ -259,6 +259,14 @@ adjust_ancestry <- function (graph) {
 }
 
 
+commit_graph <- function (store) {
+  # TODO replace with is_commit()
+  ids <- os_find(store, list(quo('commit' %in% class)))
+  ancestry_graph(ids, ids, store)
+}
+
+
+
 # --- old code ---------------------------------------------------------
 
 

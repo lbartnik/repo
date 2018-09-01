@@ -279,16 +279,6 @@ test_that("changes are synchronized into the repository", {
   expect_equal(r$last_png, u$png)
 })
 
-
-test_that("empty history", {
-  r <- empty_repository()
-
-  x <- repository_history(r, 'current')
-  expect_s3_class(x, 'history')
-  expect_length(x, 0)
-})
-
-
 test_that("full explanation", {
   skip("get rid of repository_explain")
   r <- many_repository()

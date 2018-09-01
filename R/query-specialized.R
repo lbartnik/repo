@@ -253,7 +253,7 @@ read_commits <- function (.data) {
 
     if (expr_match_fun(quo_expr(quo), quote(ancestor_of))) {
       id <- enlongate(extract_ancestor_id(quo), store)
-      return(ancestor_of_impl(id, store))
+      return(ancestor_of_impl(id, commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_children))) {
       return()
@@ -282,44 +282,4 @@ read_commits <- function (.data) {
   })
 
   structure(commits, class = 'container')
-}
-
-#' @importFrom rlang eval_tidy
-extract_ancestor_id <- function (quo) {
-  eval_tidy(quo, data = list(ancestor_of = function(x)x))
-}
-
-ancestor_of_impl <- function (root, store) {
-  # 1. read all ids; query should be something like as_commits(repository)
-  #    that is, it should return all ids of objects of the type in question
-  # TODO could be run for artifacts
-  # TODO replace with is_commit()
-  ids <- os_find(store, list(quo('commit' %in% class)))
-
-  # 2. build parents-children graph (ancestry?) for these ids
-  graph <- ancestry_graph(ids, ids, store)
-
-  # 3. find the given starting node, find all its ancestors
-  traverse(graph, root, function(node_id, graph) nth(graph, node_id)$parents)
-}
-
-
-no_children_impl <- function (query) {
-  Filter(.data, f = function (commit) identical(length(commit$children), 0L))
-}
-
-
-no_parents_impl <- function (query) {
-
-}
-
-
-data_matches_impl <- function (query) {
-  data <- if (missing(data)) list(...) else c(data, list(...))
-  stopifnot(is_all_named(data))
-
-  data <- lapply(data, storage::compute_id)
-  Filter(.data, f = function (commit) {
-    setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
-  })
 }

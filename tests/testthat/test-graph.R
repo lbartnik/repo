@@ -105,6 +105,20 @@ test_that("adjust ancestry", {
   expect_equal(map_int(x, function(n)length(n$children)), c(1, 1, 0))
 })
 
+test_that("commit graph", {
+  r <- sample_repository()
+
+  x <- commit_graph(r$store)
+  expect_length(x, 16)
+
+  len <- map_int(x, function(n)length(n$parents))
+  expect_equivalent(as.numeric(table(len)), c(`0`=1, `1`=15))
+
+  len <- map_int(x, function(n)length(n$children))
+  expect_equivalent(as.numeric(table(len)), c(`0`=3, `1`=12, `3`=1))
+})
+
+
 # --- old code ---------------------------------------------------------
 
 
