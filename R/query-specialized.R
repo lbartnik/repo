@@ -259,10 +259,11 @@ read_commits <- function (.data) {
       return(no_children_impl(commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_parents))) {
-      return()
+      return(no_parents_impl(commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(data_matches))) {
-      return()
+      match <- extract_data_match(quo)
+      return(data_matches_impl(match, store))
     }
     return(NULL)
   })

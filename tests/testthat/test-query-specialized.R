@@ -249,7 +249,8 @@ test_that("simple read_commits", {
 })
 
 test_that("complex read_commits", {
-  q <- as_commits(sample_repository())
+  r <- sample_repository()
+  q <- as_commits(r)
 
   # requires full access to all elements of the same type (commits, artifacts)
   x <- q %>% filter(ancestor_of('13b2c216')) %>% read_commits()
@@ -260,22 +261,13 @@ test_that("complex read_commits", {
   expect_length(x, 3)
 
   # single pass, parents are stored in a tag
-#  q %>% filter(no_parents()) %>% read_commits()
+  x <- q %>% filter(no_parents()) %>% read_commits()
+  expect_length(x, 1)
 
   # single pass through commit objects
-#  q %>% filter(data_matches(x)) %>% read_commits()
-
-  # what if there are other filters?
+  y <- os_read_object(r$store, '2b67f4934da0aa3baecfdd3001008539217d5719')
+  x <- q %>% filter(data_matches(input = y)) %>% read_commits()
+  expect_length(x, 1)
+  expect_s3_class(first(x), 'commit')
+  expect_equal(first(x)$id, 'ae1c6ffc1f7b10eebdbd63be0ea733fe2a10d0f8')
 })
-
-test_that("find matching data", {
-  skip("move filtering history into filtering query")
-  h <- sample_graph()
-
-  x <- filter(h, data_matches(x = 1))
-  expect_named(x, "g")
-
-  x <- filter(h, data_matches(data = list(x = 1)))
-  expect_named(x, "g")
-})
-

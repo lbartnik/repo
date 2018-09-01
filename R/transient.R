@@ -55,16 +55,29 @@ no_children_impl <- function (graph) {
 }
 
 
-no_parents_impl <- function (query) {
-
+no_parents_impl <- function (graph) {
+  stopifnot(is_graph(graph))
+  filtered <- Filter(graph, f = function (node) identical(length(node$parents), 0L))
+  names(filtered)
 }
 
-data_matches_impl <- function (query) {
-  data <- if (missing(data)) list(...) else c(data, list(...))
-  stopifnot(is_all_named(data))
 
-  data <- lapply(data, storage::compute_id)
-  Filter(.data, f = function (commit) {
+extract_data_match <- function (quo) {
+  impl <- list(data_matches = function(..., data) {
+    data <- if (missing(data)) list(...) else c(list(...), data)
+    stopifnot(is_all_named(data))
+    lapply(data, storage::compute_id)
+  })
+
+  eval_tidy(quo, data = impl)
+}
+
+#' @importFrom rlang quo
+data_matches_impl <- function (data, store) {
+  ids <- os_find(store, list(quo('commit' %in% class)))
+
+  Filter(ids, f = function (id) {
+    commit <- new_commit(id, store)
     setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
   })
 }
