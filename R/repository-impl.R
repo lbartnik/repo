@@ -200,43 +200,6 @@ strip_object_impl <- function (obj, attr = FALSE)
   obj
 }
 
-# --- history ----------------------------------------------------------
-
-commit <- function (store, id) {
-  stopifnot(storage::is_object_store(store))
-
-  data <- storage::os_read(store, id)
-
-  raw  <- data$object
-  tags <- data$tags
-
-  stopifnot(has_name(raw, 'objects'), has_name(raw, 'expr'), has_name(raw, 'plot'))
-  stopifnot(has_name(tags, 'parent'), has_name(tags, 'time'))
-
-  raw <- as.environment(raw)
-
-  raw$id       <- id
-  raw$parent   <- tags$parent
-  raw$children <- c()
-  raw$time     <- tags$time
-
-  attr(raw, 'store') <- store
-  structure(raw, class = 'commit')
-}
-
-
-#' @export
-`$.commit` <- function (x, i) {
-  if (i %in% names(x)) return(x[[i]])
-  if (identical(i, 'data')) {
-    store <- attr(x, 'store')
-    x$data <- map(x$objects, function (id) storage::os_read_object(store, id))
-    return(x[["data"]])
-  }
-
-  stop('unknown key ', i)
-}
-
 
 # --- explain ----------------------------------------------------------
 

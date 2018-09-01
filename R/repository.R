@@ -167,27 +167,3 @@ repository_rewind <- function (repo, id) {
 
   invisible()
 }
-
-
-#' @description `as_deltas` converts a `history` object (a tree of
-#' _commits_) into an equivalent tree of _artifacts_. Each node in the
-#' tree of artifacts represents a single artifact introduced in a given
-#' commit. It is still a representation of historical changes in R
-#' session but at the level of a single artifact rather than at the
-#' level of a snapshot of R session (a _commit_).
-#'
-#' @rdname repository
-#' @export
-#'
-as_deltas <- function (x) {
-  stopifnot(is_history(x))
-  history_to_deltas(x)
-}
-
-
-#' @rdname repository
-#' @export
-#'
-as_origin <- function (x) {
-  stopifnot(is_history(x))
-}

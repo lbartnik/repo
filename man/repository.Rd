@@ -9,8 +9,6 @@
 \alias{repository_update}
 \alias{repository_explain}
 \alias{repository_rewind}
-\alias{as_deltas}
-\alias{as_origin}
 \title{Object Repository for R}
 \usage{
 repository(store)
@@ -26,10 +24,6 @@ repository_update(repo, env, plot, expr)
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
 repository_rewind(repo, id)
-
-as_deltas(x)
-
-as_origin(x)
 }
 \arguments{
 \item{store}{Read and write objects into this storage.}
@@ -70,11 +64,4 @@ all artifacts is returned.
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to
 that value. Subsequent commits will be recorded as descendants of
 commit \code{id}.
-
-\code{as_deltas} converts a \code{history} object (a tree of
-\emph{commits}) into an equivalent tree of \emph{artifacts}. Each node in the
-tree of artifacts represents a single artifact introduced in a given
-commit. It is still a representation of historical changes in R
-session but at the level of a single artifact rather than at the
-level of a snapshot of R session (a \emph{commit}).
 }
