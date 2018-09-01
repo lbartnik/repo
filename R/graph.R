@@ -160,19 +160,46 @@ ancestry_graph <- function (chosen_ids, all_ids, store) {
     children[[id]] <- NULL
   }
 
-  graph <- lapply(chosen_ids, function (id) {
+  nodes <- lapply(chosen_ids, function (id) {
     list(
       parents  = parents[[id]],
       children = children[[id]]
     )
   })
-  names(graph) <- chosen_ids
+  names(nodes) <- chosen_ids
 
-  graph
+  as_graph(nodes)
 }
 
 
+#' Traverse a graph.
+#'
+#' Traverse the whole graph or its subset. `graph` is a graph structure
+#' as returned by [connect_artifacts]; it is a named `list` of `list`s,
+#' each of which contains two keys: `children` and `parents`, which are
+#' `character` vectors with node identifiers matching `names(graph)`.
+#' The traverse starts in each identifier passed in `start` (there can
+#' by multiple starting nodes). It uses `neighbours` to pick nodes to go
+#' to from any given node; this function accepts two arguments: `id`, a
+#' node identifier and `graph` which is the original graph structure.
+#'
+#' @param graph graph structure, as returned by [connect_artifacts].
+#' @param start a `vector` of `character` node identifiers.
+#' @param neighbours a `function` which accepts a node identifier
+#'        and the `graph` structure and returns a `vector` of node
+#'        identifiers.
+#' @return a `vector` of node identifiers visited on the traverse.
+#'
+#' @seealso ancestry_graph, adjust_ancestry
+#'
+#' @examples
+#' \dontrun{
+#'    g <- ancestry_graph(...)
+#'    # descend in a tree which start in the first node in the graph
+#'    traverse(g, names(g)[[1]], function(id, graph) graph[[id]]$children)
+#' }
 traverse <- function (graph, start, neighbours) {
+  stopifnot(is_graph(graph))
   stopifnot(is.function(neighbours))
   stopifnot(all(start %in% names(graph)))
 
@@ -198,6 +225,31 @@ traverse <- function (graph, start, neighbours) {
   }
 
   unlist(black$data())
+}
+
+
+#' Fix ancestry information.
+#'
+#' After defining a graph subset by a traverse, it might be desirable
+#' to have the `children` and `parents` keys of each graph node contain
+#' only identifiers of nodes present in the graph.
+#'
+#' @param graph a graph as returned by [traverse].
+#' @return Input `graph` with `children` and `parents` adjusted to
+#' contain only identifiers of nodes present in `graph`.
+#'
+#' @seealso ancestry_graph, traverse
+adjust_ancestry <- function (graph) {
+  stopifnot(is_graph(graph))
+
+  nodes <- lapply(graph, function (node) {
+    node$children <- intersect(node$children, names(graph))
+    node$parents <- intersect(node$parents, names(graph))
+    node
+  })
+
+  class(nodes) <- class(graph)
+  nodes
 }
 
 

@@ -83,6 +83,19 @@ test_that("traverse", {
   expect_equal(x, letters[1:7])
 })
 
+test_that("adjust ancestry", {
+  g <- sample_graph()
+
+  h <- g[c('a', 'c', 'g')]
+  expect_equal(map_int(h, function(n)length(n$parents)), c(0, 1, 1))
+  expect_equal(map_int(h, function(n)length(n$children)), c(2, 2, 0))
+
+  x <- adjust_ancestry(as_graph(h))
+  expect_true(is_graph(x))
+  expect_length(x, 3)
+  expect_equal(map_int(x, function(n)length(n$parents)), c(0, 1, 1))
+  expect_equal(map_int(x, function(n)length(n$children)), c(1, 1, 0))
+})
 
 
 # --- old code ---------------------------------------------------------
