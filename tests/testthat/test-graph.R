@@ -105,7 +105,6 @@ test_that("adjust ancestry", {
   expect_equal(map_int(x, function(n)length(n$children)), c(1, 1, 0))
 })
 
-
 # --- old code ---------------------------------------------------------
 
 
