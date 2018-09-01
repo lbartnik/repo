@@ -46,17 +46,15 @@ test_that("query type matches read type", {
 })
 
 test_that("full explanation", {
-  skip("get rid of repository_explain")
   r <- many_repository()
 
-  x <- repository_explain(r)
+  x <- connect_artifacts(read_artifacts(as_artifacts(r)))
   expect_length(x, 4)
-  expect_named(x, letters[1:4])
 
-  expect_node(x, 'a', parents = character(), children = 'c')
-  expect_node(x, 'b', parents = character(), children = 'c')
-  expect_node(x, 'c', parents = c('a', 'b'), children = 'd')
-  expect_node(x, 'd', parents = c('c'), children = character())
+  expect_node(nth(x, 1), id = 'a', parents = character(), children = 'c')
+  expect_node(nth(x, 2), id = 'b', parents = character(), children = 'c')
+  expect_node(nth(x, 3), id = 'c', parents = c('a', 'b'), children = 'd')
+  expect_node(nth(x, 4), id = 'd', parents = c('c'), children = character())
 })
 
 

@@ -1,18 +1,3 @@
-expect_node <- function (col, id, ...) {
-  expect_true(id %in% names(col))
-  node <- col[[id]]
-
-  cond <- list(...)
-  expect_true(all(names(cond) %in% names(node)))
-
-  lapply(names(cond), function (name) {
-    expect_equal(cond[[name]], node[[name]], info = name)
-  })
-
-  invisible(TRUE)
-}
-
-
 empty_repository <- function () {
   repository(storage::memory())
 }
@@ -44,7 +29,7 @@ many_repository <- function () {
   add_object(r, 'a', 1, 'p', list())
   add_object(r, 'b', 2L, 'q', list())
   add_object(r, 'c', 3, 'r', list(a = 'a', b = 'b'))
-  add_object(r, 'd', replot_as(dummy_plot(), 'svg'), 's', list(c = 'c'))
+  add_object(r, 'd', replot_as(dummy_plot(), 'svg'), 's', list(c = 'c'), cls = 'plot')
 
   add_commit(r, 'p', NA_character_, bquote(a <- 1), list(a = 'a'))
   add_commit(r, 'q', 'p', bquote(b <- 2L), list(a = 'a', b = 'b'))
@@ -54,8 +39,9 @@ many_repository <- function () {
   r
 }
 
-add_object <- function (r, id, value, parent_commit, parents) {
-  tags <- list(class = class(value), parent_commit = parent_commit,
+add_object <- function (r, id, value, parent_commit, parents, cls) {
+  if (missing(cls)) cls <- class(value)
+  tags <- list(class = cls, parent_commit = parent_commit,
                parents = parents, time = Sys.time(), artifact = TRUE,
                names = id)
   storage::os_write(r$store, value, tags, id)

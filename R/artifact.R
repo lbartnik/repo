@@ -32,7 +32,7 @@ new_artifact <- function (id, store) {
   if ('plot' %in% tags$class) {
     tags$name <- tags$names <- '<plot>'
   } else {
-    i <- match(id, unlist(commit$objects))
+    i <- match(id, unlist(commit$objects), nomatch = NULL)
     stopifnot(is_scalar_integer(i))
     tags$name <- nth(names(commit$objects), i)
   }
