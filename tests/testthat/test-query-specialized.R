@@ -35,9 +35,9 @@ test_that("query type matches read type", {
   expect_true(is_container(x))
   expect_length(x, 17)
 
-  #x <- expect_silent(read_commits(as_commits(r)))
-  #expect_true(is_container(x))
-  # TODO expect_length(x, 10)
+  x <- expect_silent(read_commits(as_commits(r)))
+  expect_true(is_container(x))
+  expect_length(x, 16)
 
   x <- expect_silent(read_tags(as_tags(r)))
   expect_true(tibble::is_tibble(x))
