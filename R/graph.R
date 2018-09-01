@@ -124,13 +124,15 @@ find_roots <- function (x) {
 #'
 ancestry_graph <- function (chosen_ids, all_ids, store) {
 
+  # read parent pointers written in storage as tags
   parents <- map(all_ids, function (id) {
     tags <- storage::os_read_tags(store, id)
-    # artifact
+    # artifact stores multiple parents
     if (!is.null(tags$parents)) parents <- as.character(tags$parents)
-    # commit
+    # commit stores a single parent
     if (!is.null(tags$parent)) parents <- as.character(tags$parent)
-    if (is.na(parents)) parents <- character()
+    if (is.null(parents)) parents <- character()
+    if (length(parents) && is.na(parents)) parents <- character()
     parents
   })
 
@@ -279,8 +281,8 @@ graph_reduce <- function (x, from = NULL, to = NULL) {
 
     extract <- function (id) {
       ans <- x[id]
-      parent <- first(ans)$parent
-      if (match(parent, names(x), nomatch = FALSE) && !is.na(parent)) {
+      parent <- first(ans)$parents
+      if (length(parent) && match(parent, names(x), nomatch = FALSE) && !is.na(parent)) {
         ans <- c(extract(first(ans)$parent), ans)
       }
       ans
