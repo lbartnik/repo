@@ -279,60 +279,6 @@ test_that("changes are synchronized into the repository", {
   expect_equal(r$last_png, u$png)
 })
 
-test_that("full explanation", {
-  skip("get rid of repository_explain")
-  r <- many_repository()
-
-  x <- repository_explain(r)
-  expect_length(x, 4)
-  expect_named(x, letters[1:4])
-
-  expect_node(x, 'a', parents = character(), children = 'c')
-  expect_node(x, 'b', parents = character(), children = 'c')
-  expect_node(x, 'c', parents = c('a', 'b'), children = 'd')
-  expect_node(x, 'd', parents = c('c'), children = character())
-})
-
-
-test_that("explain object", {
-  skip("get rid of repository_explain")
-  r <- many_repository()
-
-  x <- repository_explain(r, 'd')
-  expect_length(x, 4)
-
-  x <- repository_explain(r, 'c')
-  expect_length(x, 3)
-  expect_node(x, 'a', parents = character(), children = 'c')
-  expect_node(x, 'b', parents = character(), children = 'c')
-  expect_node(x, 'c', parents = c('a', 'b'), children = character())
-
-  x <- repository_explain(r, 'b')
-  expect_length(x, 1)
-  expect_node(x, 'b', parents = character(), children = character())
-})
-
-
-test_that("order origin", {
-  skip("get rid of repository_explain")
-  r <- sample_repository()
-
-  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  i <- order(unlist(lapply(x, `[[`, "time")), decreasing = FALSE)
-  x <- x[i]
-  i <- substr(unlist(lapply(x, `[[`, "id")), 1, 2)
-  expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
-})
-
-
-test_that("print origin", {
-  skip("get rid of repository_explain")
-  r <- sample_repository()
-  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  expect_output_file(print(x), "text-output/print-origin.txt")
-})
-
-
 test_that("finding ancestors", {
   r <- many_repository()
 
