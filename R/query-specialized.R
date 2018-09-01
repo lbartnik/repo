@@ -262,16 +262,16 @@ read_commits <- function (.data) {
     if (expr_match_fun(expr, quote(data_matches))) {
       return()
     }
-    return(NA)
+    return(NULL)
   })
 
   # remove complex filters
   .data$filter[!map_lgl(ans, is.na)] <- NULL
   ans <- c(ans, list(match_ids(.data)))
 
-  ids <- Reduce(ans, NA, f = function(a, b) {
-    if (is.na(a)) return(b)
-    if (is.na(b)) return(b)
+  ids <- Reduce(ans, NULL, f = function(a, b) {
+    if (is.null(a)) return(b)
+    if (is.null(b)) return(b)
     intersect(a, b)
   })
 
@@ -287,6 +287,7 @@ read_commits <- function (.data) {
 ancestor_of_impl <- function (expr, repository) {
   # 1. extract descendant id by evaluating the filter expression
   root <- eval_tidy(expr, data = list(ancestor_of = function(x)x))
+  root <- enlongate(root, repository$store)
 
   # 2. read all ids; query should be something like as_commits(repository)
   #    that is, it should return all ids of objects of the type in question
@@ -296,10 +297,7 @@ ancestor_of_impl <- function (expr, repository) {
   graph <- ancestry_graph(ids, ids, repository$store)
 
   # 4. find the given starting node, find all its ancestors
-  graph <- traverse(graph, root, function(node, graph) node$parents)
-
-  # 5. extract ids
-  names(graph)
+  traverse(graph, root, function(node_id, graph) nth(graph, node_id)$parents)
 }
 
 

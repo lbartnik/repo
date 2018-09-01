@@ -253,15 +253,16 @@ test_that("complex read_commits", {
 
   # requires full access to all elements of the same type (commits, artifacts)
   x <- q %>% filter(ancestor_of('13b2c216')) %>% read_commits()
+  expect_length(x, 5)
 
   # double pass: (1) assign children, (2) filter
-  q %>% filter(no_children()) %>% read_commits()
+#  q %>% filter(no_children()) %>% read_commits()
 
   # single pass, parents are stored in a tag
-  q %>% filter(no_parents()) %>% read_commits()
+#  q %>% filter(no_parents()) %>% read_commits()
 
   # single pass through commit objects
-  q %>% filter(data_matches(x)) %>% read_commits()
+#  q %>% filter(data_matches(x)) %>% read_commits()
 
   # what if there are other filters?
 })

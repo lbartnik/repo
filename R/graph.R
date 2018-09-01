@@ -126,8 +126,12 @@ ancestry_graph <- function (chosen_ids, all_ids, store) {
 
   parents <- map(all_ids, function (id) {
     tags <- storage::os_read_tags(store, id)
-    if (!is.null(tags$parents)) return(as.character(tags$parents))
-    character()
+    # artifact
+    if (!is.null(tags$parents)) parents <- as.character(tags$parents)
+    # commit
+    if (!is.null(tags$parent)) parents <- as.character(tags$parent)
+    if (is.na(parents)) parents <- character()
+    parents
   })
 
   children <- map(all_ids, function(...)character())

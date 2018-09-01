@@ -1,7 +1,17 @@
 new_commit <- function (id, store) {
-  commit <- os_read_object(store, id)
+  both <- os_read(store, id)
+
+  commit <- both$object
   commit$id <- id
+  commit$parents <- both$tags$parent
+
   structure(commit, class = 'commit')
+}
+
+is_commit <- function (x) inherits(x, 'commit')
+
+is_valid_commits <- function (x) {
+  stop('define')
 }
 
 print.commit <- function (x, ...) {
