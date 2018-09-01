@@ -7,7 +7,6 @@
 \alias{print.repository}
 \alias{toString.repository}
 \alias{repository_update}
-\alias{repository_history}
 \alias{repository_explain}
 \alias{repository_rewind}
 \alias{as_deltas}
@@ -23,8 +22,6 @@ is_repository(x)
 \method{toString}{repository}(x, ...)
 
 repository_update(repo, env, plot, expr)
-
-repository_history(repo, mode = "all")
 
 repository_explain(repo, id = NULL, ancestors = "unlimited")
 
@@ -49,9 +46,6 @@ as_origin(x)
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
-\item{mode}{\code{"current"} for the current branch only, \code{"all"} for the
-full tree.}
-
 \item{id}{List of artifact identifiers.}
 
 \item{ancestors}{Retrieve ancestors at most that far in the ancestry
@@ -66,14 +60,6 @@ Creates a new repository backed by the given storage.
 object.
 
 \code{repository_update} appends a new commit to the repository.
-
-\code{repository_history} returns a graph that describes the
-execution of commands in R session, also know as the \strong{time} view.
-Each node in that graph represents the state of R session (aka. a
-\strong{commit}) at a given point in time. Each edge represents a single
-R command issued by the user. If the optional parameter \code{id} is
-specified, the history is limited to the subtree of \strong{commits}
-with \code{id} as the root.
 
 \code{repository_explain} returns a graph that describes
 the \emph{origin} of an artifact (an R object or a plot) with the given

@@ -39,7 +39,6 @@ Collate:
   'commit.R'
   'container.R'
   'graph.R'
-  'history.R'
   'metadesc.R'
   'plots.R'
   'query.R'

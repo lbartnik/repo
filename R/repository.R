@@ -78,56 +78,6 @@ repository_update <- function (repo, env, plot, expr) {
 }
 
 
-#' @description `repository_history` returns a graph that describes the
-#' execution of commands in R session, also know as the __time__ view.
-#' Each node in that graph represents the state of R session (aka. a
-#' __commit__) at a given point in time. Each edge represents a single
-#' R command issued by the user. If the optional parameter `id` is
-#' specified, the history is limited to the subtree of __commits__
-#' with `id` as the root.
-#'
-#' @param mode `"current"` for the current branch only, `"all"` for the
-#'        full tree.
-#'
-#' @rdname repository
-#' @export
-#'
-# TODO is this API needed at all anymore?
-# TODO if it stays, node keys need to be agreed with repository_explain
-repository_history <- function (repo, mode = 'all') {
-  # actual implementation
-  guard()
-  stopifnot(is_repository(repo))
-  stopifnot(mode %in% c("all", "current"))
-
-  nodes <- all_commits(repo$store)
-
-  # assign children
-  lapply(nodes, function (node) {
-    if (!is.na(node$parent)) {
-      nodes[[node$parent]]$children <<- append(nodes[[node$parent]]$children, node$id)
-    }
-    node$new <- introduced(nodes, node$id)
-  })
-
-
-  # if only the current branch, filter out that branch
-  if (identical(mode, 'current')) {
-    nodes <- if (is.na(repo$last_commit$id)) list()
-             else filter(nodes, ancestor_of(repo$last_commit$id))
-  }
-
-  # assign class and keep store handy
-  nodes <- structure(nodes, class = c('history', 'graph'), store = repo$store)
-
-  # wrap in a 'commits' object that
-  # 1. can be turned into a 'stratified' object
-  # 2. can be turned into a 'deltas' object
-  # 3. can be turned into JSON
-  # 4. can be iterated over
-}
-
-
 #' @description `repository_explain` returns a graph that describes
 #' the _origin_ of an artifact (an R object or a plot) with the given
 #' identifier `id`. If no `id` is provided, an aggregated graph containing
