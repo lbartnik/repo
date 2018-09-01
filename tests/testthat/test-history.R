@@ -1,25 +1,5 @@
 context("history")
 
-
-test_that("find ancestors", {
-  skip("move filtering history into filtering query")
-
-  h <- sample_graph()
-
-  x <- filter(h, ancestor_of("d"))
-  expect_true(is_history(x))
-  expect_named(x, c("a", "b", "d"))
-
-  x <- filter(h, ancestor_of("g"))
-  expect_true(is_history(x))
-  expect_named(x, c("a", "c", "g"))
-
-  x <- filter(h, ancestor_of("c"))
-  expect_true(is_history(x))
-  expect_named(x, c("a", "c"))
-})
-
-
 test_that("find matching data", {
   skip("move filtering history into filtering query")
   h <- sample_graph()

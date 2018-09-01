@@ -246,20 +246,22 @@ flatten_lists <- function (values) {
 #' @rdname query
 read_commits <- function (.data) {
   stopifnot(is_commits(.data))
+  store <- .data$repository$store
 
   # TODO move this to match_ids
   ans <- lapply(.data$filter, function (quo) {
-    expr <- quo_expr(quo)
-    if (expr_match_fun(expr, quote(ancestor_of))) {
-      return(ancestor_of_impl(expr, .data$repository))
+
+    if (expr_match_fun(quo_expr(quo), quote(ancestor_of))) {
+      id <- enlongate(extract_ancestor_id(quo), store)
+      return(ancestor_of_impl(id, store))
     }
-    if (expr_match_fun(expr, quote(no_children))) {
+    if (expr_match_fun(quo, quote(no_children))) {
       return()
     }
-    if (expr_match_fun(expr, quote(no_parents))) {
+    if (expr_match_fun(quo, quote(no_parents))) {
       return()
     }
-    if (expr_match_fun(expr, quote(data_matches))) {
+    if (expr_match_fun(quo, quote(data_matches))) {
       return()
     }
     return(NULL)
@@ -276,33 +278,34 @@ read_commits <- function (.data) {
   })
 
   commits <- lapply(ids, function (id) {
-    new_commit(id, .data$repository$store)
+    new_commit(id, store)
   })
 
   structure(commits, class = 'container')
 }
 
-
 #' @importFrom rlang eval_tidy
-ancestor_of_impl <- function (expr, repository) {
-  # 1. extract descendant id by evaluating the filter expression
-  root <- eval_tidy(expr, data = list(ancestor_of = function(x)x))
-  root <- enlongate(root, repository$store)
+extract_ancestor_id <- function (quo) {
+  eval_tidy(quo, data = list(ancestor_of = function(x)x))
+}
 
-  # 2. read all ids; query should be something like as_commits(repository)
+ancestor_of_impl <- function (root, store) {
+  # 1. read all ids; query should be something like as_commits(repository)
   #    that is, it should return all ids of objects of the type in question
-  ids <- match_ids(as_commits(repository))
+  # TODO could be run for artifacts
+  # TODO replace with is_commit()
+  ids <- os_find(store, list(quo('commit' %in% class)))
 
-  # 3. build parents-children graph (ancestry?) for these ids
-  graph <- ancestry_graph(ids, ids, repository$store)
+  # 2. build parents-children graph (ancestry?) for these ids
+  graph <- ancestry_graph(ids, ids, store)
 
-  # 4. find the given starting node, find all its ancestors
+  # 3. find the given starting node, find all its ancestors
   traverse(graph, root, function(node_id, graph) nth(graph, node_id)$parents)
 }
 
 
 no_children_impl <- function (query) {
-
+  Filter(.data, f = function (commit) identical(length(commit$children), 0L))
 }
 
 
@@ -312,5 +315,11 @@ no_parents_impl <- function (query) {
 
 
 data_matches_impl <- function (query) {
+  data <- if (missing(data)) list(...) else c(data, list(...))
+  stopifnot(is_all_named(data))
 
+  data <- lapply(data, storage::compute_id)
+  Filter(.data, f = function (commit) {
+    setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
+  })
 }

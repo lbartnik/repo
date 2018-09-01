@@ -27,16 +27,8 @@ filter.history <- function (.data, ...)
   conditions <- list(
     ancestor_of  = function (y) graph_reduce(.data, to = y),
     branch_tip   = function ()  {
-      Filter(.data, f = function (commit) identical(length(commit$children), 0L))
     },
     data_matches = function (..., data) {
-      data <- if (missing(data)) list(...) else c(data, list(...))
-      stopifnot(is_all_named(data))
-
-      data <- lapply(data, storage::compute_id)
-      Filter(.data, f = function (commit) {
-        setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
-      })
     },
     no_parent = function () graph_roots(.data)
   )
