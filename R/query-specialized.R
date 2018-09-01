@@ -256,7 +256,7 @@ read_commits <- function (.data) {
       return(ancestor_of_impl(id, commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_children))) {
-      return()
+      return(no_children_impl(commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_parents))) {
       return()

@@ -14,11 +14,10 @@ test_that("ancestor_of_impl", {
   expect_length(x, 5)
 })
 
-test_that("can find tips of branches", {
-  skip("implement branch_tip")
-  r <- sample_repository()
-  h <- repository_history(r)
+test_that("no_children_impl", {
+  s <- sample_repository()$store
+  g <- commit_graph(s)
 
-  x <- filter(h, branch_tip())
+  x <- no_children_impl(g)
   expect_length(x, 3)
 })

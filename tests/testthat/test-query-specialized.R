@@ -256,7 +256,8 @@ test_that("complex read_commits", {
   expect_length(x, 5)
 
   # double pass: (1) assign children, (2) filter
-#  q %>% filter(no_children()) %>% read_commits()
+  x <- q %>% filter(no_children()) %>% read_commits()
+  expect_length(x, 3)
 
   # single pass, parents are stored in a tag
 #  q %>% filter(no_parents()) %>% read_commits()
