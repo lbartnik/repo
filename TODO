@@ -1,3 +1,10 @@
+* refactoring:
+  - move code operating on language into language.R
+  - refactor many_repository and test in in test-helpers.R to see if its
+    output conforms with is_valid_commit and is_valid_artifact
+  - merge new and old code in commit.R
+  - merge the implementation ancestor_of() for commits and artifacts
+
 * use `parents` istead of `parent` in commit's tags
 
 * `plot` tag cannot be exported bc it collides with graphics::plot
