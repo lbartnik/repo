@@ -2,29 +2,24 @@
 #' @export
 #' @rdname query
 as_commits <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'commits'),
-         'commit' %in% class)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'commits'), 'commit' %in% class)
 }
-
 
 #' @description `as_artifacts` creates a `query` to search for artifacts.
 #' @export
 #' @rdname query
 as_artifacts <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'artifacts'),
-         artifact)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'artifacts'), artifact)
 }
-
 
 #' @description `as_tags` creates a `query` to search for tag values.
 #' @export
 #' @rdname query
 as_tags <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'tags'),
-         artifact)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'tags'), artifact)
 }
 
 

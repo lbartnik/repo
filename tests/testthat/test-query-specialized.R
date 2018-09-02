@@ -16,6 +16,19 @@ test_that("repository can be turned into a specialized query", {
   expect_true(is_tags(q))
 })
 
+test_that("general query can be turned into a specialized query", {
+  q <- as_query(sample_repository())
+
+  p <- expect_silent(as_artifacts(q))
+  expect_true(is_artifacts(p))
+
+  p <- expect_silent(as_commits(q))
+  expect_true(is_commits(p))
+
+  p <- expect_silent(as_tags(q))
+  expect_true(is_tags(p))
+})
+
 test_that("query type matches read type", {
   r <- sample_repository()
 
