@@ -57,45 +57,33 @@ test_that("full explanation", {
   expect_node(nth(x, 4), id = 'd', parents = c('c'), children = character())
 })
 
-
 test_that("explain object", {
-  skip("get rid of repository_explain")
-  r <- many_repository()
+  q <- as_artifacts(many_repository())
 
-  x <- repository_explain(r, 'd')
+  x <- filter(q, ancestor_of('d')) %>% read_artifacts
   expect_length(x, 4)
 
-  x <- repository_explain(r, 'c')
+  x <- filter(q, ancestor_of('c')) %>% read_artifacts
   expect_length(x, 3)
-  expect_node(x, 'a', parents = character(), children = 'c')
-  expect_node(x, 'b', parents = character(), children = 'c')
-  expect_node(x, 'c', parents = c('a', 'b'), children = character())
+  expect_node(nth(x, 1), id = 'c', parents = c('a', 'b'))
+  expect_node(nth(x, 2), id = 'a', parents = character())
+  expect_node(nth(x, 3), id = 'b', parents = character())
 
-  x <- repository_explain(r, 'b')
+  x <- filter(q, ancestor_of('b')) %>% read_artifacts
   expect_length(x, 1)
-  expect_node(x, 'b', parents = character(), children = character())
+  expect_node(nth(x, 1), id = 'b', parents = character())
 })
-
 
 test_that("order origin", {
-  skip("get rid of repository_explain")
-  r <- sample_repository()
+  q <- as_artifacts(sample_repository())
 
-  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  i <- order(unlist(lapply(x, `[[`, "time")), decreasing = FALSE)
-  x <- x[i]
-  i <- substr(unlist(lapply(x, `[[`, "id")), 1, 2)
+  id <- '57fbe7553e11c7b0149040f5781c209b266ed637'
+  x <- filter(q, ancestor_of(id)) %>% read_artifacts
+
+  i <- order(map_int(x, `[[`, "time"), decreasing = FALSE)
+  i <- substr(map_chr(x[i], `[[`, "id"), 1, 2)
   expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
 })
-
-
-test_that("print origin", {
-  skip("get rid of repository_explain")
-  r <- sample_repository()
-  x <- repository_explain(r, '57fbe7553e11c7b0149040f5781c209b266ed637')
-  expect_output_file(print(x), "text-output/print-origin.txt")
-})
-
 
 test_that("symbol is matched", {
   s <- quote(id)

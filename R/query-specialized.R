@@ -41,7 +41,24 @@ read_artifacts <- function (.data) {
   stopifnot(identical(length(.data$select), 0L))
 
   store <- .data$repository$store
-  ans <- lapply(match_ids(.data), function (id) {
+
+  ans <- lapply(.data$filter, function (quo) {
+    if (expr_match_fun(quo_expr(quo), quote(ancestor_of))) {
+      id <- enlongate(extract_ancestor_id(quo), store)
+      return(ancestor_of_impl(id, artifact_graph(store)))
+    }
+  })
+
+  .data$filter[!map_lgl(ans, is.null)] <- NULL
+
+  ans <- c(ans, list(match_ids(.data)))
+  ans <- Reduce(ans, NULL, f = function (a, b) {
+    if (is.null(a)) return(b)
+    if (is.null(b)) return(a)
+    intersect(a, b)
+  })
+
+  ans <- lapply(ans, function (id) {
     new_artifact(id, store)
   })
 

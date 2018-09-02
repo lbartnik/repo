@@ -117,3 +117,10 @@ test_that("commit graph", {
   len <- map_int(x, function(n)length(n$children))
   expect_equivalent(as.numeric(table(len)), c(`0`=3, `1`=12, `3`=1))
 })
+
+test_that("artifact graph", {
+  r <- sample_repository()
+
+  x <- artifact_graph(r$store)
+  expect_length(x, 17)
+})

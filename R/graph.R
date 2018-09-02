@@ -264,3 +264,10 @@ commit_graph <- function (store) {
   ids <- os_find(store, list(quo('commit' %in% class)))
   ancestry_graph(ids, ids, store)
 }
+
+artifact_graph <- function (store) {
+  # TODO replace with is_artifact()
+  ids <- os_find(store, list(quo(artifact)))
+  ancestry_graph(ids, ids, store)
+}
+
