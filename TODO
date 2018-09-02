@@ -1,3 +1,5 @@
+* use `parents` istead of `parent` in commit's tags
+
 * `plot` tag cannot be exported bc it collides with graphics::plot
 
 * handle mutable objects: dplyr 0.7.6 injects a number of attributes (e.g.

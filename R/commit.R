@@ -39,7 +39,7 @@ introduced <- function (commits, id) {
   new_objs
 }
 
-#' @rdname history
+#' Copy commit into environment.
 #'
 #' @param commit as returned by [read_commits].
 #' @param env Environment to check-out artifacts to.

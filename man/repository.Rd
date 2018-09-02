@@ -36,6 +36,8 @@ repository_rewind(repo, id)
 \item{plot}{A recorded plot (see \link[grDevices:recordPlot]{grDevices::recordPlot}).}
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
+
+\item{id}{commit identifier.}
 }
 \description{
 Tracks full history of multiple consecutive R sessions.

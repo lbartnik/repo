@@ -2,6 +2,8 @@
 
 #' Selectors for history queries.
 #'
+#' @param x identifier of a commit or an artifact.
+#'
 #' @importFrom rlang abort
 #' @rdname history
 #' @export

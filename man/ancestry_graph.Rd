@@ -7,9 +7,11 @@
 ancestry_graph(chosen_ids, all_ids, store)
 }
 \arguments{
-\item{store}{object store; see \link[storage:object_store]{storage::object_store}}
+\item{chosen_ids}{identifiers, possibly disconnected}
 
-\item{ids}{identifiers of objects in \code{store}}
+\item{all_ids}{all identifiers, superset of \code{chosen_ids}}
+
+\item{store}{object store; see \link[storage:object_store]{storage::object_store}}
 }
 \value{
 A \code{list} named according to \code{ids}; each element is a list with

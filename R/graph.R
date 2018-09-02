@@ -116,7 +116,8 @@ find_roots <- function (x) {
 #' and `children` are also present in `ids` and that the resulting graph is
 #' connected, that is, whether there is a path between any pair of nodes.
 #'
-#' @param ids identifiers of objects in `store`
+#' @param chosen_ids identifiers, possibly disconnected
+#' @param all_ids all identifiers, superset of `chosen_ids`
 #' @param store object store; see [storage::object_store]
 #'
 #' @return A `list` named according to `ids`; each element is a list with

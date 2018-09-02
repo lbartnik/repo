@@ -83,10 +83,10 @@ repository_update <- function (repo, env, plot, expr) {
 #' that value. Subsequent commits will be recorded as descendants of
 #' commit `id`.
 #'
-#' @rdname repository
+#' @param id commit identifier.
 #'
 #' @export
-#'
+#' @rdname repository
 repository_rewind <- function (repo, id) {
   guard()
   stopifnot(is_repository(repo))
