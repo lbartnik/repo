@@ -174,14 +174,14 @@ test_that("arrange and select top tags", {
 
   p <- q %>% arrange(desc(time)) %>% top_n(2)
   x <- expect_silent(match_ids(p))
-  expect_equal(x, c('s', 'r'))
+  expect_setequal(x, c('s', 'r'))
 })
 
 test_that("read tag names", {
   r <- many_repository()
   names <- read_tag_names('a', r$store)
-  expect_true(setequal(names,
-                       c("class", "parent_commit", "parents", "time", "artifact", "names")))
+  expect_setequal(names,
+                  c("class", "parent_commit", "parents", "time", "artifact", "names"))
 })
 
 known_tags <- c("artifact", "class", "names", "parent_commit", "parents", "time")
