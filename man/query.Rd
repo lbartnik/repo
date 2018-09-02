@@ -10,7 +10,6 @@
 \alias{arrange.query}
 \alias{top_n.query}
 \alias{summarise.query}
-\alias{deprecated_execute}
 \alias{update}
 \alias{as_commits}
 \alias{as_artifacts}
@@ -32,8 +31,6 @@ is_query(x)
 \method{top_n}{query}(.data, n, wt)
 
 \method{summarise}{query}(.data, ...)
-
-deprecated_execute(.data)
 
 update(.data, ...)
 
@@ -68,8 +65,6 @@ in \code{dplyr}.}
 Query the repository of artifacts.
 
 \code{as_query} creates a general \code{query}.
-
-\code{execute} runs the query and retrieves its results.
 
 \code{as_commits} creates a \code{query} to search for commits.
 

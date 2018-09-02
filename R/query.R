@@ -174,78 +174,6 @@ only_n_summary <- function (expr) {
 # --- old code ---------------------------------------------------------
 
 
-#' @description `execute` runs the query and retrieves its results.
-#'
-#' @importFrom rlang UQS warn
-#' @rdname query
-deprecated_execute <- function (.data) {
-
-  .warn <- FALSE # TODO revisit warnings
-
-  stopifnot(is_query(.data))
-  if (!length(.data$select)) {
-    warn("selection is empty, returning an empty set")
-    return(tibble::tibble())
-  }
-
-  # TODO summarise is mutually exclusive with top_n and arrange
-
-  store <- .data$repository$store
-
-  # 1. find artifacts that match the filter
-  ids <- match_ids(.data)
-
-  # 1a. if there's a simple counting summary, this is where we can actually
-  #     return the result
-  if (only_n_summary(.data)) {
-    ans <- tibble::tibble(length(ids))
-    return(with_names(ans, names(.data$summarise)))
-  }
-
-  if (!length(ids)) {
-    if (isTRUE(.warn)) warn("filter did not match any objects, returning an empty set")
-    return(tibble::tibble())
-  }
-
-  # 2. decide what to read from the object store
-  sel <- if (length(.data$select)) .data$select else all_select_names(.data)
-
-  values <- read_tags(setdiff(sel, c("id", "object")), ids, store)
-
-  # object is the actual original data, be it an R object or a plot
-  if ("object" %in% sel) {
-    values <- c(values, list(object = lapply(ids, function (id) storage::os_read_object(store, id))))
-  }
-
-  # id is not present among tags
-  if ("id" %in% sel) {
-    values <- c(values, list(id = ids))
-  }
-
-  # simplify list-based tags into a tibble
-  values <- flatten_lists(values)
-
-  # 3. summarise goes before arrange and top_n and if defined is the last step
-  if (length(.data$summarise)) {
-    return(dplyr::summarise(values, UQS(.data$summarise)))
-  }
-
-  # 4. arrange
-  # TODO if arrange is malformed, maybe intercept the exception and provide
-  #      a custom error message to the user?
-  if (length(.data$arrange)) {
-    values <- dplyr::arrange_(values, .dots = .data$arrange)
-  }
-
-  # 5. top_n
-  if (!is.null(.data$top)) {
-    values <- head(values, .data$top)
-  }
-
-  values
-}
-
-
 #' @importFrom rlang abort caller_env expr_text eval_tidy quos quo_get_expr
 #' @rdname query
 update <- function (.data, ...) {
@@ -292,11 +220,4 @@ update_tag_values <- function (expr, tags) {
   e$remove <- function (where, what) setdiff(where, what)
 
   with_names(list(eval_tidy(expr, tags, e)), where)
-}
-
-all_select_names <- function(qry) {
-  regular_names <- all_tag_names(qry)
-  if (is.null(regular_names)) return(character())
-
-  c(regular_names, "id", "object")
 }
