@@ -70,6 +70,7 @@ read_artifacts <- function (.data) {
 #' @importFrom tidyselect vars_select
 #' @importFrom dplyr bind_cols
 #' @importFrom tibble tibble
+#' @export
 read_tags <- function (.data, ...) {
   stopifnot(is_tags(.data))
   selection <- quos(...)
