@@ -78,68 +78,6 @@ repository_update <- function (repo, env, plot, expr) {
 }
 
 
-#' @description `repository_explain` returns a graph that describes
-#' the _origin_ of an artifact (an R object or a plot) with the given
-#' identifier `id`. If no `id` is provided, an aggregated graph containing
-#' all artifacts is returned.
-#'
-#' @param id List of artifact identifiers.
-#' @param ancestors Retrieve ancestors at most that far in the ancestry
-#'        tree from specified `id`s.
-#'
-#' @importFrom rlang abort
-#'
-#' @rdname repository
-#' @export
-#'
-repository_explain <- function (repo, id = NULL, ancestors = "unlimited") {
-  if (is.null(id) && !identical(ancestors, "unlimited")) {
-    abort("cannot limit the number of ancestors if `id` is NULL")
-  }
-
-  if (is.null(id)) {
-    commits <- all_commits(repo$store)
-    objects <- unique(map_chr(commits, function (c) unlist(c$objects)))
-    parents <- map_chr(objects, function (id) {
-      storage::os_read_tags(repo$store, id)$parents
-    })
-    plots <- unique(map_chr(commits, function (c) c$plot))
-    ids <- unique(c(objects, parents, plots))
-  }
-  else {
-    if (identical(ancestors, "unlimited")) ancestors <- 0xDEADBEEF
-    ids <- object_origin(repo, id, ancestors)
-  }
-
-  # annotate objects with information about: name, parent, commit, type, etc.
-  objects <- lapply(ids, function (id) {
-    tags <- storage::os_read_tags(repo$store, id)
-
-    stopifnot(has_name(tags, c("class", "parents", "time", 'parent_commit')))
-
-    tags$id <- id
-    tags$commit <- tags$parent_commit
-    tags$children <- character()
-    tags$description <- description(tags)
-    if (is_empty(tags$names)) tags$names <- character() # plots don't have names
-
-    # remove
-    tags$parent_commit <- NULL
-
-    # read parent commit and assign expression
-    cmt <- storage::os_read_object(repo$store, tags$commit)
-    tags$expr <- cmt$expr
-
-    # finally, add a S3 class for pretty-printing
-    structure(tags, class = 'artifact.meta')
-  })
-
-  g <- connect_artifacts(as_container(objects))
-  structure(g, class = c('origin', 'artifact.set', class(g)))
-}
-
-
-
 #' @description `repository_rewind` changes the internal pointer to the
 #' _last commit_ and, if `id` denotes a historical commit, sets it to
 #' that value. Subsequent commits will be recorded as descendants of

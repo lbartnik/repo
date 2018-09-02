@@ -7,7 +7,6 @@
 \alias{print.repository}
 \alias{toString.repository}
 \alias{repository_update}
-\alias{repository_explain}
 \alias{repository_rewind}
 \title{Object Repository for R}
 \usage{
@@ -20,8 +19,6 @@ is_repository(x)
 \method{toString}{repository}(x, ...)
 
 repository_update(repo, env, plot, expr)
-
-repository_explain(repo, id = NULL, ancestors = "unlimited")
 
 repository_rewind(repo, id)
 }
@@ -39,11 +36,6 @@ repository_rewind(repo, id)
 \item{plot}{A recorded plot (see \link[grDevices:recordPlot]{grDevices::recordPlot}).}
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
-
-\item{id}{List of artifact identifiers.}
-
-\item{ancestors}{Retrieve ancestors at most that far in the ancestry
-tree from specified \code{id}s.}
 }
 \description{
 Tracks full history of multiple consecutive R sessions.
@@ -54,11 +46,6 @@ Creates a new repository backed by the given storage.
 object.
 
 \code{repository_update} appends a new commit to the repository.
-
-\code{repository_explain} returns a graph that describes
-the \emph{origin} of an artifact (an R object or a plot) with the given
-identifier \code{id}. If no \code{id} is provided, an aggregated graph containing
-all artifacts is returned.
 
 \code{repository_rewind} changes the internal pointer to the
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to
