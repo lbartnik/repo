@@ -6,31 +6,26 @@ test_that("repository can be turned into a query", {
   q <- expect_silent(as_query(r))
   expect_s3_class(q, 'query')
   expect_true(is_raw(q))
-
-  q <- expect_silent(as_artifacts(r))
-  expect_s3_class(q, 'query')
-  expect_true(is_artifacts(q))
-
-  q <- expect_silent(as_commits(r))
-  expect_s3_class(q, 'query')
-  expect_true(is_commits(q))
 })
 
-test_that("query type matches read type", {
-  r <- sample_repository()
+test_that("n() is recognized", {
+  expect_true(only_n_summary(quos(n())))
+  expect_true(only_n_summary(quos(a = n())))
 
-  expect_error(read_artifacts(as_query(r)))
-  expect_error(read_artifacts(as_commits(r)))
-
-  expect_error(read_commits(as_query(r)))
-  expect_error(read_commits(as_artifacts(r)))
-
-  x <- expect_silent(read_artifacts(as_artifacts(r)))
-  expect_true(is_container(x))
-  expect_length(x, 17)
-
-  x <- expect_silent(read_commits(as_commits(r)))
-  expect_true(is_container(x))
-  # TODO expect_length(x, 10)
+  expect_false(only_n_summary(quos(n)))
+  expect_false(only_n_summary(quos(m())))
+  expect_false(only_n_summary(quos(x(n()))))
 })
 
+test_that("summary works for n()", {
+  q <- as_query(many_repository())
+
+  x <- summarise(q, n = n())
+  expect_named(x, 'n')
+  expect_equal(x$n, 8)
+})
+
+test_that("only n() summary is allowed", {
+  q <- as_query(many_repository())
+  expect_error(summarise(q, id = min(id)), regexp = "only the n.. summary is supported")
+})

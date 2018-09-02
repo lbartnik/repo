@@ -1,4 +1,8 @@
+# TODO move to selection.R
+
 #' Selectors for history queries.
+#'
+#' @param x identifier of a commit or an artifact.
 #'
 #' @importFrom rlang abort
 #' @rdname history
@@ -33,6 +37,59 @@ branch_tip <- function() {
 data_matches <- function(..., data) {
   abort("This function should not be called directly")
 }
+
+
+
+#' @importFrom rlang eval_tidy
+extract_ancestor_id <- function (quo) {
+  eval_tidy(quo, data = list(ancestor_of = function(x)x))
+}
+
+ancestor_of_impl <- function (root, graph) {
+  stopifnot(is_graph(graph))
+  traverse(graph, root, function(node_id, graph) nth(graph, node_id)$parents)
+}
+
+no_children_impl <- function (graph) {
+  stopifnot(is_graph(graph))
+  filtered <- Filter(graph, f = function (node) identical(length(node$children), 0L))
+  names(filtered)
+}
+
+
+no_parents_impl <- function (graph) {
+  stopifnot(is_graph(graph))
+  filtered <- Filter(graph, f = function (node) identical(length(node$parents), 0L))
+  names(filtered)
+}
+
+
+extract_data_match <- function (quo) {
+  impl <- list(data_matches = function(..., data) {
+    data <- if (missing(data)) list(...) else c(list(...), data)
+    stopifnot(is_all_named(data))
+    lapply(data, storage::compute_id)
+  })
+
+  eval_tidy(quo, data = impl)
+}
+
+#' @importFrom rlang quo
+data_matches_impl <- function (data, store) {
+  ids <- os_find(store, list(quo('commit' %in% class)))
+
+  Filter(ids, f = function (id) {
+    commit <- new_commit(id, store)
+    setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
+  })
+}
+
+
+
+
+
+
+
 
 
 

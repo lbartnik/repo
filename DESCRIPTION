@@ -17,6 +17,7 @@ Imports:
   dplyr,
   glue,
   jsonlite,
+  lubridate,
   magrittr,
   png,
   proto,
@@ -35,12 +36,13 @@ Suggests:
   testthat
 Collate:
   'artifact.R'
+  'commit.R'
   'container.R'
   'graph.R'
-  'history.R'
   'metadesc.R'
   'plots.R'
   'query.R'
+  'query-specialized.R'
   'repo-package.R'
   'repository.R'
   'repository-impl.R'

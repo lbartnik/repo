@@ -1,70 +1,12 @@
 context("graph")
 
-test_that("reduce graph", {
-  h <- sample_graph()
-
-  x <- graph_reduce(h, to = 'd')
-  expect_length(x, 3)
-  expect_named(x, c('a', 'b', 'd'))
-
-  x <- graph_reduce(h, from = 'b')
-  expect_length(x, 3)
-  expect_named(x, c('b', 'd', 'e'))
-
-  x <- graph_reduce(h, from = 'b', to = 'd')
-  expect_length(x, 2)
-  expect_named(x, c('b', 'd'))
-})
-
-
-test_that("stratify", {
-  h <- sample_graph()
-
-  expect_named <- function (x) testthat::expect_named(x, c('children', 'objects', 'parents'),
-                                                      ignore.order = TRUE)
-
-  x <- graph_stratify(h)
-  expect_s3_class(x, 'stratified')
-  expect_length(x$children, 2)
-  expect_named(x)
-
-  b <- first(x$children)
-  expect_length(b$children, 2)
-  expect_named(b)
-
-  c <- last(x$children)
-  expect_length(c$children, 2)
-  expect_named(c)
-
-  lapply(b$children, expect_named)
-  lapply(c$children, expect_named)
-})
-
-
-test_that("preserve class", {
-  g <- sample_graph()
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('stratified', 'list'))
-
-  g <- structure(list(a = structure(list(), class = c('a', 'b', 'c'))), class = 'graph')
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
-
-  g <- structure(list(a = structure(list(1), class = c('a', 'b', 'c')),
-                      b = structure(list(2), class = c('a', 'b', 'c'))),
-                 class = 'graph')
-  x <- graph_stratify(g)
-  expect_s3_class(x, c('a', 'b', 'c', 'stratified'))
-})
-
-
 test_that("graph of artifacts", {
   r <- many_repository()
+  a <- many_artifacts(r)
+  g <- connect_artifacts(a)
 
-  a <- list(a = list(), b = list(), c = list(), d = list())
-  g <- graph_of_artifacts(a, r$store)
-
-  expect_named(g, letters[1:4], ignore.order = TRUE)
+  expect_length(g, 4)
+  names(g) <- utilities::map_chr(g, `[[`, 'id')
 
   expect_equal(g$a$parents, character())
   expect_equal(g$b$parents, character())
@@ -80,9 +22,11 @@ test_that("graph of artifacts", {
 
 test_that("subgraph of artifacts", {
   r <- many_repository()
+  a <- many_artifacts(r)
+  g <- connect_artifacts(as_container(a[2:3]))
 
-  a <- list(b = list(), c = list())
-  g <- graph_of_artifacts(a, r$store)
+  expect_length(g, 2)
+  names(g) <- utilities::map_chr(g, `[[`, 'id')
 
   expect_named(g, c('b', 'c'), ignore.order = TRUE)
 
@@ -93,3 +37,90 @@ test_that("subgraph of artifacts", {
   expect_equal(g$c$children, character(0))
 })
 
+test_that("stratify sample graph", {
+  h <- sample_graph()
+
+  expect_names <- function (x)
+    expect_named(x, c('id', 'children', 'objects', 'parents'), ignore.order = TRUE)
+
+  x <- stratify(h)
+  expect_length(x$children, 2)
+  expect_names(x)
+
+  b <- first(x$children)
+  expect_length(b$children, 2)
+  expect_names(b)
+
+  c <- last(x$children)
+  expect_length(c$children, 2)
+  expect_names(c)
+
+  lapply(b$children, expect_names)
+  lapply(c$children, expect_names)
+})
+
+test_that("actual repo can be stratified", {
+  a <- read_artifacts(as_artifacts(sample_repository()))
+  s <- stratify(connect_artifacts(a))
+
+  # root
+  expect_s3_class(s, 'artifact')
+  expect_length(s$children, 1)
+
+  # branching
+  expect_length(s$children[[1]]$children, 3)
+})
+
+test_that("traverse parents", {
+  g <- sample_graph()
+  f <- function(id, graph) graph[[id]]$parents
+
+  x <- traverse(g, 'g', f)
+  expect_equal(x, c('g', 'c', 'a'))
+
+  x <- traverse(g, 'd', f)
+  expect_equal(x, c("d", "b", "a"))
+
+  x <- traverse(g, 'c', f)
+  expect_equal(x, c('c', 'a'))
+})
+
+test_that("traverse children", {
+  g <- sample_graph()
+  x <- traverse(g, 'a', function(id, graph) graph[[id]]$children)
+  expect_equal(x, letters[1:7])
+})
+
+test_that("adjust ancestry", {
+  g <- sample_graph()
+
+  h <- g[c('a', 'c', 'g')]
+  expect_equal(map_int(h, function(n)length(n$parents)), c(0, 1, 1))
+  expect_equal(map_int(h, function(n)length(n$children)), c(2, 2, 0))
+
+  x <- adjust_ancestry(as_graph(h))
+  expect_true(is_graph(x))
+  expect_length(x, 3)
+  expect_equal(map_int(x, function(n)length(n$parents)), c(0, 1, 1))
+  expect_equal(map_int(x, function(n)length(n$children)), c(1, 1, 0))
+})
+
+test_that("commit graph", {
+  r <- sample_repository()
+
+  x <- commit_graph(r$store)
+  expect_length(x, 16)
+
+  len <- map_int(x, function(n)length(n$parents))
+  expect_equivalent(as.numeric(table(len)), c(`0`=1, `1`=15))
+
+  len <- map_int(x, function(n)length(n$children))
+  expect_equivalent(as.numeric(table(len)), c(`0`=3, `1`=12, `3`=1))
+})
+
+test_that("artifact graph", {
+  r <- sample_repository()
+
+  x <- artifact_graph(r$store)
+  expect_length(x, 17)
+})

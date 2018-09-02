@@ -7,12 +7,7 @@
 \alias{print.repository}
 \alias{toString.repository}
 \alias{repository_update}
-\alias{repository_history}
-\alias{repository_explain}
-\alias{print.artifact.meta}
 \alias{repository_rewind}
-\alias{as_deltas}
-\alias{as_origin}
 \title{Object Repository for R}
 \usage{
 repository(store)
@@ -25,17 +20,7 @@ is_repository(x)
 
 repository_update(repo, env, plot, expr)
 
-repository_history(repo, mode = "all")
-
-repository_explain(repo, id = NULL, ancestors = "unlimited")
-
-\method{print}{artifact.meta}(x, ..., style = "full")
-
 repository_rewind(repo, id)
-
-as_deltas(x)
-
-as_origin(x)
 }
 \arguments{
 \item{store}{Read and write objects into this storage.}
@@ -52,15 +37,7 @@ as_origin(x)
 
 \item{expr}{The expression related to the most recent changed in \code{env}.}
 
-\item{mode}{\code{"current"} for the current branch only, \code{"all"} for the
-full tree.}
-
-\item{id}{List of artifact identifiers.}
-
-\item{ancestors}{Retrieve ancestors at most that far in the ancestry
-tree from specified \code{id}s.}
-
-\item{style}{\code{"full"}, \code{"short"} or \code{"line"}.}
+\item{id}{commit identifier.}
 }
 \description{
 Tracks full history of multiple consecutive R sessions.
@@ -72,31 +49,8 @@ object.
 
 \code{repository_update} appends a new commit to the repository.
 
-\code{repository_history} returns a graph that describes the
-execution of commands in R session, also know as the \strong{time} view.
-Each node in that graph represents the state of R session (aka. a
-\strong{commit}) at a given point in time. Each edge represents a single
-R command issued by the user. If the optional parameter \code{id} is
-specified, the history is limited to the subtree of \strong{commits}
-with \code{id} as the root.
-
-\code{repository_explain} returns a graph that describes
-the \emph{origin} of an artifact (an R object or a plot) with the given
-identifier \code{id}. If no \code{id} is provided, an aggregated graph containing
-all artifacts is returned.
-
-\code{print.explained} pretty-prints a description of an
-artifact.
-
 \code{repository_rewind} changes the internal pointer to the
 \emph{last commit} and, if \code{id} denotes a historical commit, sets it to
 that value. Subsequent commits will be recorded as descendants of
 commit \code{id}.
-
-\code{as_deltas} converts a \code{history} object (a tree of
-\emph{commits}) into an equivalent tree of \emph{artifacts}. Each node in the
-tree of artifacts represents a single artifact introduced in a given
-commit. It is still a representation of historical changes in R
-session but at the level of a single artifact rather than at the
-level of a snapshot of R session (a \emph{commit}).
 }

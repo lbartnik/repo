@@ -3,11 +3,14 @@
 \name{new_artifact}
 \alias{new_artifact}
 \alias{as_artifact}
+\alias{artifact_store}
 \title{Create an artifact DTO.}
 \usage{
 new_artifact(id, store)
 
 as_artifact(tags)
+
+artifact_store(x)
 }
 \arguments{
 \item{id}{artifact identifier in \code{store}.}
@@ -16,6 +19,8 @@ as_artifact(tags)
 
 \item{tags}{list of tag values that describe an artifact; typically
 read with \code{\link[storage:os_read_tags]{storage::os_read_tags()}}.}
+
+\item{x}{artifact to extract \code{store} from.}
 }
 \value{
 An \code{artifact} object.
@@ -32,6 +37,8 @@ Each artifact (a \code{list}) has the following attributes (names):
 \itemize{
 \item \code{class} one or more \code{character} values
 \item \code{parents} zero or more identifiers of direct parent artifacts
+\item \code{description} type-specific text describing the artifact
+\item \code{expression} pre-formatted expression that produced the artifact
 }
 }
 }

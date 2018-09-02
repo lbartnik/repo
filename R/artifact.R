@@ -10,16 +10,34 @@
 #'   * `id` identifier in the object store; see [storage::object_store]
 #'   * `class` one or more `character` values
 #'   * `parents` zero or more identifiers of direct parent artifacts
+#'   * `description` type-specific text describing the artifact
+#'   * `expression` pre-formatted expression that produced the artifact
 #'
 #' @param id artifact identifier in `store`.
 #' @param store Object store; see [storage::object_store].
 #' @return An `artifact` object.
 #'
+#' @importFrom rlang is_scalar_integer
 #' @rdname artifact-internal
 new_artifact <- function (id, store) {
-  # cast tags as an artifact DTO
   tags <- storage::os_read_tags(store, id)
   tags$id <- id
+
+  # expression is stored with the commit
+  stopifnot(storage::os_exists(store, tags$parent_commit))
+  commit <- storage::os_read_object(store, tags$parent_commit)
+  tags$expression <- commit$expr
+
+  # original name as recorded upon time of creation
+  if ('plot' %in% tags$class) {
+    tags$name <- tags$names <- '<plot>'
+  } else {
+    i <- match(id, unlist(commit$objects), nomatch = NULL)
+    stopifnot(is_scalar_integer(i))
+    tags$name <- nth(names(commit$objects), i)
+  }
+
+  # cast tags as an artifact DTO
   dto <- as_artifact(tags)
 
   # attach the store; artifact_data() depends on it
@@ -33,16 +51,29 @@ new_artifact <- function (id, store) {
 #'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
-  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents')))
+  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression', 'time')))
 
   structure(
     list(
-      id      = tags$id,
-      class   = tags$class,
-      parents = as.character(tags$parents)
+      id          = tags$id,
+      name        = tags$name,
+      names       = tags$names,
+      class       = tags$class,
+      time        = tags$time,
+      parents     = as.character(tags$parents),
+      description = description(tags),
+      expression  = format_expr(tags$expression, indent = '')
     ),
     class = 'artifact'
   )
+}
+
+
+#' @param x artifact to extract `store` from.
+#' @rdname artifact-internal
+artifact_store <- function (x) {
+  stopifnot(is_artifact(x))
+  attr(x, 'store')
 }
 
 
@@ -56,12 +87,17 @@ is_artifact <- function (x) inherits(x, 'artifact')
 
 
 #' @importFrom rlang is_character is_scalar_character
+#' @importFrom lubridate is.POSIXt
 #' @rdname artifact
 artifact_assert_valid <- function (x) {
   stopifnot(is_artifact(x))
   stopifnot(is_scalar_character(x$id))
+  stopifnot(is_scalar_character(x$name))
+  stopifnot(is_character(x$names))
   stopifnot(is_character(x$class))
   stopifnot(is_character(x$parents))
+  stopifnot(is_character(x$description))
+  stopifnot(is.POSIXt(x$time))
   TRUE
 }
 
@@ -96,8 +132,4 @@ artifact_is <- function (x, what) {
 #'
 #' @export
 #' @rdname artifact
-artifact_data <- function (x) {
-  stopifnot(is_artifact(x))
-  store <- attr(x, 'store')
-  storage::os_read_object(store, x$id)
-}
+artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
