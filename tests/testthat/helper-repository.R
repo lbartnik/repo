@@ -24,6 +24,7 @@ single_repository <- function (...) {
 
 # TODO rename to in-memory-repository
 many_repository <- function () {
+  simulation$time <- 0
   r <- empty_repository()
 
   add_object(r, 'a', 1, 'p', list())
@@ -42,15 +43,17 @@ many_repository <- function () {
 add_object <- function (r, id, value, parent_commit, parents, cls) {
   if (missing(cls)) cls <- class(value)
   tags <- list(class = cls, parent_commit = parent_commit,
-               parents = parents, time = Sys.time(), artifact = TRUE,
+               parents = parents, time = Sys.time() + strtoi(charToRaw(id)), artifact = TRUE,
                names = id)
   storage::os_write(r$store, value, tags, id)
 }
 
 
 add_commit <- function (r, id, parent, expr, objects, plot = character()) {
-  storage::os_write(r$store, list(objects = objects, expr = expr, plot = plot),
-                    list(parent = parent, time = Sys.time(), class = 'commit'), id)
+  storage::os_write(r$store,
+                    list(objects = objects, expr = expr, plot = plot),
+                    list(parent = parent, time = Sys.time() + strtoi(charToRaw(id)), class = 'commit'),
+                    id)
 }
 
 
