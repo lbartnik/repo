@@ -261,9 +261,8 @@ format_expr <- function (expr, indent = '  ') {
 #' @rdname deltas
 #' @importFrom utils head tail
 #'
-history_to_deltas <- function (hist)
+deprecated_history_to_deltas <- function (hist)
 {
-  stopifnot(is_history(hist))
   store <- attr(hist, 'store')
 
   nodes <- new_map()
