@@ -41,7 +41,7 @@ introduced <- function (commits, id) {
 
 #' @rdname history
 #'
-#' @param commit as returned by [repository_history()].
+#' @param commit as returned by [read_commits].
 #' @param env Environment to check-out artifacts to.
 #'
 #' @export

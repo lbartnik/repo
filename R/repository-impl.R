@@ -255,7 +255,7 @@ format_expr <- function (expr, indent = '  ') {
 #' @description `history_to_deltas` is the main function which orchestrates
 #' the transformation.
 #'
-#' @param hist Object returned by [repository_history].
+#' @param hist List of commits.
 #' @return Object of S3 class `deltas`.
 #'
 #' @rdname deltas

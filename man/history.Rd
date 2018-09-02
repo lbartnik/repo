@@ -19,7 +19,7 @@ branch_tip()
 data_matches(..., data)
 }
 \arguments{
-\item{commit}{as returned by \code{\link[=repository_history]{repository_history()}}.}
+\item{commit}{as returned by \link{read_commits}.}
 
 \item{env}{Environment to check-out artifacts to.}
 

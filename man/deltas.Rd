@@ -10,7 +10,7 @@ deprecated_history_to_deltas(hist)
 is_deltas(x)
 }
 \arguments{
-\item{hist}{Object returned by \link{repository_history}.}
+\item{hist}{List of commits.}
 
 \item{x}{Object to be tested.}
 }
