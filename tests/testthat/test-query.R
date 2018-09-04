@@ -1,7 +1,7 @@
 context("query")
 
 test_that("repository can be turned into a query", {
-  r <- sample_repository()
+  r <- london_meters()
 
   q <- expect_silent(as_query(r))
   expect_s3_class(q, 'query')

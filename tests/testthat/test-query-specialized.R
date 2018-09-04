@@ -1,7 +1,7 @@
 context("query-specialized")
 
 test_that("repository can be turned into a specialized query", {
-  r <- sample_repository()
+  r <- london_meters()
 
   q <- expect_silent(as_artifacts(r))
   expect_s3_class(q, 'query')
@@ -17,7 +17,7 @@ test_that("repository can be turned into a specialized query", {
 })
 
 test_that("general query can be turned into a specialized query", {
-  q <- as_query(sample_repository())
+  q <- as_query(london_meters())
 
   p <- expect_silent(as_artifacts(q))
   expect_true(is_artifacts(p))
@@ -30,7 +30,7 @@ test_that("general query can be turned into a specialized query", {
 })
 
 test_that("query type matches read type", {
-  r <- sample_repository()
+  r <- london_meters()
 
   expect_error(read_artifacts(as_query(r)))
   expect_error(read_artifacts(as_commits(r)))
@@ -88,7 +88,7 @@ test_that("explain object", {
 })
 
 test_that("order origin", {
-  q <- as_artifacts(sample_repository())
+  q <- as_artifacts(london_meters())
 
   id <- '57fbe7553e11c7b0149040f5781c209b266ed637'
   x <- filter(q, ancestor_of(id)) %>% read_artifacts
@@ -293,7 +293,7 @@ test_that("simplify tags", {
 })
 
 test_that("simple read_commits", {
-  q <- as_commits(sample_repository())
+  q <- as_commits(london_meters())
 
   x <- read_commits(q)
   expect_s3_class(x, 'container')
@@ -302,7 +302,7 @@ test_that("simple read_commits", {
 })
 
 test_that("complex read_commits", {
-  r <- sample_repository()
+  r <- london_meters()
   q <- as_commits(r)
 
   # requires full access to all elements of the same type (commits, artifacts)

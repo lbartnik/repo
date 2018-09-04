@@ -6,7 +6,7 @@ test_that("extract ancestor id", {
 })
 
 test_that("ancestor_of_impl", {
-  r <- sample_repository()
+  r <- london_meters()
   id <- '13b2c2164cb69ed8f1922d141cc0deca73e04f18'
 
   x <- ancestor_of_impl(id, commit_graph(r$store))
@@ -15,7 +15,7 @@ test_that("ancestor_of_impl", {
 })
 
 test_that("no_children_impl", {
-  s <- sample_repository()$store
+  s <- london_meters()$store
   g <- commit_graph(s)
 
   x <- no_children_impl(g)
@@ -23,7 +23,7 @@ test_that("no_children_impl", {
 })
 
 test_that("no_parents_impl", {
-  s <- sample_repository()$store
+  s <- london_meters()$store
   g <- commit_graph(s)
 
   x <- no_parents_impl(g)

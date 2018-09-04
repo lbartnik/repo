@@ -60,7 +60,7 @@ test_that("stratify sample graph", {
 })
 
 test_that("actual repo can be stratified", {
-  a <- read_artifacts(as_artifacts(sample_repository()))
+  a <- read_artifacts(as_artifacts(london_meters()))
   s <- stratify(connect_artifacts(a))
 
   # root
@@ -106,7 +106,7 @@ test_that("adjust ancestry", {
 })
 
 test_that("commit graph", {
-  r <- sample_repository()
+  r <- london_meters()
 
   x <- commit_graph(r$store)
   expect_length(x, 16)
@@ -119,7 +119,7 @@ test_that("commit graph", {
 })
 
 test_that("artifact graph", {
-  r <- sample_repository()
+  r <- london_meters()
 
   x <- artifact_graph(r$store)
   expect_length(x, 17)
