@@ -4,6 +4,7 @@
 \alias{query}
 \alias{as_query}
 \alias{is_query}
+\alias{format.query}
 \alias{print.query}
 \alias{query}
 \alias{filter.query}
@@ -21,6 +22,8 @@
 as_query(x)
 
 is_query(x)
+
+\method{format}{query}(x, indent = "  ", ...)
 
 \method{print}{query}(x, ...)
 

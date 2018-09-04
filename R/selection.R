@@ -11,6 +11,10 @@ dplyr::arrange
 dplyr::summarise
 
 #' @export
+#' @importFrom dplyr n
+dplyr::n
+
+#' @export
 #' @importFrom magrittr %>%
 magrittr::`%>%`
 
