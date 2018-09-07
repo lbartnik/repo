@@ -91,7 +91,7 @@ read_tags <- function (.data, ...) {
       names <- tryCatch(vars_select(names, UQS(selection)), error = function(e)e)
 
       if (is_error(names)) {
-        abort(sprintf("could not select names: %s", names$message))
+        abort(glue("could not select names: {names$message}"))
       }
       if (!length(names)) {
         abort("selection reduced to an empty set")

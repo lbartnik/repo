@@ -4,6 +4,7 @@ new_commit <- function (id, store) {
   commit <- both$object
   commit$id <- id
   commit$parents <- both$tags$parent
+  commit$time <- both$tags$time
 
   structure(commit, class = 'commit')
 }
@@ -11,7 +12,12 @@ new_commit <- function (id, store) {
 is_commit <- function (x) inherits(x, 'commit')
 
 is_valid_commits <- function (x) {
-  stop('define')
+  has_name(x, 'objects') &&
+    has_name(x, "expr") &&
+    has_name(x, "plot") &&
+    has_name(x, "id") &&
+    has_name(x, "parents") &&
+    has_name(x, "time")
 }
 
 print.commit <- function (x, ...) {
