@@ -6,23 +6,45 @@ new_commit <- function (id, store) {
   commit$parents <- both$tags$parent
   commit$time <- both$tags$time
 
-  structure(commit, class = 'commit')
+  structure(commit, class = 'commit', store = store)
 }
 
+commit_store <- function (x) attr(x, 'store')
+
+
+#' Commit API.
+#'
+#' @param x commit object.
+#'
+#' @name commit
+#' @rdname commit
+NULL
+
+#' @rdname commit
 is_commit <- function (x) inherits(x, 'commit')
 
+#' @rdname commit
 is_valid_commits <- function (x) {
   has_name(x, 'objects') &&
     has_name(x, "expr") &&
     has_name(x, "plot") &&
     has_name(x, "id") &&
     has_name(x, "parents") &&
-    has_name(x, "time")
+    has_name(x, "time") &&
+    !is.null(attr(x, 'store'))
 }
 
+#' @export
+#' @rdname commit
 print.commit <- function (x, ...) {
   cat0("<commit: ", join(names(x$objects), ' '), '>\n')
   invisible(x)
+}
+
+#' @rdname commit
+commit_data <- function (x) {
+  stopifnot(is_commit(x))
+  lapply(x$objects, function (id) os_read_object(commit_store(x), id))
 }
 
 introduced <- function (commits, id) {
@@ -52,7 +74,8 @@ introduced <- function (commits, id) {
 #'
 #' @export
 commit_checkout <- function (commit, env) {
-  mapply(names(commit$data), commit$data, FUN = function (name, value) {
+  data <- commit_data(commit)
+  mapply(names(data), data, FUN = function (name, value) {
     assign(name, value, envir = env)
   })
   invisible()
