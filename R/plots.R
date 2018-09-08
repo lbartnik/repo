@@ -9,6 +9,8 @@ rawplot <- function (rp) {
   structure(list(recordedplot = rp), class = 'rawplot')
 }
 
+#' @export
+#' @rdname rawplot
 is_rawplot <- function (x) inherits(x, 'rawplot')
 
 
