@@ -11,6 +11,10 @@ dplyr::arrange
 dplyr::summarise
 
 #' @export
+#' @importFrom dplyr n
+dplyr::n
+
+#' @export
 #' @importFrom magrittr %>%
 magrittr::`%>%`
 
@@ -63,5 +67,8 @@ tag_values <- function (x) {
   ids <- match_ids(q)
   names <- read_tag_names(ids, q$repository$store)
   values <- read_tag_values(ids, names, q$repository$store)
-  lapply(values, unique)
+  lapply(values, function (vs) {
+    vs <- vs[!map_lgl(vs, is.null)] # remove NULLs
+    unique(vs)
+  })
 }

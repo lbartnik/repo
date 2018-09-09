@@ -58,12 +58,13 @@ is_query <- function (x) inherits(x, 'query')
 is_raw <- function (x) is_query(x) && identical(x$type, 'raw')
 
 
-#' @param ... further arguments passed to or from other methods.
+#' @param indent string prepended to each line.
+#' @inheritDotParams base::format
 #'
 #' @importFrom rlang expr_deparse get_expr
 #' @export
 #' @rdname query
-print.query <- function (x, ...) {
+format.query <- function (x, indent = '  ', ...) {
 
   quos_text <- function (x) {
     join(map_chr(x, function (f) expr_deparse(get_expr(f))), ', ')
@@ -80,8 +81,14 @@ print.query <- function (x, ...) {
     }
   }
 
-  cat0('  ', join(lines$data(), ' %>%\n    '), '\n')
+  lines <- stri_paste(indent, lines$data())
+  join(lines, ' %>%\n  ')
+}
 
+#' @export
+#' @rdname query
+print.query <- function (x, ...) {
+  cat0(format(x), '\n')
   invisible(x)
 }
 

@@ -2,6 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{rawplot}
 \alias{rawplot}
+\alias{is_rawplot}
 \alias{print.rawplot}
 \alias{plot.rawplot}
 \alias{png_equal}
@@ -9,6 +10,8 @@
 \title{Container for plots.}
 \usage{
 rawplot(rp)
+
+is_rawplot(x)
 
 \method{print}{rawplot}(x, ...)
 

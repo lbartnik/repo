@@ -165,7 +165,7 @@ simulate_london_meters <- function (repo, .silent = TRUE)
 #' installed with the package.
 #'
 #' @export
-sample_repository <- function () {
+london_meters <- function () {
   source_path <- system.file('sample-repository/', package = 'repository')
   target_path <- file.path(tempdir(TRUE), basename(source_path))
 

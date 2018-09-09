@@ -2,29 +2,24 @@
 #' @export
 #' @rdname query
 as_commits <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'commits'),
-         'commit' %in% class)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'commits'), 'commit' %in% class)
 }
-
 
 #' @description `as_artifacts` creates a `query` to search for artifacts.
 #' @export
 #' @rdname query
 as_artifacts <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'artifacts'),
-         artifact)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'artifacts'), artifact)
 }
-
 
 #' @description `as_tags` creates a `query` to search for tag values.
 #' @export
 #' @rdname query
 as_tags <- function (x) {
-  stopifnot(is_repository(x))
-  filter(set_type(as_query(x), 'tags'),
-         artifact)
+  if (!is_query(x)) x <- as_query(x)
+  filter(set_type(x, 'tags'), artifact)
 }
 
 
@@ -70,6 +65,8 @@ read_artifacts <- function (.data) {
 #' @importFrom tidyselect vars_select
 #' @importFrom dplyr bind_cols
 #' @importFrom tibble tibble
+#' @export
+#' @rdname query
 read_tags <- function (.data, ...) {
   stopifnot(is_tags(.data))
   selection <- quos(...)
@@ -95,7 +92,7 @@ read_tags <- function (.data, ...) {
       names <- tryCatch(vars_select(names, UQS(selection)), error = function(e)e)
 
       if (is_error(names)) {
-        abort(sprintf("could not select names: %s", names$message))
+        abort(glue("could not select names: {names$message}"))
       }
       if (!length(names)) {
         abort("selection reduced to an empty set")

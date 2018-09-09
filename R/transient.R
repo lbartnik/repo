@@ -21,7 +21,7 @@ no_parent <- function() {
 #' @importFrom rlang abort
 #' @rdname history
 #' @export
-branch_tip <- function() {
+no_children <- function() {
   abort("This function should not be called directly")
 }
 

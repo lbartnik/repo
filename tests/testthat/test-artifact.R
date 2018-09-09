@@ -1,7 +1,7 @@
 context("artifact")
 
 # load once, save time
-a <- read_artifacts(as_artifacts(sample_repository()))
+a <- read_artifacts(as_artifacts(london_meters()))
 
 test_that("artifact is recognized as valid", {
   map(a, function (x) {
@@ -26,7 +26,7 @@ test_that("plot is recognized as such", {
 })
 
 test_that("data can be loaded", {
-  r <- sample_repository()
+  r <- london_meters()
   a <- new_artifact(nth(a, 2)$id, r$store)
   expect_true(is_artifact(a))
 
