@@ -3,7 +3,7 @@
 \name{ancestor_of}
 \alias{ancestor_of}
 \alias{no_parent}
-\alias{branch_tip}
+\alias{no_children}
 \alias{data_matches}
 \title{Selectors for history queries.}
 \usage{
@@ -11,7 +11,7 @@ ancestor_of(x)
 
 no_parent()
 
-branch_tip()
+no_children()
 
 data_matches(..., data)
 }

@@ -66,6 +66,7 @@ read_artifacts <- function (.data) {
 #' @importFrom dplyr bind_cols
 #' @importFrom tibble tibble
 #' @export
+#' @rdname query
 read_tags <- function (.data, ...) {
   stopifnot(is_tags(.data))
   selection <- quos(...)

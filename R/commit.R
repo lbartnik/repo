@@ -34,6 +34,7 @@ is_valid_commits <- function (x) {
     !is.null(attr(x, 'store'))
 }
 
+#' @inheritDotParams base::print
 #' @export
 #' @rdname commit
 print.commit <- function (x, ...) {

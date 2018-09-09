@@ -18,6 +18,11 @@ commit_data(x)
 }
 \arguments{
 \item{x}{commit object.}
+
+\item{...}{Arguments passed on to \code{base::print}
+\describe{
+  \item{x}{an object used to select a method.}
+}}
 }
 \description{
 Commit API.

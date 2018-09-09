@@ -16,6 +16,7 @@
 \alias{as_artifacts}
 \alias{as_tags}
 \alias{read_artifacts}
+\alias{read_tags}
 \alias{read_commits}
 \title{Query the repository of artifacts.}
 \usage{
@@ -45,6 +46,8 @@ as_tags(x)
 
 read_artifacts(.data)
 
+read_tags(.data, ...)
+
 read_commits(.data)
 }
 \arguments{
@@ -52,7 +55,12 @@ read_commits(.data)
 printed, cast as \code{query} (\code{as_query()}, \code{as_artifacts()},
 \code{as_commits()}) or querried (verbs).}
 
-\item{...}{further arguments passed to or from other methods.}
+\item{indent}{string prepended to each line.}
+
+\item{...}{Arguments passed on to \code{base::format}
+\describe{
+  \item{x}{any \R object (conceptually); typically numeric.}
+}}
 
 \item{.data}{\code{query} object.}
 

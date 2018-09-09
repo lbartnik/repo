@@ -58,7 +58,8 @@ is_query <- function (x) inherits(x, 'query')
 is_raw <- function (x) is_query(x) && identical(x$type, 'raw')
 
 
-#' @param ... further arguments passed to or from other methods.
+#' @param indent string prepended to each line.
+#' @inheritDotParams base::format
 #'
 #' @importFrom rlang expr_deparse get_expr
 #' @export
