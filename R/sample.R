@@ -137,7 +137,7 @@ simulate_iris <- function (repo, .silent = TRUE) {
 #' @export
 #' @rdname samples
 iris_models <- function () {
-  source_path <- system.file('sample-repository/', package = 'repository')
+  source_path <- system.file('iris-models/', package = 'repository')
   rw_copy(source_path)
 }
 
