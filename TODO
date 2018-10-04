@@ -1,3 +1,7 @@
+* create a Docker image with all the third-party libraries pre-installed
+  and everything ready for work, without the need to compile all the
+  dependencies, esp. imager and its dependencies
+
 * refactoring:
   - move code operating on language into language.R
   - refactor many_repository and test in in test-helpers.R to see if its

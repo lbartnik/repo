@@ -98,51 +98,52 @@ R_session_simulator <- function (repo, .silent = TRUE) {
 }
 
 
-# --- simple sequence --------------------------------------------------
+# --- iris sequence ----------------------------------------------------
 
-# Suppress checks in `simulate_modelling`.
-utils::globalVariables(c('iris'))
+rw_copy <- function (source_path) {
+  target_path <- file.path(tempdir(TRUE), basename(source_path))
 
+  if (!dir.exists(target_path)) {
+    dir.create(dirname(target_path), recursive = TRUE, showWarnings = FALSE)
+    file.copy(source_path, dirname(target_path), recursive = TRUE)
+  }
 
-#' @title Simulations.
-#'
-#' @rdname simulations
-#' @name simulations
-NULL
-
-
-#' @param repo Repository to write to.
-#'
-#' @rdname simulations
-generate_simple <- function (repo)
-{
-  workspace <- R_session_simulator(repo)
-
-  workspace$run(x <- stats::lm(Sepal.Width ~ Sepal.Length, iris))
-  workspace$run(iris2 <- iris)
-  workspace$run(iris2$Sepal.Length <- iris2$Sepal.Length ** 2)
-  workspace$run(y <- stats::lm(Sepal.Width ~ Sepal.Length, iris2))
+  repository(storage::filesystem(target_path, create = FALSE))
 }
 
+#' @importFrom rlang parse_exprs
+simulate_iris <- function (repo, .silent = TRUE) {
+  workspace <- R_session_simulator(repo, .silent = .silent)
+  exprs <- parse_exprs(file(system.file('scripts/iris.R', package = 'repository')))
+
+  lapply(exprs, function (expr) {
+    workspace$run_quoted(expr)
+    simulation_offset_time(60)
+  })
+
+  invisible()
+}
+
+#' Work with a sample artifact repository.
+#'
+#' @description Obtain a handle to a read/write copy of an artifact
+#' repository installed with the package.
+#'
+#' @details `iris_models` shows a simple modeling excercise with the
+#' [datasets::iris] data set.
+#'
+#' @return a [repository] object.
+#'
+#' @export
+#' @rdname samples
+iris_models <- function () {
+  source_path <- system.file('iris-models/', package = 'repository')
+  rw_copy(source_path)
+}
 
 # --- London meters sequece --------------------------------------------
 
-
-#' Simulations and examples.
-#'
-#' These functions populate sessions' history cache with a complete
-#' history of data exploration.
-#'
-#' @description `simulate_london_meters` loads and examines a subset
-#' of __London meters__ data; see the [Kaggle website](https://www.kaggle.com/jeanmidev/smart-meters-in-london)
-#' for this data set and the introductory vignette.
-#'
-#' @param .silent Do not print output.
-#'
-#' @rdname simulations
 #' @importFrom rlang parse_exprs
-#' @import utilities
-#'
 simulate_london_meters <- function (repo, .silent = TRUE)
 {
   workspace <- R_session_simulator(repo, .silent = .silent)
@@ -153,26 +154,18 @@ simulate_london_meters <- function (repo, .silent = TRUE)
     simulation_offset_time(60)
   })
 
-  # TODO split between two sessions
-
   invisible()
 }
 
 
-#' Work with a sample artifact repository.
-#'
-#' Returns a handle to a read/write copy of an artifact repository
-#' installed with the package.
+#' @details `london_meters` documents a simple analysis of a subset of
+#' the __London meters__ data; see the
+#' [Kaggle website](https://www.kaggle.com/jeanmidev/smart-meters-in-london)
+#' for more details on this data set.
 #'
 #' @export
+#' @rdname samples
 london_meters <- function () {
-  source_path <- system.file('sample-repository/', package = 'repository')
-  target_path <- file.path(tempdir(TRUE), basename(source_path))
-
-  if (!dir.exists(target_path)) {
-    dir.create(dirname(target_path), recursive = TRUE, showWarnings = FALSE)
-    file.copy(source_path, dirname(target_path), recursive = TRUE)
-  }
-
-  repository(storage::filesystem(target_path, create = FALSE))
+  source_path <- system.file('london-meters/', package = 'repository')
+  rw_copy(source_path)
 }

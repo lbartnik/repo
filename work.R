@@ -11,7 +11,7 @@ unlink(path, recursive = TRUE)
 store <- storage::filesystem(path, create = TRUE)
 repo  <- repository::repository(store)
 
-generate_simple(repo)
+simulate_iris(repo)
 simulate_london_meters(repo)
 
 x <- read_commits(as_commits(repo))
