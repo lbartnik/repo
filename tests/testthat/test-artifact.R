@@ -43,7 +43,7 @@ test_that("replot a plot", {
     first
 
   path <- tempfile(fileext = '.png')
-  png(path)
+  png(path, width = 800, height = 600)
   expect_silent(replot(a))
   dev.off()
 
