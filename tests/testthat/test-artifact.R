@@ -35,3 +35,14 @@ test_that("data can be loaded", {
   expect_equal(ncol(d), 3)
   expect_equal(nrow(d), 26280)
 })
+
+test_that("replot a plot", {
+  a <- as_artifacts(iris_models()) %>% filter(id == '0f1105f2e5992669196384b0a66536ef7dfc4111') %>% read_artifacts %>% first
+
+  path <- tempfile(fileext = '.png')
+  png(path)
+  replot(a)
+  dev.off()
+
+  expect_equivalent(tools::md5sum(path), "5cff7ff77aca285c61cb295531ec87ea")
+})

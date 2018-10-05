@@ -147,14 +147,16 @@ artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
 #'
 #' @param x plot artifact, as returned by [read_artifacts()].
 #'
-#' @importFrom rlang eval_bare
+#' @importFrom rlang caller_env
 #' @export
 #' @rdname rerun
 replot <- function (x) {
   stopifnot(artifact_is(x, 'plot'))
 
   env <- as_environment(new_commit(x$from, artifact_store(x)))
+  parent.env(env) <- caller_env()
+
   expr <- parse(text = x$expression)
 
-  eval_bare(expr, env)
+  eval(expr, env)
 }
