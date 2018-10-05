@@ -3,18 +3,18 @@
 \name{commit}
 \alias{commit}
 \alias{is_commit}
-\alias{is_valid_commits}
 \alias{print.commit}
 \alias{commit_data}
+\alias{commit_checkout}
 \title{Commit API.}
 \usage{
 is_commit(x)
 
-is_valid_commits(x)
-
 \method{print}{commit}(x, ...)
 
 commit_data(x)
+
+commit_checkout(commit, env)
 }
 \arguments{
 \item{x}{commit object.}
@@ -23,7 +23,13 @@ commit_data(x)
 \describe{
   \item{x}{an object used to select a method.}
 }}
+
+\item{commit}{as returned by \link{read_commits}.}
+
+\item{env}{Environment to check-out artifacts to.}
 }
 \description{
 Commit API.
+
+Copy commit into environment.
 }

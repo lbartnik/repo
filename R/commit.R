@@ -1,3 +1,9 @@
+#' Creating and manipulating commits.
+#'
+#' @param id commit identifier.
+#' @param store object store, see [storage::object_store].
+#'
+#' @rdname commit-internal
 new_commit <- function (id, store) {
   both <- os_read(store, id)
 
@@ -9,6 +15,9 @@ new_commit <- function (id, store) {
   structure(commit, class = 'commit', store = store)
 }
 
+
+#' @param x commit object.
+#' @rdname commit-internal
 commit_store <- function (x) attr(x, 'store')
 
 
@@ -20,10 +29,11 @@ commit_store <- function (x) attr(x, 'store')
 #' @rdname commit
 NULL
 
+#' @export
 #' @rdname commit
 is_commit <- function (x) inherits(x, 'commit')
 
-#' @rdname commit
+#' @rdname commit-internal
 is_valid_commits <- function (x) {
   has_name(x, 'objects') &&
     has_name(x, "expr") &&
@@ -74,12 +84,21 @@ introduced <- function (commits, id) {
 #' @param env Environment to check-out artifacts to.
 #'
 #' @export
+#' @rdname commit
 commit_checkout <- function (commit, env) {
   data <- commit_data(commit)
   mapply(names(data), data, FUN = function (name, value) {
     assign(name, value, envir = env)
   })
   invisible()
+}
+
+#' @rdname commit-internal
+as_environment <- function (x) {
+  stopifnot(is_commit(x))
+
+  objects <- lapply(x$objects, function (id) storage::os_read_object(commit_store(x), id))
+  as.environment(objects)
 }
 
 
