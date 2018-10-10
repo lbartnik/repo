@@ -35,8 +35,11 @@ Each artifact (a \code{list}) has the following attributes (names):
 \itemize{
 \item \code{id} identifier in the object store; see \link[storage:object_store]{storage::object_store}
 \itemize{
+\item \code{name} original artifact name
+\item \code{names} other names for the artifact
 \item \code{class} one or more \code{character} values
 \item \code{parents} zero or more identifiers of direct parent artifacts
+\item \code{time} creation time
 \item \code{description} type-specific text describing the artifact
 \item \code{expression} pre-formatted expression that produced the artifact
 }

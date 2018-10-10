@@ -305,7 +305,7 @@ test_that("format expr", {
   expr <- bquote(x <- input %>%
                    mutate(hour = hour(timestamp), dow = wday(timestamp)) %>%
                    mutate_at(vars(hour, dow), funs(as.factor)))
-  expect_output_file(format_expr(expr), 'text-output/format-expr.txt')
+  expect_output_file(format_expr(expr), 'expected-output/format-expr.txt')
 })
 
 

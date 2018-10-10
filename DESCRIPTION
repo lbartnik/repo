@@ -4,7 +4,7 @@ Title: Object Repository for R
 Version: 0.1
 Date: 2018-05-09
 Authors@R: person("Lukasz", "Bartnik", email = "l.bartnik@gmail.com", role = c("aut", "cre"))
-Description: Tracks full history of multiple consecutive R sessions.
+Description: Stores a graph of R artifacts: object, plots, code and their relationships.
 License: MIT + file LICENSE
 URL: https://github.com/lbartnik/repository
 BugReports: https://github.com/lbartnik/repository/issues

@@ -8,8 +8,11 @@
 #' Each artifact (a `list`) has the following attributes (names):
 #'
 #'   * `id` identifier in the object store; see [storage::object_store]
+#'   * `name` original artifact name
+#'   * `names` other names for the artifact
 #'   * `class` one or more `character` values
 #'   * `parents` zero or more identifiers of direct parent artifacts
+#'   * `time` creation time
 #'   * `description` type-specific text describing the artifact
 #'   * `expression` pre-formatted expression that produced the artifact
 #'
@@ -51,7 +54,7 @@ new_artifact <- function (id, store) {
 #'
 #' @rdname artifact-internal
 as_artifact <- function (tags) {
-  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression', 'time')))
+  stopifnot(utilities::has_name(tags, c('id', 'class', 'parents', 'expression', 'time', 'parent_commit')))
 
   structure(
     list(
@@ -61,6 +64,7 @@ as_artifact <- function (tags) {
       class       = tags$class,
       time        = tags$time,
       parents     = as.character(tags$parents),
+      from        = tags$parent_commit,
       description = description(tags),
       expression  = format_expr(tags$expression, indent = '')
     ),
@@ -98,6 +102,7 @@ artifact_assert_valid <- function (x) {
   stopifnot(is_character(x$parents))
   stopifnot(is_character(x$description))
   stopifnot(is.POSIXt(x$time))
+  stopifnot(is_character(x$from))
   TRUE
 }
 
@@ -133,3 +138,25 @@ artifact_is <- function (x, what) {
 #' @export
 #' @rdname artifact
 artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
+
+
+#' Re-plot the archived plot.
+#'
+#' Restore the state of the parent R session and re-run the expression
+#' that created the given plot in that restored R session.
+#'
+#' @param x plot artifact, as returned by [read_artifacts()].
+#'
+#' @importFrom rlang caller_env
+#' @export
+#' @rdname rerun
+replot <- function (x) {
+  stopifnot(artifact_is(x, 'plot'))
+
+  env <- as_environment(new_commit(x$from, artifact_store(x)))
+  parent.env(env) <- caller_env()
+
+  expr <- parse(text = x$expression)
+
+  eval(expr, env)
+}

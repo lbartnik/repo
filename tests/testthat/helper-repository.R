@@ -67,3 +67,7 @@ many_artifacts <- function (r) {
   })
   structure(a, class = 'container')
 }
+
+sample_commit_id <- function () {
+  "13b2c2164cb69ed8f1922d141cc0deca73e04f18"
+}
