@@ -40,12 +40,22 @@ test_that("replot a plot", {
   a <- as_artifacts(iris_models()) %>%
     filter(id == '0f1105f2e5992669196384b0a66536ef7dfc4111') %>%
     read_artifacts %>%
-    first
+    (utilities::first)
 
+  # rudimentary test: whether anything happens and there are no errors
   path <- tempfile(fileext = '.png')
   png(path, width = 800, height = 600)
   expect_silent(replot(a))
   dev.off()
 
-  expect_equal(png::readPNG(path), png::readPNG('expected-output/0f1105f2.png'))
+  expect_true(file.size(path) > 0)
+
+  # there is no good way to compare images - other than to use search::image_dist
+  if (utilities::try_load(search) && utilities::try_load(imager)) {
+    d <- image_dist(
+      unwrap_image(load.image(path)),
+      unwrap_image(load.image('expected-output/0f1105f2.png'))
+    )
+    expect_true(d < 10)
+  }
 })
