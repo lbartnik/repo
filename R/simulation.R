@@ -31,6 +31,24 @@ london_meters <- function () {
   rw_copy(source_path)
 }
 
+#' @details `execute_simulation` runs a script inside a simulated R
+#' session with a artifact tracker enabled. Artifacts are stored in
+#' repository `repo`.
+#'
+#' @param path path to a script to be executed.
+#' @param repo store artifacts in this repository.
+#'
+#' @export
+#' @rdname samples
+execute_simulation <- function (path, repo) {
+  stopifnot(file.exists(path))
+  stopifnot(is_repository(repo))
+
+  run_simulation(path, repo, FALSE)
+
+  invisible(TRUE)
+}
+
 
 rw_copy <- function (source_path) {
   target_path <- file.path(tempdir(TRUE), basename(source_path))

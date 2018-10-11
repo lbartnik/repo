@@ -4,11 +4,19 @@
 \alias{samples}
 \alias{iris_models}
 \alias{london_meters}
+\alias{execute_simulation}
 \title{Work with a sample artifact repository.}
 \usage{
 iris_models()
 
 london_meters()
+
+execute_simulation(path, repo)
+}
+\arguments{
+\item{path}{path to a script to be executed.}
+
+\item{repo}{store artifacts in this repository.}
 }
 \value{
 a \link{repository} object.
@@ -25,4 +33,8 @@ repository installed with the package.
 the \strong{London meters} data; see the
 \href{https://www.kaggle.com/jeanmidev/smart-meters-in-london}{Kaggle website}
 for more details on this data set.
+
+\code{execute_simulation} runs a script inside a simulated R
+session with a artifact tracker enabled. Artifacts are stored in
+repository \code{repo}.
 }
