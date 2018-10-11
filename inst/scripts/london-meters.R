@@ -1,5 +1,5 @@
 # predefined session id
-simulation_set('session_id', crc32("1st R session"))
+meta::set('session_id', crc32("1st R session"))
 
 library(dplyr)
 library(lubridate)
@@ -23,7 +23,7 @@ input %<>%
   dplyr::summarise(usage = sum(usage))
 
 # remember the commit id so that later we can come back to this point in history
-simulation_commit_remember()
+meta::commit_remember()
 
 
 # dplyr adds attributes to objects when filter is called
@@ -65,10 +65,10 @@ ggplot2::ggplot(x) +
 
 m <- stats::lm(usage ~ hour:dow, x)
 
-simulation_set('session_id', crc32("2nd R session"))
-simulation_offset_time(7200)
+meta::set('session_id', crc32("2nd R session"))
+meta::offset_time(7200)
 
-simulation_commit_restore()
+meta::commit_restore()
 
 # 21.
 input %<>% filter(meter == "MAC000010")
@@ -84,7 +84,7 @@ ggplot(x) +
   facet_wrap(~dow)
 
 # go back again, and try the third house
-simulation_commit_restore()
+meta::commit_restore()
 
 input %<>% filter(meter == "MAC004391")
 

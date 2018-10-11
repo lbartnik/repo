@@ -24,7 +24,8 @@ single_repository <- function (...) {
 
 # TODO rename to in-memory-repository
 many_repository <- function () {
-  simulation$time <- 0
+  # every time a new test repository is created, the meta-clock should be reset
+  simulation_meta_state$time <- 0
   r <- empty_repository()
 
   add_object(r, 'a', 1, 'p', list())
