@@ -78,7 +78,7 @@ run_simulation <- function (script_path, repo, .silent) {
 
   lapply(exprs, function (expr) {
     workspace$run_quoted(expr)
-    simulation_offset_time(60)
+    simulation_meta_offset_time(60)
   })
 
   invisible(NULL)
@@ -132,7 +132,7 @@ session_simulator <- function (repo, .silent = TRUE) {
 
       eval(expr)
     } else {
-      inform(glue("evaluating: {first(deparse(expr))}"))
+      .$inform(glue("evaluating: {first(deparse(expr))}"))
 
       # print is necessary for graphics, but we don't want to see the
       # output on the console, thus - print and capture at the same time
