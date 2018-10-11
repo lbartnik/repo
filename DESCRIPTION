@@ -46,14 +46,14 @@ Collate:
   'repo-package.R'
   'repository.R'
   'repository-impl.R'
-  'sample.R'
   'selection.R'
+  'simulation.R'
   'transient.R'
   'utils.R'
 Remotes:
-  lbartnik/defer,
-  lbartnik/storage,
-  lbartnik/utilities
+  github::lbartnik/defer,
+  github::lbartnik/storage,
+  github::lbartnik/utilities
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
