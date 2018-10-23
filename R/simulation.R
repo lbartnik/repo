@@ -134,11 +134,6 @@ session_simulator <- function (repo, .silent = TRUE) {
     } else {
       .$inform(glue("evaluating: {first(deparse(expr))}"))
 
-      # TODO detect if is_ui_shortcut() and if so, expect only a single name
-      #      after $
-      #      retrieve that object
-      #      make sure the original "input" data set is actually named uniquely
-
       # print is necessary for graphics, but we don't want to see the
       # output on the console, thus - print and capture at the same time
       eval_expr <- substitute(print(expr), list(expr = expr))
@@ -170,25 +165,6 @@ is_meta_command <- function (expr) {
 extract_meta_command <- function (expr) {
   paste0('simulation_meta_', as.character(nth(first(expr), 3)))
 }
-
-#' @importFrom rlang is_character
-is_ui_shortcut <- function (line, shortcut_name = 'artifacts') {
-  is_colon <- function (x) is.call(x) && (identical(x[[1]], bquote(`::`)) || identical(x[[1]], bquote(`:::`)))
-  is_assignment <- function (x) is.call(x) && identical(x[[1]], bquote(`<-`))
-
-  traverse <- function (x) {
-    recurse <- function (y) any(unlist(lapply(y, traverse)))
-    if (is.name(x) && identical(as.character(x), shortcut_name)) return(TRUE)
-    if (is_assignment(x)) return(recurse(x[-(1:2)]))
-    if (is_colon(x)) return(FALSE)
-    if (is.recursive(x)) return(recurse(x))
-    FALSE
-  }
-
-  if (is_character(line)) line <- parse(text = line)
-  traverse(line)
-}
-
 
 
 simulation_meta_state <- new.env()
