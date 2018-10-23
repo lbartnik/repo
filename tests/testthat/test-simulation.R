@@ -22,13 +22,30 @@ test_that("simulation command is recognized", {
   expect_true(difftime(current_time(), tm, units = 'secs') >= 1000)
 })
 
-test_that("commit can be restored", {
+test_that("reference to artifacts is recognized", {
+  expect_true(is_ui_shortcut("artifacts$x"))
+  expect_true(is_ui_shortcut("artifacts$x$y$z$a"))
+  expect_true(is_ui_shortcut("z <- artifacts$x"))
+
+  expect_false(is_ui_shortcut("artifact$x"))
+  expect_false(is_ui_shortcut("artifacts$x <- 1"))
+})
+
+test_that("reference in expression", {
+  expect_true(is_ui_shortcut(quote(artifacts$a$b$c)))
+})
+
+test_that("custom reference name", {
+  expect_true(is_ui_shortcut(quote(zzz$a$b$c), 'zzz'))
+})
+
+test_that("object can be remembered and restored")
   rss <- session_simulator(empty_repository())
 
   rss$run(x <- 1)
   expect_equal(rss$contents(), list(x = 1))
 
-  rss$run(meta::commit_remember())
+  rss$run(meta::remember_object(x))
 
   rss$run(x <- 2)
   expect_equal(rss$contents(), list(x = 2))

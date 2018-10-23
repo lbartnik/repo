@@ -23,7 +23,7 @@ input %<>%
   dplyr::summarise(usage = sum(usage))
 
 # remember the commit id so that later we can come back to this point in history
-meta::commit_remember()
+meta::remember_object(input)
 
 
 # dplyr adds attributes to objects when filter is called

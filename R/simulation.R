@@ -134,6 +134,11 @@ session_simulator <- function (repo, .silent = TRUE) {
     } else {
       .$inform(glue("evaluating: {first(deparse(expr))}"))
 
+      # TODO detect if is_ui_shortcut() and if so, expect only a single name
+      #      after $
+      #      retrieve that object
+      #      make sure the original "input" data set is actually named uniquely
+
       # print is necessary for graphics, but we don't want to see the
       # output on the console, thus - print and capture at the same time
       eval_expr <- substitute(print(expr), list(expr = expr))
@@ -166,6 +171,25 @@ extract_meta_command <- function (expr) {
   paste0('simulation_meta_', as.character(nth(first(expr), 3)))
 }
 
+#' @importFrom rlang is_character
+is_ui_shortcut <- function (line, shortcut_name = 'artifacts') {
+  is_colon <- function (x) is.call(x) && (identical(x[[1]], bquote(`::`)) || identical(x[[1]], bquote(`:::`)))
+  is_assignment <- function (x) is.call(x) && identical(x[[1]], bquote(`<-`))
+
+  traverse <- function (x) {
+    recurse <- function (y) any(unlist(lapply(y, traverse)))
+    if (is.name(x) && identical(as.character(x), shortcut_name)) return(TRUE)
+    if (is_assignment(x)) return(recurse(x[-(1:2)]))
+    if (is_colon(x)) return(FALSE)
+    if (is.recursive(x)) return(recurse(x))
+    FALSE
+  }
+
+  if (is_character(line)) line <- parse(text = line)
+  traverse(line)
+}
+
+
 
 simulation_meta_state <- new.env()
 
@@ -181,13 +205,18 @@ simulation_meta_unset <- function (names, ...) {
   rm(list = names, envir = simulation_meta_state)
 }
 
-simulation_meta_commit_remember <- function (repo, ...) {
-  simulation_meta_state$last_commit_id <- repo$last_commit$id
-}
+#' @importFrom rlang quos quo_get_expr as_character
+simulation_remember_object <- function (repo, env, ...) {
+  args <- quos(...)
+  stopifnot(identical(length(args), 1L))
 
-simulation_meta_commit_restore <- function (repo, env, ...) {
-  repository_rewind(repo, simulation_meta_state$last_commit_id)
-  commit_checkout(commit(repo$store, simulation_meta_state$last_commit_id), env)
+  args <- quo_get_expr(first(args))
+  stopifnot(is.symbol(args))
+
+  name <- as_character(args)
+  stopifnot(exists(name, envir = env), name %in% names(repo$last_commit$objects))
+
+  simulation_meta_state$objects[[name]] <<- nth(repo$last_commit$objects, name)
 }
 
 simulation_meta_offset_time <- function (value, ...) {
