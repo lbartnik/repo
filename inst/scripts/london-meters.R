@@ -31,7 +31,7 @@ hourly <- input %>%
 # filter() to maintain the same object id between commits
 
 # 11.
-meter_4929 <- hourly %>% dplyr::filter(meter == "MAC004929")
+meter_4929 <- hourly %>% subset(meter == "MAC004929")
 
 with(meter_4929, plot(timestamp, usage, type = 'p', pch = '.'))
 
@@ -43,6 +43,8 @@ x <-
   dplyr::group_by(hour, dow) %>%
   dplyr::summarise(usage = mean(usage, na.rm = TRUE))
 
+# also calling plot triggers dplyr's C++ code and alters the tibble,
+# in this case: x
 with(x, plot(hour, usage))
 
 ggplot2::ggplot(x) +
@@ -66,7 +68,7 @@ meta::set('session_id', crc32("2nd R session"))
 meta::offset_time(7200)
 
 # 21.
-meter_0010 <- hourly %>% filter(meter == "MAC000010")
+meter_0010 <- hourly %>% subset(meter == "MAC000010")
 
 x <-
   meter_0010 %>%
@@ -79,7 +81,7 @@ ggplot(x) +
   facet_wrap(~dow)
 
 
-meter_4391 <- hourly %>% filter(meter == "MAC004391")
+meter_4391 <- hourly %>% subset(meter == "MAC004391")
 
 # 26.
 x <-
