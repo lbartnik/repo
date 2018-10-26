@@ -115,7 +115,7 @@ test_that("commit graph", {
   expect_equivalent(as.numeric(table(len)), c(`0`=1, `1`=15))
 
   len <- map_int(x, function(n)length(n$children))
-  expect_equivalent(as.numeric(table(len)), c(`0`=3, `1`=12, `3`=1))
+  expect_equivalent(as.numeric(table(len)), c(`0`=1, `1`=15))
 })
 
 test_that("artifact graph", {

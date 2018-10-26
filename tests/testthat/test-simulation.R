@@ -21,18 +21,3 @@ test_that("simulation command is recognized", {
 
   expect_true(difftime(current_time(), tm, units = 'secs') >= 1000)
 })
-
-test_that("commit can be restored", {
-  rss <- session_simulator(empty_repository())
-
-  rss$run(x <- 1)
-  expect_equal(rss$contents(), list(x = 1))
-
-  rss$run(meta::commit_remember())
-
-  rss$run(x <- 2)
-  expect_equal(rss$contents(), list(x = 2))
-
-  rss$run(meta::commit_restore())
-  expect_equal(rss$contents(), list(x = 1))
-})

@@ -11,7 +11,7 @@ test_that("commit constructor", {
 
 test_that("print commit", {
   c <- expect_silent(new_commit(sample_commit_id(), london_meters()$store))
-  expect_output(print(c), "<commit: x input m>")
+  expect_output(print(c), "<commit: x input meter_4929 hourly m>")
 })
 
 test_that("commit data", {
@@ -42,7 +42,7 @@ test_that("as environment", {
   c <- new_commit(sample_commit_id(), london_meters()$store)
   e <- as_environment(c)
 
-  expect_named(e, c("input", "m", "x"), ignore.order = TRUE)
+  expect_named(e, c("hourly", "input", "m", "meter_4929", "x"), ignore.order = TRUE)
   expect_s3_class(e$m, "lm")
   expect(is.data.frame(e$x))
   expect(is.data.frame(e$input))

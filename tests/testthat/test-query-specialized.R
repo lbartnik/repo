@@ -90,12 +90,11 @@ test_that("explain object", {
 test_that("order origin", {
   q <- as_artifacts(london_meters())
 
-  id <- '57fbe7553e11c7b0149040f5781c209b266ed637'
-  x <- filter(q, ancestor_of(id)) %>% read_artifacts
+  x <- filter(q, ancestor_of(sample_artifact_id())) %>% read_artifacts
 
   i <- order(map_int(x, `[[`, "time"), decreasing = FALSE)
   i <- substr(map_chr(x[i], `[[`, "id"), 1, 2)
-  expect_equivalent(i, c("89", "2b", "af", "b8", "57"))
+  expect_equivalent(i, c("89", "2b", "47"))
 })
 
 test_that("symbol is matched", {
@@ -306,21 +305,21 @@ test_that("complex read_commits", {
   q <- as_commits(r)
 
   # requires full access to all elements of the same type (commits, artifacts)
-  x <- q %>% filter(ancestor_of('13b2c216')) %>% read_commits()
-  expect_length(x, 5)
+  x <- q %>% filter(ancestor_of(sample_commit_id())) %>% read_commits()
+  expect_length(x, 10)
 
   # double pass: (1) assign children, (2) filter
   x <- q %>% filter(no_children()) %>% read_commits()
-  expect_length(x, 3)
+  expect_length(x, 1)
 
   # single pass, parents are stored in a tag
   x <- q %>% filter(no_parents()) %>% read_commits()
   expect_length(x, 1)
 
   # single pass through commit objects
-  y <- os_read_object(r$store, '2b67f4934da0aa3baecfdd3001008539217d5719')
+  y <- os_read_object(r$store, '89c78e898c6eabe8f86337134c0e1defc14ad0d6')
   x <- q %>% filter(data_matches(input = y)) %>% read_commits()
   expect_length(x, 1)
   expect_s3_class(first(x), 'commit')
-  expect_equal(first(x)$id, 'ae1c6ffc1f7b10eebdbd63be0ea733fe2a10d0f8')
+  expect_equal(first(x)$id, '89fb3d5551bdf61c0833029320e57785e9972686')
 })

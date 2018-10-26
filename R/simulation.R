@@ -181,13 +181,18 @@ simulation_meta_unset <- function (names, ...) {
   rm(list = names, envir = simulation_meta_state)
 }
 
-simulation_meta_commit_remember <- function (repo, ...) {
-  simulation_meta_state$last_commit_id <- repo$last_commit$id
-}
+#' @importFrom rlang quos quo_get_expr as_character
+simulation_remember_object <- function (repo, env, ...) {
+  args <- quos(...)
+  stopifnot(identical(length(args), 1L))
 
-simulation_meta_commit_restore <- function (repo, env, ...) {
-  repository_rewind(repo, simulation_meta_state$last_commit_id)
-  commit_checkout(commit(repo$store, simulation_meta_state$last_commit_id), env)
+  args <- quo_get_expr(first(args))
+  stopifnot(is.symbol(args))
+
+  name <- as_character(args)
+  stopifnot(exists(name, envir = env), name %in% names(repo$last_commit$objects))
+
+  simulation_meta_state$objects[[name]] <<- nth(repo$last_commit$objects, name)
 }
 
 simulation_meta_offset_time <- function (value, ...) {
