@@ -70,5 +70,9 @@ many_artifacts <- function (r) {
 }
 
 sample_commit_id <- function () {
-  "13b2c2164cb69ed8f1922d141cc0deca73e04f18"
+  "84c88beb1c100db2fe22574c8f9ccd18afb5ecbd"
+}
+
+sample_artifact_id <- function () {
+  "4756f19b61b5df2b5f7c8e85321d464142274ff9"
 }

@@ -27,13 +27,13 @@ test_that("plot is recognized as such", {
 
 test_that("data can be loaded", {
   r <- london_meters()
-  a <- new_artifact(nth(a, 2)$id, r$store)
+  a <- new_artifact(sample_artifact_id(), r$store)
   expect_true(is_artifact(a))
 
   d <- artifact_data(a)
   expect_s3_class(d, 'data.frame')
   expect_equal(ncol(d), 3)
-  expect_equal(nrow(d), 26280)
+  expect_equal(nrow(d), 8760)
 })
 
 test_that("replot a plot", {
