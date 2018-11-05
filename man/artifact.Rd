@@ -24,8 +24,6 @@ artifact_data(x)
 \item{what}{property of an \code{artifact} to be tested.}
 }
 \description{
-Manipulating and processing artifacts.
-
 \code{artifact_is} answers various questions about an
 artifact.
 

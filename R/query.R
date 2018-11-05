@@ -163,12 +163,12 @@ summarise.query <- function (.data, ...) {
 # A stop-gap function: check if the only summary is n() and if so, returns TRUE.
 # If there is no summary at all, returns FALSE.
 # If there's an unsupported summary, throws an exception.
-#' @importFrom rlang abort quo_expr
+#' @importFrom rlang abort quo_squash
 only_n_summary <- function (expr) {
   if (!length(expr)) return(FALSE)
 
   i <- map_lgl(expr, function (s) {
-    e <- quo_expr(s)
+    e <- quo_squash(s)
     is.call(e) && identical(e, quote(n()))
   })
 

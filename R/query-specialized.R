@@ -38,7 +38,7 @@ read_artifacts <- function (.data) {
   store <- .data$repository$store
 
   ans <- lapply(.data$filter, function (quo) {
-    if (expr_match_fun(quo_expr(quo), quote(ancestor_of))) {
+    if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
       id <- enlongate(extract_ancestor_id(quo), store)
       return(ancestor_of_impl(id, artifact_graph(store)))
     }
@@ -82,7 +82,7 @@ read_tags <- function (.data, ...) {
   }
   else {
     # if only symbols or characters, that's it
-    exprs <- map(selection, quo_expr)
+    exprs <- map(selection, quo_squash)
     is_name <- map_lgl(exprs, function(x) is_symbol(x) || is_character(x))
     if (all(is_name)) {
       names <- as.character(exprs)
@@ -155,7 +155,7 @@ match_ids <- function (query) {
 }
 
 
-#' @importFrom rlang quos quo_expr
+#' @importFrom rlang quos quo_squash
 quos_match <- function (quos, ...) {
   symbols <- lapply(list(...), function (e) {
     if (is.symbol(e)) return(e)
@@ -164,7 +164,7 @@ quos_match <- function (quos, ...) {
   })
 
   map_lgl(quos, function (quo) {
-    any(map_lgl(symbols, function (sym) expr_match_sym(quo_expr(quo), sym)))
+    any(map_lgl(symbols, function (sym) expr_match_sym(quo_squash(quo), sym)))
   })
 }
 
@@ -265,7 +265,7 @@ read_commits <- function (.data) {
   # TODO move this to match_ids
   ans <- lapply(.data$filter, function (quo) {
 
-    if (expr_match_fun(quo_expr(quo), quote(ancestor_of))) {
+    if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
       id <- enlongate(extract_ancestor_id(quo), store)
       return(ancestor_of_impl(id, commit_graph(store)))
     }

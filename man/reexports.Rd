@@ -4,13 +4,9 @@
 \name{reexports}
 \alias{reexports}
 \alias{filter}
-\alias{reexports}
 \alias{arrange}
-\alias{reexports}
 \alias{summarise}
-\alias{reexports}
 \alias{n}
-\alias{reexports}
 \alias{\%>\%}
 \title{Objects exported from other packages}
 \keyword{internal}
