@@ -6,7 +6,6 @@
 \alias{is_query}
 \alias{format.query}
 \alias{print.query}
-\alias{query}
 \alias{filter.query}
 \alias{arrange.query}
 \alias{top_n.query}
@@ -73,8 +72,6 @@ in \code{dplyr}.}
 \code{TRUE} if \code{x} inherits from \code{"query"}.
 }
 \description{
-Query the repository of artifacts.
-
 \code{as_query} creates a general \code{query}.
 
 \code{as_commits} creates a \code{query} to search for commits.

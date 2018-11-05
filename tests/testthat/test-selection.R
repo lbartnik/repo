@@ -7,11 +7,11 @@ test_that("filter adds up", {
   r <- as_query(many_repository())
 
   q <- filter(r, x == 1)
-  expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
+  expect_equal(rlang::quo_squash(first(q$filter)), bquote(x == 1))
 
   q <- filter(q, y == 2)
-  expect_equal(rlang::quo_expr(first(q$filter)), bquote(x == 1))
-  expect_equal(rlang::quo_expr(second(q$filter)), bquote(y == 2))
+  expect_equal(rlang::quo_squash(first(q$filter)), bquote(x == 1))
+  expect_equal(rlang::quo_squash(second(q$filter)), bquote(y == 2))
 })
 
 # --- arrange ----------------------------------------------------------
@@ -20,11 +20,11 @@ test_that("arrange adds up", {
   r <- as_query(many_repository())
 
   q <- arrange(r, x)
-  expect_equal(rlang::quo_expr(first(q$arrange)), bquote(x))
+  expect_equal(rlang::quo_squash(first(q$arrange)), bquote(x))
 
   q <- arrange(q, y)
-  expect_equal(rlang::quo_expr(first(q$arrange)), quote(x))
-  expect_equal(rlang::quo_expr(second(q$arrange)), quote(y))
+  expect_equal(rlang::quo_squash(first(q$arrange)), quote(x))
+  expect_equal(rlang::quo_squash(second(q$arrange)), quote(y))
 })
 
 # --- top_n ------------------------------------------------------------

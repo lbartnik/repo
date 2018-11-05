@@ -33,8 +33,6 @@ for_store(x)
 \item{b}{PNG plot.}
 }
 \description{
-Container for plots.
-
 \code{for_store} prepares a \code{rawplot} for writing to an
 object store (e.g. see \link[storage:filesystem]{storage::filesystem}).
 }

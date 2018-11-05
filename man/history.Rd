@@ -23,8 +23,6 @@ data_matches(..., data)
 \item{data}{(Optional). \code{...} as a single \code{list}.}
 }
 \description{
-Selectors for history queries.
-
 \code{data_matches} searches for a commit whose artifacts
 match objects passed via \code{...} and \code{data}.
 }

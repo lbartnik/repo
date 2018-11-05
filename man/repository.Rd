@@ -2,7 +2,6 @@
 % Please edit documentation in R/repo-package.R, R/repository.R
 \name{repository}
 \alias{repository}
-\alias{repository}
 \alias{is_repository}
 \alias{print.repository}
 \alias{toString.repository}
@@ -41,8 +40,6 @@ repository_rewind(repo, id)
 }
 \description{
 Tracks full history of multiple consecutive R sessions.
-
-Creates a new repository backed by the given storage.
 
 \code{is_repository} verifies whether \code{x} is a repository
 object.
