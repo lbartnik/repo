@@ -9,13 +9,13 @@
 #' @rdname samples
 NULL
 
-#' @details `iris_models` shows a simple modeling excercise with the
+#' @details `iris_model` shows a simple modeling excercise with the
 #' [datasets::iris] data set.
 #'
 #' @export
 #' @rdname samples
-iris_models <- function () {
-  source_path <- system.file('iris-models/', package = 'repository')
+iris_model <- function () {
+  source_path <- system.file('iris-model/', package = 'repository')
   rw_copy(source_path)
 }
 
@@ -64,7 +64,7 @@ rw_copy <- function (source_path) {
 
 
 simulate_iris <- function (repo, .silent = TRUE) {
-  run_simulation(system.file('scripts/iris.R', package = 'repository'), repo, .silent)
+  run_simulation(system.file('scripts/iris-model.R', package = 'repository'), repo, .silent)
 }
 
 simulate_london_meters <- function (repo, .silent = TRUE) {
