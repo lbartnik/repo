@@ -161,7 +161,9 @@ replot <- function (x, method = 'replay') {
 
   if (identical(method, "replay")) {
     d <- artifact_data(x)
-    replayPlot(d$recoredplot)
+    suppressMessages({
+      replayPlot(d$recordedplot)
+    })
   } else {
     parent <- caller_env()
     env <- as_environment(new_commit(x$from, artifact_store(x)), parent)
