@@ -2,14 +2,18 @@
 % Please edit documentation in R/artifact.R
 \name{replot}
 \alias{replot}
-\title{Re-plot the archived plot.}
+\title{Re-plot an archived plot.}
 \usage{
-replot(x)
+replot(x, method = "replay")
 }
 \arguments{
 \item{x}{plot artifact, as returned by \code{\link[=read_artifacts]{read_artifacts()}}.}
+
+\item{method}{\code{"replay"} or \code{"re-evaluate"}}
 }
 \description{
-Restore the state of the parent R session and re-run the expression
-that created the given plot in that restored R session.
+There are two ways of re-creating the plot. One (\code{method == "replay"})
+is to call \link[grDevices:replayPlot]{grDevices::replayPlot}. The other (\code{method == "re-evaluate"})
+is to restore the state of R session at the time of plotting and re-run
+the expression that created the original plot.
 }

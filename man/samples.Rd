@@ -2,12 +2,12 @@
 % Please edit documentation in R/simulation.R
 \name{samples}
 \alias{samples}
-\alias{iris_models}
+\alias{iris_model}
 \alias{london_meters}
 \alias{execute_simulation}
 \title{Work with a sample artifact repository.}
 \usage{
-iris_models()
+iris_model()
 
 london_meters()
 
@@ -26,7 +26,7 @@ Obtain a handle to a read/write copy of an artifact
 repository installed with the package.
 }
 \details{
-\code{iris_models} shows a simple modeling excercise with the
+\code{iris_model} shows a simple modeling excercise with the
 \link[datasets:iris]{datasets::iris} data set.
 
 \code{london_meters} documents a simple analysis of a subset of

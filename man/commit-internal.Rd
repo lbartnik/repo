@@ -13,7 +13,7 @@ commit_store(x)
 
 is_valid_commits(x)
 
-as_environment(x)
+as_environment(x, parent = new.env())
 }
 \arguments{
 \item{id}{commit identifier.}
@@ -21,6 +21,8 @@ as_environment(x)
 \item{store}{object store, see \link[storage:object_store]{storage::object_store}.}
 
 \item{x}{commit object.}
+
+\item{parent}{parent environment for the newly created one.}
 }
 \description{
 Creating and manipulating commits.

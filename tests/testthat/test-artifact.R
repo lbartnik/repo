@@ -36,8 +36,10 @@ test_that("data can be loaded", {
   expect_equal(nrow(d), 8760)
 })
 
-test_that("replot a plot", {
-  a <- as_artifacts(iris_models()) %>%
+
+
+test_replot <- function (method, distance) {
+  a <- as_artifacts(iris_model()) %>%
     filter(id == '0f1105f2e5992669196384b0a66536ef7dfc4111') %>%
     read_artifacts %>%
     (utilities::first)
@@ -45,7 +47,7 @@ test_that("replot a plot", {
   # rudimentary test: whether anything happens and there are no errors
   path <- tempfile(fileext = '.png')
   png(path, width = 800, height = 600)
-  expect_silent(replot(a))
+  expect_silent(replot(a, method))
   dev.off()
 
   expect_true(file.size(path) > 0)
@@ -56,6 +58,9 @@ test_that("replot a plot", {
       unwrap_image(load.image(path)),
       unwrap_image(load.image('expected-output/0f1105f2.png'))
     )
-    expect_true(d < 10)
+    expect_true(d < distance)
   }
-})
+}
+
+test_that("re-evaluate a plot", test_replot('re-evaluate', 10))
+test_that("replay a plot", test_replot('replay', .1))

@@ -140,23 +140,35 @@ artifact_is <- function (x, what) {
 artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
 
 
-#' Re-plot the archived plot.
+#' Re-plot an archived plot.
 #'
-#' Restore the state of the parent R session and re-run the expression
-#' that created the given plot in that restored R session.
+#' There are two ways of re-creating the plot. One (`method == "replay"`)
+#' is to call [grDevices::replayPlot]. The other (`method == "re-evaluate"`)
+#' is to restore the state of R session at the time of plotting and re-run
+#' the expression that created the original plot.
 #'
 #' @param x plot artifact, as returned by [read_artifacts()].
+#' @param method `"replay"` or `"re-evaluate"`
 #'
 #' @importFrom rlang caller_env
+#' @importFrom grDevices replayPlot
+#'
 #' @export
 #' @rdname rerun
-replot <- function (x) {
+replot <- function (x, method = 'replay') {
   stopifnot(artifact_is(x, 'plot'))
+  stopifnot(method %in% c("replay", "re-evaluate"))
 
-  env <- as_environment(new_commit(x$from, artifact_store(x)))
-  parent.env(env) <- caller_env()
+  if (identical(method, "replay")) {
+    d <- artifact_data(x)
+    suppressMessages({
+      replayPlot(d$recordedplot)
+    })
+  } else {
+    parent <- caller_env()
+    env <- as_environment(new_commit(x$from, artifact_store(x)), parent)
 
-  expr <- parse(text = x$expression)
-
-  eval(expr, env)
+    expr <- parse(text = x$expression)
+    eval(expr, env)
+  }
 }
