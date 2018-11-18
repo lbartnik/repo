@@ -37,7 +37,6 @@ Suggests:
 Collate:
   'artifact.R'
   'commit.R'
-  'container.R'
   'graph.R'
   'metadesc.R'
   'plots.R'
