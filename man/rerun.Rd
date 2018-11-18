@@ -13,7 +13,7 @@ replot(x, method = "replay")
 }
 \description{
 There are two ways of re-creating the plot. One (\code{method == "replay"})
-is to call \link{grDevices:replayPlot}. The other (\code{method == "re-evaluate"})
+is to call \link[grDevices:replayPlot]{grDevices::replayPlot}. The other (\code{method == "re-evaluate"})
 is to restore the state of R session at the time of plotting and re-run
 the expression that created the original plot.
 }

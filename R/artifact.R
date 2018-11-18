@@ -143,7 +143,7 @@ artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
 #' Re-plot an archived plot.
 #'
 #' There are two ways of re-creating the plot. One (`method == "replay"`)
-#' is to call [grDevices:replayPlot]. The other (`method == "re-evaluate"`)
+#' is to call [grDevices::replayPlot]. The other (`method == "re-evaluate"`)
 #' is to restore the state of R session at the time of plotting and re-run
 #' the expression that created the original plot.
 #'
