@@ -94,11 +94,15 @@ commit_checkout <- function (commit, env) {
 }
 
 #' @rdname commit-internal
-as_environment <- function (x) {
+#' @param parent parent environment for the newly created one.
+as_environment <- function (x, parent = new.env()) {
   stopifnot(is_commit(x))
 
   objects <- lapply(x$objects, function (id) storage::os_read_object(commit_store(x), id))
-  as.environment(objects)
+  e <- as.environment(objects)
+  parent.env(e) <- parent
+
+  e
 }
 
 
