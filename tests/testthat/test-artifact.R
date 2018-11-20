@@ -36,6 +36,15 @@ test_that("data can be loaded", {
   expect_equal(nrow(d), 8760)
 })
 
+test_that("commit can be retrieved", {
+  r <- london_meters()
+  a <- new_artifact(sample_artifact_id(), r$store)
+
+  c <- artifact_commit(a)
+  expect_s3_class(c, 'commit')
+  expect_true(a$id %in% c$objects)
+  expect_equal(rlang::parse_expr(a$expression), c$expr)
+})
 
 
 test_replot <- function (method, distance) {

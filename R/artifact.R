@@ -140,6 +140,14 @@ artifact_is <- function (x, what) {
 artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
 
 
+#' @description `artifact_commit` returns the parent `commit` for the
+#' given artifact.
+#'
+#' @export
+#' @rdname artifact
+artifact_commit <- function (x) new_commit(x$from, artifact_store(x))
+
+
 #' Re-plot an archived plot.
 #'
 #' There are two ways of re-creating the plot. One (`method == "replay"`)

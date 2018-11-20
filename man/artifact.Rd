@@ -6,6 +6,7 @@
 \alias{is_valid_artifact}
 \alias{artifact_is}
 \alias{artifact_data}
+\alias{artifact_commit}
 \title{Manipulating and processing artifacts.}
 \usage{
 is_artifact(x)
@@ -17,6 +18,8 @@ is_valid_artifact(x)
 artifact_is(x, what)
 
 artifact_data(x)
+
+artifact_commit(x)
 }
 \arguments{
 \item{x}{object to be tested; \code{artifact} to be processed.}
@@ -29,6 +32,9 @@ artifact.
 
 \code{artifact_data} loads the actual artifact object. The
 output might be large and thus it is not loaded until requested.
+
+\code{artifact_commit} returns the parent \code{commit} for the
+given artifact.
 }
 \examples{
 \dontrun{
