@@ -132,16 +132,3 @@ commit <- function (store, id) {
   attr(raw, 'store') <- store
   structure(raw, class = 'commit')
 }
-
-
-#' @export
-`$.commit` <- function (x, i) {
-  if (i %in% names(x)) return(x[[i]])
-  if (identical(i, 'data')) {
-    store <- attr(x, 'store')
-    x$data <- map(x$objects, function (id) storage::os_read_object(store, id))
-    return(x[["data"]])
-  }
-
-  stop('unknown key ', i)
-}
