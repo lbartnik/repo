@@ -7,10 +7,13 @@
 new_commit <- function (id, store) {
   both <- os_read(store, id)
 
-  commit <- both$object
+  commit <- list()
   commit$id <- id
-  commit$parents <- both$tags$parent
-  commit$time <- both$tags$time
+  commit$parents    <- both$tags$parent
+  commit$time       <- both$tags$time
+  commit$expression <- both$object$expr
+  commit$plot       <- both$object$plot
+  commit$objects    <- both$object$objects
 
   structure(commit, class = 'commit', store = store)
 }
@@ -36,7 +39,7 @@ is_commit <- function (x) inherits(x, 'commit')
 #' @rdname commit-internal
 is_valid_commit <- function (x) {
   has_name(x, 'objects') &&
-    has_name(x, "expr") &&
+    has_name(x, "expression") &&
     has_name(x, "plot") &&
     has_name(x, "id") &&
     has_name(x, "parents") &&

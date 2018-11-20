@@ -43,7 +43,7 @@ test_that("commit can be retrieved", {
   c <- artifact_commit(a)
   expect_s3_class(c, 'commit')
   expect_true(a$id %in% c$objects)
-  expect_equal(rlang::parse_expr(a$expression), c$expr)
+  expect_equal(rlang::parse_expr(a$expression), c$expression)
 })
 
 
