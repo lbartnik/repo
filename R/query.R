@@ -3,12 +3,12 @@
 #' @param x `repository` object or an object to be turned into a `query`.
 #' @rdname query-internal
 new_query <- function (x) {
-  stopifnot(is_repository(x))
-  structure(list(repository = x,
-                 filter = list(),
+  stopifnot(is_object_store(x))
+  structure(list(store   = x,
+                 filter  = list(),
                  arrange = list(),
-                 top_n = NULL,
-                 type = 'raw'),
+                 top_n   = NULL,
+                 type    = 'raw'),
             class = 'query')
 }
 
@@ -41,11 +41,14 @@ as_query <- function (x) {
   if (is_query(x)) {
     return(x)
   }
-  if (is_repository(x)) {
+  if (is_object_store(x)) {
     return(new_query(x))
   }
+  if (is_repository(x)) {
+    return(new_query(x$store))
+  }
 
-  stop("cannot coerce class ", first(class(x)), " to query")
+  abort(glue("cannot coerce class '{first(class(x))}' to query"))
 }
 
 #' @return `TRUE` if `x` inherits from `"query"`.
@@ -72,7 +75,7 @@ format.query <- function (x, indent = '  ', ...) {
 
   # describe the source repo
   lines <- new_vector()
-  lines$push_back(toString(x$repository))
+  lines$push_back(toString(x$store))
 
   # print the full query
   for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {
@@ -192,7 +195,7 @@ update <- function (.data, ...) {
 
   ids <- match_ids(.data)
   lapply(ids, function (id) {
-    tags <- storage::os_read_tags(.data$repository$store, id)
+    tags <- storage::os_read_tags(.data$store, id)
 
     newt <- unlist(lapply(seq_along(quos), function (i) {
       n <- nth(names(quos), i)
@@ -205,7 +208,7 @@ update <- function (.data, ...) {
       update_tag_values(quo_get_expr(q), tags)
     }), recursive = FALSE)
 
-    storage::os_update_tags(.data$repository$store, id, combine(newt, tags))
+    storage::os_update_tags(.data$store, id, combine(newt, tags))
   })
 }
 
