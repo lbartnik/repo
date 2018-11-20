@@ -34,7 +34,7 @@ NULL
 is_commit <- function (x) inherits(x, 'commit')
 
 #' @rdname commit-internal
-is_valid_commits <- function (x) {
+is_valid_commit <- function (x) {
   has_name(x, 'objects') &&
     has_name(x, "expr") &&
     has_name(x, "plot") &&

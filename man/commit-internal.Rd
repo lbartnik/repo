@@ -3,7 +3,7 @@
 \name{new_commit}
 \alias{new_commit}
 \alias{commit_store}
-\alias{is_valid_commits}
+\alias{is_valid_commit}
 \alias{as_environment}
 \title{Creating and manipulating commits.}
 \usage{
@@ -11,7 +11,7 @@ new_commit(id, store)
 
 commit_store(x)
 
-is_valid_commits(x)
+is_valid_commit(x)
 
 as_environment(x, parent = new.env())
 }
