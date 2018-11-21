@@ -4,7 +4,7 @@
 \alias{replot}
 \title{Re-plot an archived plot.}
 \usage{
-replot(x, method = "replay")
+replot(x, method = "re-evaluate")
 }
 \arguments{
 \item{x}{plot artifact, as returned by \code{\link[=read_artifacts]{read_artifacts()}}.}

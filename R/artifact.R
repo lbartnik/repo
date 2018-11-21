@@ -163,15 +163,24 @@ artifact_commit <- function (x) new_commit(x$from, artifact_store(x))
 #'
 #' @export
 #' @rdname rerun
-replot <- function (x, method = 'replay') {
+replot <- function (x, method = 're-evaluate') {
   stopifnot(artifact_is(x, 'plot'))
   stopifnot(method %in% c("replay", "re-evaluate"))
 
   if (identical(method, "replay")) {
     d <- artifact_data(x)
-    suppressMessages({
-      replayPlot(d$recordedplot)
-    })
+    plot_r_version <- attr(d$recordedplot, 'Rversion')
+    if (!identical(plot_r_version, getRversion())) {
+      warn(glue("plot was obtained in R {plot_r_version} which is different from th current {getRversion()}"))
+    }
+    tryCatch(
+      error = function (e) warn("failed to replay the plot"),
+      {
+        suppressMessages({
+          replayPlot(d$recordedplot)
+        })
+      }
+    )
   } else {
     parent <- caller_env()
     env <- as_environment(new_commit(x$from, artifact_store(x)), parent)
