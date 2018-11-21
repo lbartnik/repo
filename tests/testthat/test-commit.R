@@ -5,7 +5,7 @@ test_that("commit constructor", {
   c <- expect_silent(new_commit(sample_commit_id(), s))
 
   expect_true(is_commit(c))
-  expect_true(is_valid_commits(c))
+  expect_true(is_valid_commit(c))
   expect_equal(commit_store(c), s)
 })
 

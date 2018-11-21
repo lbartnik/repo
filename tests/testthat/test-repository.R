@@ -307,15 +307,3 @@ test_that("format expr", {
                    mutate_at(vars(hour, dow), funs(as.factor)))
   expect_output_file(format_expr(expr), 'expected-output/format-expr.txt')
 })
-
-
-# --- commit -----------------------------------------------------------
-
-test_that("commit returns its data", {
-  r <- single_repository()
-  c <- commit(r$store, 'p')
-
-  d <- c$data
-  expect_named(d, 'a')
-  expect_equivalent(unlist(d), 1)
-})

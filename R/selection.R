@@ -51,7 +51,7 @@ top_n.default <- function (.data, n, wt) dplyr::top_n(.data, n, wt)
 tag_names <- function (x) {
   q <- as_query(x)
   ids <- match_ids(q)
-  ans <- read_tag_names(ids, q$repository$store)
+  ans <- read_tag_names(ids, q$store)
   # TODO return all tag names
   setdiff(ans, 'artifact')
 }
@@ -65,8 +65,8 @@ tag_names <- function (x) {
 tag_values <- function (x) {
   q <- as_query(x)
   ids <- match_ids(q)
-  names <- read_tag_names(ids, q$repository$store)
-  values <- read_tag_values(ids, names, q$repository$store)
+  names <- read_tag_names(ids, q$store)
+  values <- read_tag_values(ids, names, q$store)
   lapply(values, function (vs) {
     vs <- vs[!map_lgl(vs, is.null)] # remove NULLs
     unique(vs)

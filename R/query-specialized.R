@@ -35,7 +35,7 @@ read_artifacts <- function (.data) {
   stopifnot(is_artifacts(.data))
   stopifnot(identical(length(.data$select), 0L))
 
-  store <- .data$repository$store
+  store <- .data$store
 
   ans <- lapply(.data$filter, function (quo) {
     if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
@@ -78,7 +78,7 @@ read_tags <- function (.data, ...) {
 
   # if nothing is specified, choose everything
   if (!length(selection)) {
-    names <- c("id", read_tag_names(ids, .data$repository$store))
+    names <- c("id", read_tag_names(ids, .data$store))
   }
   else {
     # if only symbols or characters, that's it
@@ -88,7 +88,7 @@ read_tags <- function (.data, ...) {
       names <- as.character(exprs)
     } else {
       # is not only names, try tidyselect
-      names <- c("id", read_tag_names(ids, .data$repository$store))
+      names <- c("id", read_tag_names(ids, .data$store))
       names <- tryCatch(vars_select(names, UQS(selection)), error = function(e)e)
 
       if (is_error(names)) {
@@ -106,21 +106,21 @@ read_tags <- function (.data, ...) {
 
   # handle id
   if (!match("id", names, nomatch = FALSE)) {
-    return(flatten_lists(read_tag_values(ids, names, .data$repository$store)))
+    return(flatten_lists(read_tag_values(ids, names, .data$store)))
   }
 
   names <- setdiff(names, "id")
   if (!length(names)) return(tibble(id = ids))
 
   bind_cols(tibble(id = ids),
-            flatten_lists(read_tag_values(ids, names, .data$repository$store)))
+            flatten_lists(read_tag_values(ids, names, .data$store)))
 }
 
 #' @importFrom rlang caller_env eval_tidy quo quo_get_env warn UQS
 #' @importFrom tibble tibble
 match_ids <- function (query) {
   stopifnot(is_query(query))
-  store <- query$repository$store
+  store <- query$store
 
   # identify which filter expressions include symbol `id`
   with_id <- quos_match(query$filter, 'id')
@@ -260,7 +260,7 @@ flatten_lists <- function (values) {
 #' @rdname query
 read_commits <- function (.data) {
   stopifnot(is_commits(.data))
-  store <- .data$repository$store
+  store <- .data$store
 
   # TODO move this to match_ids
   ans <- lapply(.data$filter, function (quo) {
