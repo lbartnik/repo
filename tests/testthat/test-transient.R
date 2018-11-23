@@ -18,7 +18,8 @@ test_that("descendant_of_impl", {
 
   x <- descendant_of_impl(sample_artifact_id(), artifact_graph(r$store))
   expect_true(is.character(x))
-  expect_length(x, 3)
+  expect_length(x, 2)
+  expect_true(sample_artifact_id() %nin% x)
 })
 
 

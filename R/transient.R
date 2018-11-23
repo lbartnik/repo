@@ -55,7 +55,8 @@ ancestor_of_impl <- function (root, graph) {
 
 descendant_of_impl <- function (root, graph) {
   stopifnot(is_graph(graph))
-  traverse(graph, root, function(node_id, graph) nth(graph, node_id)$children)
+  ans <- traverse(graph, root, function(node_id, graph) nth(graph, node_id)$children)
+  setdiff(ans, root)
 }
 
 no_children_impl <- function (graph) {
