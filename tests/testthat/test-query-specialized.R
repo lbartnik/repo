@@ -328,6 +328,6 @@ test_that("descendant artifacts", {
   r <- london_meters()
   q <- as_artifacts(r)
 
-  r <- q %>% filter(descendant_of(sample_artifact_id())) %>% read_artifacts
-  expect_length(r, 3)
+  x <- q %>% filter(descendant_of(sample_artifact_id())) %>% read_artifacts
+  expect_length(x, 3)
 })
