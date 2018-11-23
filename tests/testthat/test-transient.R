@@ -1,7 +1,7 @@
 context("transient")
 
 test_that("extract ancestor id", {
-  id <- extract_ancestor_id(quo(ancestor_of('x')))
+  id <- extract_id(quo(ancestor_of('x')))
   expect_equal(id, 'x')
 })
 
@@ -12,6 +12,16 @@ test_that("ancestor_of_impl", {
   expect_true(is.character(x))
   expect_length(x, 10)
 })
+
+test_that("descendant_of_impl", {
+  r <- london_meters()
+
+  x <- descendant_of_impl(sample_artifact_id(), artifact_graph(r$store))
+  expect_true(is.character(x))
+  expect_length(x, 2)
+  expect_true(sample_artifact_id() %nin% x)
+})
+
 
 test_that("no_children_impl", {
   s <- london_meters()$store
