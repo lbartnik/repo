@@ -4,21 +4,24 @@
 #'
 #' @param x identifier of a commit or an artifact.
 #'
-#' @importFrom rlang abort
 #' @rdname history
 #' @export
 ancestor_of <- function(x) {
   abort("This function should not be called directly")
 }
 
-#' @importFrom rlang abort
+#' @rdname history
+#' @export
+descendant_of <- function (x) {
+  abort("This function should not be called directly")
+}
+
 #' @rdname history
 #' @export
 no_parent <- function() {
   abort("This function should not be called directly")
 }
 
-#' @importFrom rlang abort
 #' @rdname history
 #' @export
 no_children <- function() {
@@ -41,13 +44,18 @@ data_matches <- function(..., data) {
 
 
 #' @importFrom rlang eval_tidy
-extract_ancestor_id <- function (quo) {
-  eval_tidy(quo, data = list(ancestor_of = function(x)x))
+extract_id <- function (quo) {
+  eval_tidy(quo, data = list(ancestor_of = function(x)x, descendant_of = function(x)x))
 }
 
 ancestor_of_impl <- function (root, graph) {
   stopifnot(is_graph(graph))
   traverse(graph, root, function(node_id, graph) nth(graph, node_id)$parents)
+}
+
+descendant_of_impl <- function (root, graph) {
+  stopifnot(is_graph(graph))
+  traverse(graph, root, function(node_id, graph) nth(graph, node_id)$children)
 }
 
 no_children_impl <- function (graph) {

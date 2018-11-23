@@ -323,3 +323,11 @@ test_that("complex read_commits", {
   expect_s3_class(first(x), 'commit')
   expect_equal(first(x)$id, '89fb3d5551bdf61c0833029320e57785e9972686')
 })
+
+test_that("descendant artifacts", {
+  r <- london_meters()
+  q <- as_artifacts(r)
+
+  r <- q %>% filter(descendant_of(sample_artifact_id())) %>% read_artifacts
+  expect_length(r, 3)
+})

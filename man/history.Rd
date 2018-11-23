@@ -2,12 +2,15 @@
 % Please edit documentation in R/transient.R
 \name{ancestor_of}
 \alias{ancestor_of}
+\alias{descendant_of}
 \alias{no_parent}
 \alias{no_children}
 \alias{data_matches}
 \title{Selectors for history queries.}
 \usage{
 ancestor_of(x)
+
+descendant_of(x)
 
 no_parent()
 
