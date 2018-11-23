@@ -329,5 +329,5 @@ test_that("descendant artifacts", {
   q <- as_artifacts(r)
 
   x <- q %>% filter(descendant_of(sample_artifact_id())) %>% read_artifacts
-  expect_length(x, 3)
+  expect_length(x, 2)
 })
