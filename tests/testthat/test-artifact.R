@@ -25,6 +25,14 @@ test_that("plot is recognized as such", {
   expect_true(artifact_is(a, 'plot'))
 })
 
+test_that("store can be accessed", {
+  r <- london_meters()
+  a <- new_artifact(sample_artifact_id(), r$store)
+
+  expect_true(is_artifact(a))
+  expect_equal(artifact_store(a), r$store)
+})
+
 test_that("data can be loaded", {
   r <- london_meters()
   a <- new_artifact(sample_artifact_id(), r$store)

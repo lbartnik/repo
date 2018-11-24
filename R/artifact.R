@@ -110,6 +110,7 @@ is_artifact <- function (x) inherits(x, 'artifact')
 #' where artifact `x` is stored.
 #'
 #' @rdname artifact
+#' @export
 artifact_store <- function (x) {
   stopifnot(is_artifact(x))
   attr(x, 'store')
