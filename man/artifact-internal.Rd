@@ -22,6 +22,8 @@ is_valid_artifact(x)
 
 \item{tags}{list of tag values that describe an artifact; typically
 read with \code{\link[storage:os_read_tags]{storage::os_read_tags()}}.}
+
+\item{x}{object to be tested.}
 }
 \value{
 An \code{artifact} object.

@@ -73,6 +73,8 @@ as_artifact <- function (tags) {
 }
 
 
+#' @param x object to be tested.
+#'
 #' @importFrom rlang is_character is_scalar_character
 #' @importFrom lubridate is.POSIXt
 #' @rdname artifact-internal
