@@ -3,14 +3,17 @@
 \name{new_artifact}
 \alias{new_artifact}
 \alias{as_artifact}
-\alias{artifact_store}
+\alias{artifact_assert_valid}
+\alias{is_valid_artifact}
 \title{Create an artifact DTO.}
 \usage{
 new_artifact(id, store)
 
 as_artifact(tags)
 
-artifact_store(x)
+artifact_assert_valid(x)
+
+is_valid_artifact(x)
 }
 \arguments{
 \item{id}{artifact identifier in \code{store}.}
@@ -19,8 +22,6 @@ artifact_store(x)
 
 \item{tags}{list of tag values that describe an artifact; typically
 read with \code{\link[storage:os_read_tags]{storage::os_read_tags()}}.}
-
-\item{x}{artifact to extract \code{store} from.}
 }
 \value{
 An \code{artifact} object.
