@@ -75,7 +75,7 @@ format.query <- function (x, indent = '  ', ...) {
 
   # describe the source repo
   lines <- new_vector()
-  lines$push_back(toString(x$store))
+  lines$push_back(paste0('<repository:', toString(x$store), '>'))
 
   # print the full query
   for (part in c('select', 'filter', 'arrange', 'top_n', 'summarise')) {

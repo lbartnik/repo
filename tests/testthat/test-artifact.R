@@ -25,6 +25,14 @@ test_that("plot is recognized as such", {
   expect_true(artifact_is(a, 'plot'))
 })
 
+test_that("store can be accessed", {
+  r <- london_meters()
+  a <- new_artifact(sample_artifact_id(), r$store)
+
+  expect_true(is_artifact(a))
+  expect_equal(artifact_store(a), r$store)
+})
+
 test_that("data can be loaded", {
   r <- london_meters()
   a <- new_artifact(sample_artifact_id(), r$store)
@@ -61,11 +69,13 @@ test_replot <- function (method, distance) {
 
   expect_true(file.size(path) > 0)
 
+  # TODO this shouldn't require search or imager
+
   # there is no good way to compare images - other than to use search::image_dist
   if (utilities::try_load(search) && utilities::try_load(imager)) {
-    d <- image_dist(
-      unwrap_image(load.image(path)),
-      unwrap_image(load.image('expected-output/0f1105f2.png'))
+    d <- search::image_dist(
+      search::unwrap_image(imager::load.image(path)),
+      search::unwrap_image(imager::load.image('expected-output/0f1105f2.png'))
     )
     expect_true(d < distance)
   }

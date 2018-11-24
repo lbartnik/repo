@@ -2,8 +2,7 @@
 % Please edit documentation in R/artifact.R
 \name{is_artifact}
 \alias{is_artifact}
-\alias{artifact_assert_valid}
-\alias{is_valid_artifact}
+\alias{artifact_store}
 \alias{artifact_is}
 \alias{artifact_data}
 \alias{artifact_commit}
@@ -11,9 +10,7 @@
 \usage{
 is_artifact(x)
 
-artifact_assert_valid(x)
-
-is_valid_artifact(x)
+artifact_store(x)
 
 artifact_is(x, what)
 
@@ -27,11 +24,17 @@ artifact_commit(x)
 \item{what}{property of an \code{artifact} to be tested.}
 }
 \description{
+\code{is_artifact} tests whether an object is an \code{artifact}.
+
+\code{artifact_store} gives access to \link[storage:object_store]{storage::object_store}
+where artifact \code{x} is stored.
+
 \code{artifact_is} answers various questions about an
 artifact.
 
 \code{artifact_data} loads the actual artifact object. The
-output might be large and thus it is not loaded until requested.
+output might be large and thus it is loaded lazily only upon explicit
+request.
 
 \code{artifact_commit} returns the parent \code{commit} for the
 given artifact.
@@ -40,4 +43,7 @@ given artifact.
 \dontrun{
 artifact_is(a, 'plot')
 }
+}
+\seealso{
+replot
 }

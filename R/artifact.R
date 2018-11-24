@@ -73,26 +73,11 @@ as_artifact <- function (tags) {
 }
 
 
-#' @param x artifact to extract `store` from.
-#' @rdname artifact-internal
-artifact_store <- function (x) {
-  stopifnot(is_artifact(x))
-  attr(x, 'store')
-}
-
-
-#' Manipulating and processing artifacts.
+#' @param x object to be tested.
 #'
-#' @param x object to be tested; `artifact` to be processed.
-#'
-#' @export
-#' @rdname artifact
-is_artifact <- function (x) inherits(x, 'artifact')
-
-
 #' @importFrom rlang is_character is_scalar_character
 #' @importFrom lubridate is.POSIXt
-#' @rdname artifact
+#' @rdname artifact-internal
 artifact_assert_valid <- function (x) {
   stopifnot(is_artifact(x))
   stopifnot(is_scalar_character(x$id))
@@ -107,8 +92,31 @@ artifact_assert_valid <- function (x) {
 }
 
 
-#' @rdname artifact
+#' @rdname artifact-internal
 is_valid_artifact <- function (x) isTRUE(try(artifact_assert_valid(x), silent = TRUE))
+
+
+#' Manipulating and processing artifacts.
+#'
+#' @description `is_artifact` tests whether an object is an `artifact`.
+#' @param x object to be tested; `artifact` to be processed.
+#'
+#' @seealso replot
+#'
+#' @export
+#' @rdname artifact
+is_artifact <- function (x) inherits(x, 'artifact')
+
+
+#' @description `artifact_store` gives access to [storage::object_store]
+#' where artifact `x` is stored.
+#'
+#' @rdname artifact
+#' @export
+artifact_store <- function (x) {
+  stopifnot(is_artifact(x))
+  attr(x, 'store')
+}
 
 
 #' @description `artifact_is` answers various questions about an
@@ -133,7 +141,8 @@ artifact_is <- function (x, what) {
 
 
 #' @description `artifact_data` loads the actual artifact object. The
-#' output might be large and thus it is not loaded until requested.
+#' output might be large and thus it is loaded lazily only upon explicit
+#' request.
 #'
 #' @export
 #' @rdname artifact
@@ -162,7 +171,7 @@ artifact_commit <- function (x) new_commit(x$from, artifact_store(x))
 #' @importFrom grDevices replayPlot
 #'
 #' @export
-#' @rdname rerun
+#' @rdname artifact-methods
 replot <- function (x, method = 're-evaluate') {
   stopifnot(artifact_is(x, 'plot'))
   stopifnot(method %in% c("replay", "re-evaluate"))
