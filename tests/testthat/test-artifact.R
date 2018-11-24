@@ -61,11 +61,13 @@ test_replot <- function (method, distance) {
 
   expect_true(file.size(path) > 0)
 
+  # TODO this shouldn't require search or imager
+
   # there is no good way to compare images - other than to use search::image_dist
   if (utilities::try_load(search) && utilities::try_load(imager)) {
-    d <- image_dist(
-      unwrap_image(load.image(path)),
-      unwrap_image(load.image('expected-output/0f1105f2.png'))
+    d <- search::image_dist(
+      search::unwrap_image(imager::load.image(path)),
+      search::unwrap_image(imager::load.image('expected-output/0f1105f2.png'))
     )
     expect_true(d < distance)
   }
