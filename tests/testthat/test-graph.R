@@ -8,15 +8,15 @@ test_that("graph of artifacts", {
   expect_length(g, 4)
   names(g) <- utilities::map_chr(g, `[[`, 'id')
 
-  expect_equal(g$a$parents, character())
-  expect_equal(g$b$parents, character())
-  expect_equal(g$c$parents, c('a', 'b'))
-  expect_equal(g$d$parents, 'c')
+  expect_length(g$a$parents, 0)
+  expect_length(g$b$parents, 0)
+  expect_equal(g$c$parents, as_id(c('a', 'b')))
+  expect_equal(g$d$parents, as_id('c'))
 
-  expect_equal(g$a$children, 'c')
-  expect_equal(g$b$children, 'c')
-  expect_equal(g$c$children, 'd')
-  expect_equal(g$d$children, character())
+  expect_equal(g$a$children, as_id('c'))
+  expect_equal(g$b$children, as_id('c'))
+  expect_equal(g$c$children, as_id('d'))
+  expect_length(g$d$children, 0)
 })
 
 
@@ -30,11 +30,11 @@ test_that("subgraph of artifacts", {
 
   expect_named(g, c('b', 'c'), ignore.order = TRUE)
 
-  expect_equal(g$b$parents, character())
-  expect_equal(g$c$parents, 'b')
+  expect_length(g$b$parents, 0)
+  expect_equal(g$c$parents, as_id('b'))
 
-  expect_equal(g$b$children, 'c')
-  expect_equal(g$c$children, character(0))
+  expect_equal(g$b$children, as_id('c'))
+  expect_length(g$c$children, 0)
 })
 
 test_that("stratify sample graph", {

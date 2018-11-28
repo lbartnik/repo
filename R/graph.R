@@ -43,8 +43,8 @@ connect_artifacts <- function (artifacts) {
   # assign newly computed paretns and children
   artifacts <- lapply(artifacts, function (a) {
     node <- graph[[a$id]]
-    a$parents <- node$parents
-    a$children <- node$children
+    a$parents <- as_id(node$parents)
+    a$children <- as_id(node$children)
     a
   })
 
