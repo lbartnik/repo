@@ -23,12 +23,12 @@
 #' @importFrom rlang is_scalar_integer
 #' @rdname artifact-internal
 new_artifact <- function (id, store) {
-  tags <- storage::os_read_tags(store, id)
+  tags <- storage::os_read_tags(store, as_id(id))
   tags$id <- id
 
   # expression is stored with the commit
-  stopifnot(storage::os_exists(store, tags$parent_commit))
-  commit <- storage::os_read_object(store, tags$parent_commit)
+  stopifnot(storage::os_exists(store, as_id(tags$parent_commit)))
+  commit <- storage::os_read_object(store, as_id(tags$parent_commit))
   tags$expression <- commit$expr
 
   # original name as recorded upon time of creation
@@ -146,7 +146,7 @@ artifact_is <- function (x, what) {
 #'
 #' @export
 #' @rdname artifact
-artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
+artifact_data <- function (x) storage::os_read_object(artifact_store(x), as_id(x$id))
 
 
 #' @description `artifact_commit` returns the parent `commit` for the
@@ -154,7 +154,7 @@ artifact_data <- function (x) storage::os_read_object(artifact_store(x), x$id)
 #'
 #' @export
 #' @rdname artifact
-artifact_commit <- function (x) new_commit(x$from, artifact_store(x))
+artifact_commit <- function (x) new_commit(as_id(x$from), artifact_store(x))
 
 
 #' Re-plot an archived plot.
@@ -192,7 +192,7 @@ replot <- function (x, method = 're-evaluate') {
     )
   } else {
     parent <- caller_env()
-    env <- as_environment(new_commit(x$from, artifact_store(x)), parent)
+    env <- as_environment(new_commit(as_id(x$from), artifact_store(x)), parent)
 
     expr <- parse(text = x$expression)
     eval(expr, env)

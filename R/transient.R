@@ -88,7 +88,7 @@ data_matches_impl <- function (data, store) {
   ids <- os_find(store, list(quo('commit' %in% class)))
 
   Filter(ids, f = function (id) {
-    commit <- new_commit(id, store)
+    commit <- new_commit(as_id(id), store)
     setequal(names(commit$objects), names(data)) && setequal(unname(commit$objects), unname(data))
   })
 }
