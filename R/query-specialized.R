@@ -42,12 +42,12 @@ read_artifacts <- function (.data) {
   ans <- lapply(.data$filter, function (quo) {
     # find ancestors
     if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(ancestor_of_impl(id, artifact_graph(store)))
     }
     # find descendants
     if (expr_match_fun(quo_squash(quo), quote(descendant_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(descendant_of_impl(id, artifact_graph(store)))
     }
   })
@@ -274,7 +274,7 @@ read_commits <- function (.data) {
   ans <- lapply(.data$filter, function (quo) {
 
     if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(ancestor_of_impl(id, commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_children))) {
