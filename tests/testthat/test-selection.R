@@ -48,7 +48,7 @@ test_that("update", {
   q <- filter(as_query(r), id == 'a')
 
   expect_tag <- function (tag, value) {
-    expect_equal(nth(storage::os_read_tags(r$store, 'a'), tag), value, label = tag)
+    expect_equal(nth(storage::os_read_tags(r$store, as_id('a')), tag), value, label = tag)
   }
 
   q %>% update(class = 'xyz')

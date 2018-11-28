@@ -61,13 +61,13 @@ test_that("data_matches_impl", {
   m <- list(a = 'a', b = 'b', c = 'c')
 
   x <- data_matches_impl(m[1], r$store)
-  expect_equal(x, 'p')
+  expect_equal(x, as_id('p'))
 
   x <- data_matches_impl(m[1:2], r$store)
-  expect_equal(x, 'q')
+  expect_equal(x, as_id('q'))
 
   x <- data_matches_impl(m, r$store)
-  expect_equal(x, c('r', 's'))
+  expect_equal(x, as_id(c('r', 's')))
 
   x <- data_matches_impl(m[2:3], r$store)
   expect_length(x, 0)
