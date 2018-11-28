@@ -42,12 +42,12 @@ read_artifacts <- function (.data) {
   ans <- lapply(.data$filter, function (quo) {
     # find ancestors
     if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(ancestor_of_impl(id, artifact_graph(store)))
     }
     # find descendants
     if (expr_match_fun(quo_squash(quo), quote(descendant_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(descendant_of_impl(id, artifact_graph(store)))
     }
   })
@@ -200,7 +200,7 @@ expr_match_fun <- function (expr, sym) expr_match(expr, sym, 'fun-only')
 
 #' @importFrom rlang quo
 read_tag_names <- function (ids, store) {
-  all_names <- lapply(ids, function (id) names(storage::os_read_tags(store, id)))
+  all_names <- lapply(ids, function (id) names(storage::os_read_tags(store, as_id(id))))
   unique(unlist(all_names))
 }
 
@@ -210,7 +210,7 @@ read_tag_values <- function (ids, selected, store) {
 
   # read id by id, set tag values in respective column vector
   Map(ids, seq_along(ids), f = function (id, i) {
-    tags <- storage::os_read_tags(store, id)
+    tags <- storage::os_read_tags(store, as_id(id))
     imap(tags[selected], function (value, name) {
       columns[[name]][[i]] <<- value
     })
@@ -274,7 +274,7 @@ read_commits <- function (.data) {
   ans <- lapply(.data$filter, function (quo) {
 
     if (expr_match_fun(quo_squash(quo), quote(ancestor_of))) {
-      id <- enlongate(extract_id(quo), store)
+      id <- match_short(extract_id(quo), store)
       return(ancestor_of_impl(id, commit_graph(store)))
     }
     if (expr_match_fun(quo, quote(no_children))) {
@@ -301,7 +301,7 @@ read_commits <- function (.data) {
   })
 
   commits <- lapply(ids, function (id) {
-    new_commit(id, store)
+    new_commit(as_id(id), store)
   })
 
   structure(commits, class = 'container')

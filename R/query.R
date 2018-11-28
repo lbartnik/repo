@@ -195,7 +195,7 @@ update <- function (.data, ...) {
 
   ids <- match_ids(.data)
   lapply(ids, function (id) {
-    tags <- storage::os_read_tags(.data$store, id)
+    tags <- storage::os_read_tags(.data$store, as_id(id))
 
     newt <- unlist(lapply(seq_along(quos), function (i) {
       n <- nth(names(quos), i)
@@ -208,7 +208,7 @@ update <- function (.data, ...) {
       update_tag_values(quo_get_expr(q), tags)
     }), recursive = FALSE)
 
-    storage::os_update_tags(.data$store, id, combine(newt, tags))
+    storage::os_update_tags(.data$store, as_id(id), combine(newt, tags))
   })
 }
 

@@ -127,7 +127,7 @@ ancestry_graph <- function (chosen_ids, all_ids, store) {
 
   # read parent pointers written in storage as tags
   parents <- map(all_ids, function (id) {
-    tags <- storage::os_read_tags(store, id)
+    tags <- storage::os_read_tags(store, as_id(id))
     # artifact stores multiple parents
     if (!is.null(tags$parents)) parents <- as.character(tags$parents)
     # commit stores a single parent

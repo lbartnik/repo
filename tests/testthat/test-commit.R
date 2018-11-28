@@ -15,14 +15,14 @@ test_that("print commit", {
 })
 
 test_that("commit data", {
-  c <- expect_silent(new_commit('p', many_repository()$store))
+  c <- expect_silent(new_commit(as_id('p'), many_repository()$store))
   d <- commit_data(c)
 
   expect_equal(d, list(a = 1))
 })
 
 test_that("checkout commit", {
-  c <- expect_silent(new_commit('p', many_repository()$store))
+  c <- expect_silent(new_commit(as_id('p'), many_repository()$store))
   e <- new.env()
 
   commit_checkout(c, e)

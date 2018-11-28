@@ -58,7 +58,7 @@ print.commit <- function (x, ...) {
 #' @rdname commit
 commit_data <- function (x) {
   stopifnot(is_commit(x))
-  lapply(x$objects, function (id) os_read_object(commit_store(x), id))
+  lapply(x$objects, function (id) os_read_object(commit_store(x), as_id(id)))
 }
 
 introduced <- function (commits, id) {
@@ -101,7 +101,7 @@ commit_checkout <- function (commit, env) {
 as_environment <- function (x, parent = new.env()) {
   stopifnot(is_commit(x))
 
-  objects <- lapply(x$objects, function (id) storage::os_read_object(commit_store(x), id))
+  objects <- lapply(x$objects, function (id) storage::os_read_object(commit_store(x), as_id(id)))
   e <- as.environment(objects)
   parent.env(e) <- parent
 
@@ -113,6 +113,7 @@ as_environment <- function (x, parent = new.env()) {
 
 commit <- function (store, id) {
   stopifnot(storage::is_object_store(store))
+  stopifnot(storage::is_id(id))
 
   data <- storage::os_read(store, id)
 

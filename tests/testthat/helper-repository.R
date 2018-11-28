@@ -16,7 +16,7 @@ single_repository <- function (...) {
   storage::os_write(r$store, list(objects = r$last_commit$objects,
                                   expr = bquote(), plot = NA_character_),
                     list(parent = NA_character_, time = NA),
-                    r$last_commit$id)
+                    as_id(r$last_commit$id))
 
   r
 }
@@ -46,7 +46,7 @@ add_object <- function (r, id, value, parent_commit, parents, cls) {
   tags <- list(class = cls, parent_commit = parent_commit,
                parents = parents, time = Sys.time() + strtoi(charToRaw(id)), artifact = TRUE,
                names = id)
-  storage::os_write(r$store, value, tags, id)
+  storage::os_write(r$store, value, tags, as_id(id))
 }
 
 
@@ -54,7 +54,7 @@ add_commit <- function (r, id, parent, expr, objects, plot = character()) {
   storage::os_write(r$store,
                     list(objects = objects, expr = expr, plot = plot),
                     list(parent = parent, time = Sys.time() + strtoi(charToRaw(id)), class = 'commit'),
-                    id)
+                    as_id(id))
 }
 
 
@@ -70,9 +70,9 @@ many_artifacts <- function (r) {
 }
 
 sample_commit_id <- function () {
-  "84c88beb1c100db2fe22574c8f9ccd18afb5ecbd"
+  as_id("84c88beb1c100db2fe22574c8f9ccd18afb5ecbd")
 }
 
 sample_artifact_id <- function () {
-  "4756f19b61b5df2b5f7c8e85321d464142274ff9"
+  as_id("4756f19b61b5df2b5f7c8e85321d464142274ff9")
 }

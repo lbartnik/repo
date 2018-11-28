@@ -137,24 +137,24 @@ test_that("select by id", {
 
   # no filter
   x <- r %>% match_ids
-  expect_equal(x, all)
+  expect_equal(toString(x), all)
 
   # first special case
   x <- r %>% filter(id == 'a') %>% match_ids
-  expect_equal(x, 'a')
+  expect_equal(toString(x), 'a')
 
   # first special case: variable
   i <- 'a'
   x <- r %>% filter(id == i) %>% match_ids
-  expect_equal(x, 'a')
+  expect_equal(toString(x), 'a')
 
   # second special case
   x <- r %>% filter(id %in% c('a', 'b')) %>% match_ids
-  expect_equal(x, letters[1:2])
+  expect_equal(toString(x), letters[1:2])
 
   # general case
   x <- r %>% filter(id != 'a') %>% match_ids
-  expect_equal(x, all[-1])
+  expect_equal(toString(x), all[-1])
 })
 
 test_that("select by id and tags", {
@@ -162,7 +162,7 @@ test_that("select by id and tags", {
 
   p <- q %>% filter(id == 'a', isTRUE(artifact))
   x <- expect_silent(match_ids(p))
-  expect_equal(x, 'a')
+  expect_equal(toString(x), 'a')
 })
 
 test_that("select by multiple references to id", {
@@ -170,7 +170,7 @@ test_that("select by multiple references to id", {
 
   p <- q %>% filter(id == 'a', id != 'b')
   x <- expect_silent(match_ids(p))
-  expect_equal(x, 'a')
+  expect_equal(toString(x), 'a')
 })
 
 test_that("select top tags", {
@@ -178,7 +178,7 @@ test_that("select top tags", {
 
   p <- q %>% top_n(2)
   x <- expect_silent(match_ids(p))
-  expect_equal(x, c('a', 'b'))
+  expect_equal(toString(x), c('a', 'b'))
 })
 
 test_that("arrange and select top tags", {
@@ -186,7 +186,7 @@ test_that("arrange and select top tags", {
 
   p <- q %>% arrange(desc(time)) %>% top_n(2)
   x <- expect_silent(match_ids(p))
-  expect_setequal(x, c('s', 'r'))
+  expect_setequal(toString(x), c('s', 'r'))
 })
 
 test_that("read tag names", {
@@ -259,19 +259,19 @@ test_that("complex tag queries", {
   q <- as_tags(many_repository())
 
   x <- filter(q, class == "integer") %>% read_tags(id)
-  expect_equal(x$id, "b")
+  expect_equal(toString(x$id), "b")
 
   x <- filter(q, class == "numeric") %>% read_tags(id)
-  expect_equal(x$id, c("a", "c"))
+  expect_equal(toString(x$id), c("a", "c"))
 
   x <- filter(q, class == "numeric") %>% arrange(desc(id)) %>% read_tags(id)
-  expect_equal(x$id, c("c", "a"))
+  expect_equal(toString(x$id), c("c", "a"))
 
   x <- arrange(q, id) %>% top_n(1) %>% read_tags(id)
-  expect_equal(x$id, "a")
+  expect_equal(toString(x$id), "a")
 
   x <- arrange(q, desc(id)) %>% top_n(1) %>% read_tags(id)
-  expect_equal(x$id, "d")
+  expect_equal(toString(x$id), "d")
 })
 
 test_that("simplify tags", {
@@ -317,11 +317,11 @@ test_that("complex read_commits", {
   expect_length(x, 1)
 
   # single pass through commit objects
-  y <- os_read_object(r$store, '89c78e898c6eabe8f86337134c0e1defc14ad0d6')
+  y <- os_read_object(r$store, as_id('89c78e898c6eabe8f86337134c0e1defc14ad0d6'))
   x <- q %>% filter(data_matches(input = y)) %>% read_commits()
   expect_length(x, 1)
   expect_s3_class(first(x), 'commit')
-  expect_equal(first(x)$id, '89fb3d5551bdf61c0833029320e57785e9972686')
+  expect_equal(first(x)$id, as_id('89fb3d5551bdf61c0833029320e57785e9972686'))
 })
 
 test_that("descendant artifacts", {
