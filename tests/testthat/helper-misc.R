@@ -8,6 +8,10 @@ expect_not_null <- function (object, info = NULL, label = NULL) {
 expect_node <- function (node, ...) {
 
   cond <- list(...)
+  if (!is.null(cond$id))       cond$id <- as_id(cond$id)
+  if (!is.null(cond$parents))  cond$parents <- as_id(cond$parents)
+  if (!is.null(cond$children)) cond$children <- as_id(cond$children)
+
   expect_true(all(names(cond) %in% names(node)))
 
   lapply(names(cond), function (name) {

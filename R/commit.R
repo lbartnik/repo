@@ -9,7 +9,7 @@ new_commit <- function (id, store) {
 
   commit <- list()
   commit$id <- id
-  commit$parents    <- both$tags$parent
+  commit$parents    <- as_id(both$tags$parent)
   commit$time       <- both$tags$time
   commit$expression <- both$object$expr
   commit$plot       <- both$object$plot

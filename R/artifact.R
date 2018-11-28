@@ -58,12 +58,12 @@ as_artifact <- function (tags) {
 
   structure(
     list(
-      id          = tags$id,
+      id          = as_id(tags$id),
       name        = tags$name,
       names       = tags$names,
       class       = tags$class,
       time        = tags$time,
-      parents     = as.character(tags$parents),
+      parents     = as_id(as.character(tags$parents)),
       from        = tags$parent_commit,
       description = description(tags),
       expression  = format_expr(tags$expression, indent = '')
