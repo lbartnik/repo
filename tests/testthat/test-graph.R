@@ -41,7 +41,7 @@ test_that("stratify sample graph", {
   h <- sample_graph()
 
   expect_names <- function (x)
-    expect_named(x, c('id', 'children', 'objects', 'parents'), ignore.order = TRUE)
+    expect_named(x, c('id', 'children', 'objects', 'parents', 'time'), ignore.order = TRUE)
 
   x <- stratify(h)
   expect_length(x$children, 2)
@@ -70,6 +70,46 @@ test_that("actual repo can be stratified", {
   # branching
   expect_length(s$children[[1]]$children, 3)
 })
+
+test_that("stratify, each element once", {
+  a <- read_artifacts(as_artifacts(iris_model()))
+  s <- stratify(connect_artifacts(a))
+
+  # x <- iris
+  x <- s
+  expect_equal(x$name, "x")
+  expect_length(x$children, 1)
+
+  # x <- x %>% mutate(Sepal.Area = ...)
+  x <- first(x$children)
+  expect_equal(x$name, "x")
+  expect_length(x$children, 1)
+
+  # virginica <- x %>% mutate(Virginica = ...)
+  #
+  # here artifact has multiple children because another downstream "virginica"
+  # comes from both this "virginica" data.frame and the lm model "m";
+  # the expression that creates it is: virginica$predict <- predict(m, virginica)
+  #
+  # this test explicitly checks that the second "virginica" is assigned under
+  # "m" (because it's the closer parent, so it makes more sense to show it there
+  # as it reflects user's train of thought better), but also that it is assigned
+  # only once (there was a bug where a child node would be assigned under each
+  # parent)
+  x <- first(x$children)
+  expect_equal(x$name, "virginica")
+  expect_length(x$children, 1)
+
+  # m <- lm(Virginica ~ ...
+  x <- first(x$children)
+  expect_equal(x$name, "m")
+  expect_length(x$children, 1)
+
+  # make sure each child is extracted only once
+  extract_children <- function (x) c(x$id, unlist(lapply(x$children, extract_children)))
+  expect_setequal(extract_children(s), map_chr(a, `[[`, 'id'))
+})
+
 
 test_that("traverse parents", {
   g <- sample_graph()

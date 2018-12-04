@@ -58,16 +58,26 @@ connect_artifacts <- function (artifacts) {
 stratify <- function (x) {
   stopifnot(is_graph(x))
 
-  # TODO if a parent has more than one child, displaying the tree might
-  #      tricky: the branch that the parent is assigned to needs to be
-  #      displayed first if the sequence of commands is to produce the
-  #      final object; but even then, if names collide, the actual parent
-  #      might be overwritten before the child is created based on it
+  order_by_time <- function (id) {
+    if (!length(id)) return(id)
+    time <- map_dbl(id, function(i)nth(x, i)$time)
+    stopifnot(length(time) == length(id), sum(!is.na(time)) == length(id))
+    unclass(id)[order(time, decreasing = FALSE)]
+  }
 
   process_node <- function (id) {
+    # if already visited (from a different parent), skip
+    if (!nodes$find(id)) return(NULL)
+
     nodes$erase(id)
     node <- x[[id]]
-    node$children <- lapply(node$children, process_node)
+
+    # process children ordered in time; it is DFS so if there are multiple
+    # parents, the closer parent will prevail
+    children <- lapply(order_by_time(node$children), process_node)
+
+    # keep those that are not NULL
+    node$children <- Filter(not(is.null), children)
     node
   }
 
