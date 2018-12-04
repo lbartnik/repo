@@ -81,7 +81,7 @@ read_tags <- function (.data, ...) {
 
   ids <- match_ids(.data)
   if (!length(ids)) {
-    abort("query does not match any objects")
+    abort("query does not match any objects", "nothing-matched")
   }
 
   # if nothing is specified, choose everything

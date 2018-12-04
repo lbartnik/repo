@@ -51,6 +51,14 @@ as_query <- function (x) {
   abort(glue("cannot coerce class '{first(class(x))}' to query"))
 }
 
+#' @description `reset_query` drops all filters and sets type to `"raw"`.
+#' @export
+#' @rdname query
+reset_query <- function (x) {
+  stopifnot(is_query(x))
+  as_query(x$store)
+}
+
 #' @return `TRUE` if `x` inherits from `"query"`.
 #'
 #' @export
