@@ -8,6 +8,20 @@ test_that("repository can be turned into a query", {
   expect_true(is_raw(q))
 })
 
+test_that("query can be reset", {
+  s <- london_meters()$store
+  q <- as_query(s)
+
+  x <- reset_query(q)
+  expect_true(is_raw(x))
+  expect_equal(x$store, r$store)
+
+  x <- reset_query(q %>% filter(a == 1) %>% arrange(desc(b)) %>% top_n(10))
+  expect_length(x$filter, 0)
+  expect_length(x$arrange, 0)
+  expect_length(x$top_n, 0)
+})
+
 test_that("n() is recognized", {
   expect_true(only_n_summary(quos(n())))
   expect_true(only_n_summary(quos(a = n())))

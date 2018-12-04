@@ -3,6 +3,7 @@
 \name{query}
 \alias{query}
 \alias{as_query}
+\alias{reset_query}
 \alias{is_query}
 \alias{format.query}
 \alias{print.query}
@@ -20,6 +21,8 @@
 \title{Query the repository of artifacts.}
 \usage{
 as_query(x)
+
+reset_query(x)
 
 is_query(x)
 
@@ -73,6 +76,8 @@ in \code{dplyr}.}
 }
 \description{
 \code{as_query} creates a general \code{query}.
+
+\code{reset_query} drops all filters and sets type to \code{"raw"}.
 
 \code{as_commits} creates a \code{query} to search for commits.
 
