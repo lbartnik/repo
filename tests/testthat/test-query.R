@@ -14,7 +14,7 @@ test_that("query can be reset", {
 
   x <- reset_query(q)
   expect_true(is_raw(x))
-  expect_equal(x$store, r$store)
+  expect_equal(x$store, s)
 
   x <- reset_query(q %>% filter(a == 1) %>% arrange(desc(b)) %>% top_n(10))
   expect_length(x$filter, 0)
