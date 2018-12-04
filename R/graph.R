@@ -64,10 +64,26 @@ stratify <- function (x) {
   #      final object; but even then, if names collide, the actual parent
   #      might be overwritten before the child is created based on it
 
+  order_by_time <- function (id) {
+    if (is.null(id)) return(NULL)
+    time <- unlist(lapply(id, function(i)nth(x, i)$time))
+    unclass(id)[order(time, decreasing = FALSE)]
+  }
+
   process_node <- function (id) {
+    # if already visited (from a different parent), skip
+    if (!nodes$find(id)) return(NULL)
+
     nodes$erase(id)
     node <- x[[id]]
-    node$children <- lapply(node$children, process_node)
+
+    # process children ordered in time; it is DFS so if there are multiple
+    # parents, the closer parent will prevail
+    children <- order_by_time(node$children)
+    children <- lapply(node$children, process_node)
+
+    # keep those that are not NULL
+    node$children <- Filter(is_artifact, children)
     node
   }
 

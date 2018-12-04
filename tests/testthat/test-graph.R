@@ -71,6 +71,20 @@ test_that("actual repo can be stratified", {
   expect_length(s$children[[1]]$children, 3)
 })
 
+test_that("stratify, each element once", {
+  a <- read_artifacts(as_artifacts(iris_model()))
+  x <- stratify(connect_artifacts(a))
+
+  expect_length(x$children, 1)
+  x <- first(x$children)
+  expect_length(x$children, 1)
+
+  # here artifact has multiple children: virginica$predict <- predict(m, virginica)
+  x <- first(x$children)
+  expect_length(x$children, 1)
+})
+
+
 test_that("traverse parents", {
   g <- sample_graph()
   f <- function(id, graph) graph[[id]]$parents
